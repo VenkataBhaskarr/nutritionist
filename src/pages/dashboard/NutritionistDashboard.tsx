@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, ClipboardCheck, Calendar } from "lucide-react";
-
+import api from "@/lib/api";
 // Mock data for the demo
 const MOCK_CLIENTS = [
   { id: 1, name: "Michael Brown", email: "michael@example.com", plan: "Weight Loss", lastCheckIn: "2023-05-10", progress: "Good" },
@@ -29,14 +29,14 @@ const NutritionistDashboard = () => {
        const userJSONValue = JSON.parse(user)
       //  const email = encodeURIComponent(userJSONValue.email);
        const token = localStorage.getItem("token")
-       const nutDetails = await axios.get(`http://localhost:3000/api/nuts/email`, {
+       const nutDetails = await api.get(`/nuts/email`, {
         params: { email: userJSONValue.email },
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       // console.log(nutDetails)
-      const clientDetails = await axios.get(`http://localhost:3000/api/client/byNutId`, {
+      const clientDetails = await api.get(`/client/byNutId`, {
         params: { id: nutDetails.data[0].id },
         headers: {
           Authorization: `Bearer ${token}`

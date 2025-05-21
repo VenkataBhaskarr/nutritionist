@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import api from "@/lib/api";
 import {
   Calendar,
   ClipboardList,
@@ -52,14 +53,14 @@ const ClientDashboard = () => {
       const userJSONValue = JSON.parse(user)
       const email = encodeURIComponent(userJSONValue.email);
       const token = localStorage.getItem("token")
-      const clientDetails = await axios.get(`http://localhost:3000/api/client/email`, {
+      const clientDetails = await api.get(`/client/email`, {
         params: { email:userJSONValue.email },
         headers: {
           Authorization: `Bearer ${token}`
         }
       });
       console.log(clientDetails)
-      const nuttData = await axios.get(`http://localhost:3000/api/nuts/id`, {
+      const nuttData = await api.get(`/nuts/id`, {
         params: {
           id: clientDetails.data[0].nId
         },

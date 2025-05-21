@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import axios from "axios";
+import api from "@/lib/api";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
@@ -50,7 +51,7 @@ const Signup = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3000/api/users/signup", {
+      const response = await api.post("/users/signup", {
         email,
         password,
         role,

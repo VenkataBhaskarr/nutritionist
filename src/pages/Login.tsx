@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import axios from "axios";
+import api from "@/lib/api";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -26,10 +27,16 @@ const Login = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:3000/api/users/login", {
+      // const response = await axios.post("http://localhost:3000/api/users/login", {
+      //   email,
+      //   password,
+      //   role
+      // });
+    
+       const response = await api.post("/users/login", {
         email,
         password,
-        role
+        role,
       });
 
       const { token, user } = response.data;
@@ -115,20 +122,20 @@ const Login = () => {
               </Button>
             </form>
             
-            <div className="mt-4 text-center">
+            {/* <div className="mt-4 text-center">
               <a href="#" className="text-sm text-primary-500 hover:underline">
                 Forgot password?
               </a>
-            </div>
+            </div> */}
           </CardContent>
-          <CardFooter className="flex justify-center">
+          {/* <CardFooter className="flex justify-center">
             <p className="text-sm text-gray-500">
               Don't you have an account?{" "}
               <Link to="/signup" className="text-primary-500 hover:underline">
                 Sign Up
               </Link>
             </p>
-          </CardFooter>
+          </CardFooter> */}
         </Card>
         
         <p className="text-center mt-4 text-gray-600">

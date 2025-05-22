@@ -1,47 +1,36 @@
-import api from "../lib/api";
+import api from '@/lib/api';
 
-interface Nutritionist {
-  name: string;
-  email: string;
-  specialty: string;
-}
-
-interface Appointment {
-  date: string;
-  time: string;
-}
-
-interface Progress {
-  week: string;
-  weight: number;
-}
-
-interface Meal {
-  meal: string;
-  food: string;
-}
-
-interface Plan {
+export interface Client {
   id: number;
   name: string;
-  description: string;
-  startDate: string;
-  endDate: string;
-}
-
-interface ClientProfile {
-  name: string;
   email: string;
+  phone: string;
+  address: string;
+  age: number;
+  gender: string;
+  nutritionist: string;
+  nutritionistId: number;
+  status: 'active' | 'inactive';
+  joinDate: string;
   plan: string;
-  startDate: string;
-  nutritionist: Nutritionist;
-  appointments: Appointment[];
-  plans: Plan[];
-  progress: Progress[];
-  mealPlan: Meal[];
 }
 
-export const getClientProfile = async (): Promise<ClientProfile> => {
-  const response = await api.get("/client/profile");
-  return response.data as ClientProfile;
-};
+export const getAllClients = () =>
+  api.get<Client[]>('/clients', {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+  }).then(res => res.data);
+
+export const createClient = (data: Omit<Client, 'id' | 'nutritionist'>) =>
+  api.post<Client>('/clients', data, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+  }).then(res => res.data);
+
+export const updateClient = (id: number, data: Omit<Client, 'id' | 'nutritionist'>) =>
+  api.put<Client>(`/clients/${id}`, data, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+  }).then(res => res.data);
+
+export const deleteClient = (id: number) =>
+  api.delete(`/clients/${id}`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+  }).then(res => res.data);

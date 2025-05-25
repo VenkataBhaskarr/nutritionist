@@ -37,7 +37,7 @@ const NavBar = () => {
           </HashLink>
           <Link to="/login">
             <Button className="bg-primary-500 text-white hover:bg-primary-600">
-              Get Started
+              UserLogin
             </Button>
           </Link>
         </nav>

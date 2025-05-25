@@ -20,31 +20,32 @@ const Landing = () => {
 
       <section id="home" className="hero-gradient pt-20 pb-32">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row items-center">
-            <div className="md:w-1/2 mb-10 md:mb-0 md:pr-10">
-              <h1 className="text-4xl md:text-5xl font-bold mb-6">
+          <div className="flex flex-col-reverse md:flex-row items-center md:items-center md:justify-center gap-32">
+            {/* Text Section */}
+            <div className="md:w-1/2 mt-10 md:mt-0 md:pr-10 text-center md:text-left">
+              <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
                 Your Personal
-                <span className="gradient-text block"> Nutrition Journey </span>
+                <span className="gradient-text block">Nutrition Journey</span>
                 Starts Here
               </h1>
               <p className="text-lg text-gray-700 mb-8">
                 Connect with expert nutritionists, track your progress, and achieve
                 your health goals with our comprehensive nutrition platform.
               </p>
-              <div className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+              <div className="flex flex-col sm:flex-row justify-center md:justify-start space-y-4 sm:space-y-0 sm:space-x-4">
                 <Link to="/login">
                   <Button className="bg-primary-500 hover:bg-primary-600 text-white px-8 py-6 rounded-lg text-lg">
                     Get Started
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                 <Link to="/login">
-                   <Button variant="outline" className="border-primary-500 text-primary-500 hover:bg-primary-50 px-8 py-6 rounded-lg text-lg">
-                     Learn More
-                   </Button>
+                <Link to="/signup">
+                  <Button variant="outline" className="border-primary-500 text-primary-500 hover:bg-primary-50 px-8 py-6 rounded-lg text-lg">
+                    Get in touch
+                  </Button>
                 </Link>
               </div>
-              <div className="mt-8 flex items-center space-x-2">
+              <div className="mt-8 flex items-center justify-center md:justify-start space-x-2">
                 <div className="flex -space-x-2">
                   {[1, 2, 3, 4].map((item) => (
                     <div key={item} className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white" />
@@ -55,26 +56,19 @@ const Landing = () => {
                 </p>
               </div>
             </div>
-            <div className="md:w-1/2">
-              <div className="bg-white p-4 rounded-2xl shadow-xl">
-                <div className="bg-gray-100 rounded-xl overflow-hidden">
-                  <div className="h-64 bg-primary-100 flex items-center justify-center">
-                    <div className="text-center">
-                      {/* <div className="w-16 h-16 bg-primary-500 rounded-full mx-auto flex items-center justify-center mb-4">
-                        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                        </svg>
-                      </div> */}
-                      <img src="logo.png" />
-                      {/* <p className="text-gray-500">Dashboard Preview</p> */}
-                    </div>
-                  </div>
-                </div>
-              </div>
+
+            {/* Image Section */}
+            <div className="order-1 md:order-2 flex justify-center">
+              <img
+                src="mainph2.png"
+                alt="Hero Visual"
+                className="max-w-full md:max-w-lg lg:max-w-xl rounded-2xl shadow-sm object-contain"
+              />
             </div>
           </div>
         </div>
       </section>
+
 
       <section id="features" className="py-20 bg-white">
         <div className="container mx-auto px-4">
@@ -141,9 +135,9 @@ const Landing = () => {
               Join our platform today and transform how you manage nutrition services.
               Whether you're an admin, nutritionist, or client, we have the tools for you.
             </p>
-            <Link to="/login">
+            <Link to="/signup">
               <Button className="bg-white text-primary-500 hover:bg-gray-100 px-8 py-6 rounded-lg text-lg">
-                Sign Up Now
+                 Signup Now 
               </Button>
             </Link>
           </div>

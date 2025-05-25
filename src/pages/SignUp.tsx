@@ -1,276 +1,181 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import axios from "axios";
-import api from "@/lib/api";
+import { Link } from "react-router-dom";
 
-const Signup = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const navigate = useNavigate();
+const indianStates = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat",
+  "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh",
+  "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh",
+  "Uttarakhand", "West Bengal"
+];
+
+const SignUp = () => {
   const [form, setForm] = useState({
     name: "",
-    age: "",
+    illness: "",
     phone: "",
-    gender: "",
-    location: "",
-    issue: "",
-    qualification: "",
+    email: "",
+    country: "",
+    state: "",
+    otp: ""
   });
 
-  const handleChange = (field) => (e) => {
-    setForm({ ...form, [field]: e.target.value });
+  const [otpSent, setOtpSent] = useState(false);
+
+  const handleChange = (key, value) => {
+    setForm({ ...form, [key]: value });
   };
 
-  const handleSignup = async (e) => {
+  const handleSendOtp = async () => {
+    if (!form.phone) return toast.error("Enter a valid phone number");
+    // Placeholder for OTP sending API
+    toast.success("OTP sent successfully");
+    setOtpSent(true);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
-
-    if (!email || !password || !confirmPassword || !role) {
-      toast.error("Please fill in all fields");
-      setIsLoading(false);
-      return;
-    }
-
-    if(password.length < 8){
-      toast.error("please enter password of minimum length 8 characters")
-    }
-
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match");
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      const response = await api.post("/users/signup", {
-        email,
-        password,
-        role,
-        ...form
-      });
-      navigate(`/login`);
-    } catch (error) {
-      const errorMessage = error.response?.data?.message || "Signup failed. Please try again.";
-      toast.error(errorMessage);
-    } finally {
-      setIsLoading(false);
+      await axios.post("/api/signup", form);
+      toast.success("Signed up successfully!");
+    } catch (err) {
+      toast.error("Failed to sign up");
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <Link to="/" className="flex items-center justify-center space-x-2 mb-8">
-          <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center">
-            <span className="text-white font-bold">N</span>
-          </div>
-          <span className="text-2xl font-bold">Livin Significant</span>
-        </Link>
-        
-        <Card>
+    <div className="grid place-items-center min-h-screen md:grid-cols-2 bg-white">
+      <div className="w-full max-w-lg">
+        <Card className="shadow-md border border-gray-200">
           <CardHeader>
-            <CardTitle className="text-2xl font-bold text-center">Sign Up</CardTitle>
-            <CardDescription className="text-center">
-              Create a new account to get started
-            </CardDescription>
+            <CardTitle className="text-center text-2xl font-semibold">
+               Get in touch with our nutritionists
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSignup} className="space-y-4">
-              <div className="space-y-2">
+            <form onSubmit={handleSubmit} className="space-y-5">
+              <div className="space-y-1">
+                <Label htmlFor="name">Name</Label>
+                <Input
+                  id="name"
+                  value={form.name}
+                  onChange={(e) => handleChange("name", e.target.value)}
+                  required
+                />
+              </div>
+              
+              <div className="space-y-1">
+                <Label htmlFor="illness">Illness you are suffering from</Label>
+                <Input
+                  id="illness"
+                  value={form.illness}
+                  onChange={(e) => handleChange("illness", e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-1">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={form.email}
+                  onChange={(e) => handleChange("email", e.target.value)}
                   required
                 />
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
+
+              <div className="space-y-1">
+                <Label htmlFor="phone">Phone</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={form.phone}
+                    onChange={(e) => handleChange("phone", e.target.value)}
+                    required
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleSendOtp}
+                    className="bg-primary-500 text-white hover:bg-primary-600"
+                  >
+                    Send OTP
+                  </Button>
+                </div>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="role">Register As</Label>
-                <Select onValueChange={setRole} value={role}>
+
+              {otpSent && (
+                <div className="space-y-1">
+                  <Label htmlFor="otp">Enter OTP</Label>
+                  <Input
+                    id="otp"
+                    value={form.otp}
+                    onChange={(e) => handleChange("otp", e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <Label>Country</Label>
+                <Select onValueChange={(val) => handleChange("country", val)}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select role" />
+                    <SelectValue placeholder="Select country" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="nutritionist">Nutritionist</SelectItem>
-                    <SelectItem value="client">Client</SelectItem>
+                    <SelectItem value="India">India</SelectItem>
+                    <SelectItem value="Outside India">Outside India</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              {
-                role == "" ? <div>nothing</div> : role == "client" ? <div>
-                   <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      value={form.name}
-                      onChange={handleChange("name")}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="age">Age</Label>
-                    <Input
-                      id="age"
-                      type="number"
-                      value={form.age}
-                      onChange={handleChange("age")}
-                      required
-                    />
-                 </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={form.phone}
-                    onChange={handleChange("phone")}
-                    required
-                  />
+              {form.country === "India" && (
+                <div className="space-y-1">
+                  <Label>State</Label>
+                  <Select onValueChange={(val) => handleChange("state", val)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select state" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {indianStates.map((state) => (
+                        <SelectItem key={state} value={state}>{state}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
+              )}
 
-                <div className="space-y-2">
-                  <Label htmlFor="gender">Gender</Label>
-                  <Input
-                    id="gender"
-                    type="text"
-                    value={form.gender}
-                    onChange={handleChange("gender")}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    type="text"
-                    value={form.location}
-                    onChange={handleChange("location")}
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="issue">Issue</Label>
-                  <Input
-                    id="issue"
-                    type="text"
-                    value={form.issue}
-                    onChange={handleChange("issue")}
-                    required
-                  />
-                </div>
-        
-                </div> : role == "nutritionist" ? <div>
-                   <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      type="text"
-                      value={form.name}
-                      onChange={handleChange("name")}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                  <Label htmlFor="qualification">Qualification</Label>
-                  <Input
-                    id="qualification"
-                    type="text"
-                    value={form.qualification}
-                    onChange={handleChange("qualification")}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    value={form.phone}
-                    onChange={handleChange("phone")}
-                    required
-                  />
-                </div>
-                </div> : 
-                 <div>Welcome Admin</div>
-              }
-
-
-
-              
               <Button
                 type="submit"
-                className="w-full bg-primary-500 hover:bg-primary-600 text-white"
-                disabled={isLoading}
+                className="w-full bg-primary-500 text-white hover:bg-primary-600"
               >
-                {isLoading ? "Signing Up..." : "Sign Up"}
+                Sign Up
               </Button>
             </form>
-            
-            <div className="mt-4 text-center">
-              <a href="#" className="text-sm text-primary-500 hover:underline">
-                Need help?
-              </a>
-            </div>
           </CardContent>
-          <CardFooter className="flex justify-center">
-            <p className="text-sm text-gray-500">
-              Already have an account?{" "}
-              <Link to="/login" className="text-primary-500 hover:underline">
-                Sign In
-              </Link>
-            </p>
-          </CardFooter>
         </Card>
-        
-        <p className="text-center mt-4 text-gray-600">
-          <Link to="/" className="text-primary-500 hover:underline">
-            Back to Home
-          </Link>
+        <p className="mt-5 text-sm text-center text-gray-500">
+                <Link to="/" className="text-primary-500 hover:underline">← Back to Home</Link>
         </p>
       </div>
+
+      <div className="hidden md:flex justify-end items-center pr-20">
+        <img
+          src="logo.png"
+          alt="Nutrition Visual"
+          className="max-w-[500px] w-full"
+        />
+    </div>
     </div>
   );
 };
 
-export default Signup;
+export default SignUp;

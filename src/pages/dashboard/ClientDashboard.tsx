@@ -339,14 +339,17 @@ const ClientDashboard = () => {
             <CardContent>
               <div className="h-64 flex items-end space-x-2">
                 {clientData.progress.map((progress, index) => (
-                  <div key={index} className="flex-1 flex flex-col items-center">
-                    <div
-                      className="bg-primary-500 rounded-t-md w-full"
-                      style={{
-                        height: `${((progress.weight - 170) / 15) * 100}%`,
-                        minHeight: "10%",
-                      }}
-                    />
+                  <div key={index} className="flex-1 flex flex-col items-center h-64">
+                      <div
+                        className="bg-green-500 w-full border rounded-t-md"
+                        style={{
+                          height: progress.weight
+                            ? `${Math.max(((progress.weight - 170) / 15) * 100, 10)}%`
+                            : "10%",
+                          minHeight: "20px",
+                        }}
+                      />
+
                     <div className="mt-2 text-xs font-medium">{progress.week}</div>
                     <div className="text-sm">{progress.weight} lbs</div>
                   </div>

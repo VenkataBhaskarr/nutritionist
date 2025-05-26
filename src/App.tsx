@@ -9,11 +9,12 @@ import Login from "./pages/Login";
 import AdminDashboard from "./pages/dashboard/AdminDashboard";
 import NutritionistDashboard from "./pages/dashboard/NutritionistDashboard";
 import ClientDashboard from "./pages/dashboard/ClientDashboard";
-
+import Blogs from "./components/Blogs";
+import Calculator from "./components/Calculator";
 import AdminClients from "./pages/admin/AdminClients";
 import AdminNuts from "./pages/admin/AdminNuts";
 import AdminSettings from "./pages/admin/AdminSettings";
-
+import BlogDetails from "@/components/BlogDetails"
 import NutClients from "./pages/nut/NutClients";
 import NutProfile from "./pages/nut/NutProfile";
 import NutSettings from "./pages/nut/NutSettings";
@@ -37,6 +38,9 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
+          <Route path="/blogs" element={<Blogs />} />
+           <Route path="/blogs/:id" element={<BlogDetails />} />
+          <Route path="/calculator" element={<Calculator />} />
           <Route path="/dashboard/admin" element={<AdminDashboard />} />
           <Route path="/dashboard/admin/nutritionists" element={<AdminNuts/>} />
           <Route path="/dashboard/admin/clients" element={<AdminClients/>} />

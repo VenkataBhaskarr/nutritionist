@@ -28,6 +28,20 @@ const NavBar = () => {
           >
             Features
           </HashLink>
+           <HashLink
+            smooth
+            to="/blogs"
+            className="text-gray-700 hover:text-primary-500 font-medium"
+          >
+            Blogs
+          </HashLink>
+           <HashLink
+            smooth
+            to="/calculator"
+            className="text-gray-700 hover:text-primary-500 font-medium"
+          >
+            Calculator
+          </HashLink>
           <HashLink
             smooth
             to="/#testimonials"

@@ -18,12 +18,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const MOCK_CLIENTS = [
-  { id: 1, name: "Michael Brown", email: "michael@example.com", plan: "Weight Loss", lastCheckIn: "2023-05-10", progress: "Good" },
-  { id: 2, name: "Jennifer Wilson", email: "jennifer@example.com", plan: "Muscle Gain", lastCheckIn: "2023-05-14", progress: "Excellent" },
-  { id: 3, name: "David Thompson", email: "david@example.com", plan: "Sports Performance", lastCheckIn: "2023-05-12", progress: "Fair" },
-  { id: 4, name: "Lisa Martinez", email: "lisa@example.com", plan: "General Health", lastCheckIn: "2023-05-15", progress: "Good" }
-];
+// const MOCK_CLIENTS = [
+//   { id: 1, name: "Michael Brown", email: "michael@example.com", plan: "Weight Loss", lastCheckIn: "2023-05-10", progress: "Good" },
+//   { id: 2, name: "Jennifer Wilson", email: "jennifer@example.com", plan: "Muscle Gain", lastCheckIn: "2023-05-14", progress: "Excellent" },
+//   { id: 3, name: "David Thompson", email: "david@example.com", plan: "Sports Performance", lastCheckIn: "2023-05-12", progress: "Fair" },
+//   { id: 4, name: "Lisa Martinez", email: "lisa@example.com", plan: "General Health", lastCheckIn: "2023-05-15", progress: "Good" }
+// ];
 
 const MOCK_APPOINTMENTS = [
   { id: 1, clientName: "Michael Brown", date: "2023-05-20", time: "10:00 AM", type: "Follow-up" },
@@ -33,7 +33,7 @@ const MOCK_APPOINTMENTS = [
 
 const NutritionistDashboard = () => {
   const navigate = useNavigate();
-  const [clients, setClients] = useState(MOCK_CLIENTS);
+  const [clients, setClients] = useState([]);
   const [appointments, setAppointments] = useState(MOCK_APPOINTMENTS);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -89,20 +89,22 @@ const NutritionistDashboard = () => {
         nId: nutDetails.data[0].id,
       };
 
-      setFormData({
-        name: "",
-        age: "",
-        email: "",
-        phone: "",
-        gender: "",
-        location: "",
-        issue: "",
-      });
-      
+
       await api.post(`/client/add`, newClient, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      setClients((prev) => [...prev, newClient]);
+      setFormData({
+              name: "",
+              age: "",
+              email: "",
+              phone: "",
+              gender: "",
+              location: "",
+              issue: "",
+            });
+     
       toast.success("Client added successfully!");
       setDialogOpen(false);
       

@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import api from "@/lib/api";
 
 const indianStates = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat",
@@ -17,6 +18,7 @@ const indianStates = [
 ];
 
 const SignUp = () => {
+  const [resp, setResp] = useState("")
   const [form, setForm] = useState({
     name: "",
     illness: "",
@@ -24,27 +26,24 @@ const SignUp = () => {
     email: "",
     country: "",
     state: "",
-    otp: ""
+   
   });
 
-  const [otpSent, setOtpSent] = useState(false);
 
   const handleChange = (key, value) => {
     setForm({ ...form, [key]: value });
   };
 
-  const handleSendOtp = async () => {
-    if (!form.phone) return toast.error("Enter a valid phone number");
-    // Placeholder for OTP sending API
-    toast.success("OTP sent successfully");
-    setOtpSent(true);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("/api/signup", form);
+      const response = await api.post("/users/sendmail", form);
+      setResp(response.data)
+      setTimeout(() => {
+        setResp("");
+      }, 5000);
       toast.success("Signed up successfully!");
+      
     } catch (err) {
       toast.error("Failed to sign up");
     }
@@ -102,27 +101,10 @@ const SignUp = () => {
                     onChange={(e) => handleChange("phone", e.target.value)}
                     required
                   />
-                  <Button
-                    type="button"
-                    onClick={handleSendOtp}
-                    className="bg-primary-500 text-white hover:bg-primary-600"
-                  >
-                    Send OTP
-                  </Button>
+                 
                 </div>
               </div>
 
-              {otpSent && (
-                <div className="space-y-1">
-                  <Label htmlFor="otp">Enter OTP</Label>
-                  <Input
-                    id="otp"
-                    value={form.otp}
-                    onChange={(e) => handleChange("otp", e.target.value)}
-                    required
-                  />
-                </div>
-              )}
 
               <div className="space-y-1">
                 <Label>Country</Label>
@@ -162,6 +144,11 @@ const SignUp = () => {
             </form>
           </CardContent>
         </Card>
+        {
+          resp!="" ? <div className="text-green-500 text-lg">
+            {resp}
+          </div> : <div></div>
+        }
         <p className="mt-5 text-sm text-center text-gray-500">
                 <Link to="/" className="text-primary-500 hover:underline">← Back to Home</Link>
         </p>

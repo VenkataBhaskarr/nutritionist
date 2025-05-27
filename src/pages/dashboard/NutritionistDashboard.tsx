@@ -328,6 +328,7 @@ const NutritionistDashboard = () => {
     gender: "",
     location: "",
     nextSession: "",
+    plan: "",
     issue: "",
   });
 
@@ -363,8 +364,8 @@ const NutritionistDashboard = () => {
   }, []);
 
   const handleAddClient = async () => {
-    const { name, age, email, phone, gender, location, issue } = formData;
-    if (!name || !age || !email || !phone || !gender || !location || !issue) {
+    const { name, age, email, phone, gender, location, issue, plan } = formData;
+    if (!name || !age || !email || !phone || !gender || !location || !issue || !plan) {
       toast.error("Please fill in all the fields.");
       return;
     }
@@ -391,6 +392,7 @@ const NutritionistDashboard = () => {
         email: "",
         phone: "",
         gender: "",
+        plan: "",
         location: "",
         issue: "",
         nextSession: "",
@@ -552,7 +554,7 @@ const NutritionistDashboard = () => {
               <DialogTitle>Add New Client</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              {["name", "age", "email", "phone", "gender", "location", "issue", "nextSession"].map((field) => (
+              {["name", "age", "email", "phone", "gender", "location", "issue","plan", "nextSession"].map((field) => (
                 <div key={field} className="space-y-2">
                   <Label htmlFor={field}>{field.charAt(0).toUpperCase() + field.slice(1)}</Label>
                   <Input

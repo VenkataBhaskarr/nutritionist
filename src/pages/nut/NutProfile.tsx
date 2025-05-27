@@ -6,6 +6,17 @@ import DashboardLayout from '@/components/DashboardLayout';
 import axios from 'axios';
 import { toast } from "sonner";
 import api from '@/lib/api';
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Eye, EyeOff } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 interface NutritionistProfile {
   name: string;
@@ -21,6 +32,50 @@ const NutProfile: FC = () => {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [open, setOpen] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+
+  const handleUpdatePassword = async () => {
+    if (!password || !confirmPassword) {
+      toast.error("Please fill in both fields.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem("token");
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+      await api.post(
+        "/nuts/updatepassword",
+        {
+          email: user.email,
+          password: password,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      toast.success("Password updated successfully!");
+      setOpen(false);
+      setPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      console.error("Error updating password", error);
+      toast.error("Something went wrong. Try again.");
+    }
+  };
+
 
 const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const file = e.target.files?.[0];
@@ -131,6 +186,74 @@ const triggerFileInput = () => {
                 </Button>
               </CardContent>
             </Card>
+          <Card className="mt-7">
+            <CardHeader>
+              <CardTitle>Update Password</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Dialog open={open} onOpenChange={setOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="destructive">Please update your password here</Button>
+                </DialogTrigger>
+
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Change Password</DialogTitle>
+                  </DialogHeader>
+
+                  <div className="space-y-4 py-2">
+                    {/* New Password Field */}
+                    <div className="space-y-1">
+                      <Label htmlFor="new-password">New Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="new-password"
+                          type={showPassword ? "text" : "password"}
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          className="absolute inset-y-0 right-2 flex items-center text-muted-foreground"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          tabIndex={-1}
+                        >
+                          {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Confirm Password Field */}
+                    <div className="space-y-1">
+                      <Label htmlFor="confirm-password">Confirm Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="confirm-password"
+                          type={showConfirm ? "text" : "password"}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          className="pr-10"
+                        />
+                        <button
+                          type="button"
+                          className="absolute inset-y-0 right-2 flex items-center text-muted-foreground"
+                          onClick={() => setShowConfirm((prev) => !prev)}
+                          tabIndex={-1}
+                        >
+                          {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <DialogFooter>
+                    <Button onClick={handleUpdatePassword}>Update</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardContent>
+          </Card>
           </div>
 
           <div className="md:col-span-2">
@@ -209,7 +332,10 @@ const triggerFileInput = () => {
               </div>
             </CardContent>
           </Card>
+
+          
         </div>
+        
       </div>
     </DashboardLayout>
   );

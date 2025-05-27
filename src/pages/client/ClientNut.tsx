@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import DashboardLayout from '@/components/DashboardLayout';
 import api from "@/lib/api";
+import { useNavigate } from 'react-router-dom';
 
 interface NutritionistInfo {
   id: number;
@@ -49,6 +50,10 @@ const BookSessionDialog: FC<{
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
+      const navigate = useNavigate();
+   if(!token){
+    navigate("/login")
+   }
       await api.post(
         "/appointments",
         { clientId, nutritionistId, date, time, type, duration, status: "upcoming" },
@@ -144,6 +149,10 @@ const RescheduleSessionDialog: FC<{
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
+      const navigate = useNavigate();
+         if(!token){
+          navigate("/login")
+         }
       await api.put(
         `/appointments/${sessionId}`,
         { date, time },
@@ -215,6 +224,10 @@ const CancelSessionDialog: FC<{
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
+      const navigate = useNavigate();
+   if(!token){
+    navigate("/login")
+   }
       await api.put(
         `/appointments/${sessionId}`,
         { status: "cancelled" },
@@ -269,7 +282,12 @@ const SendMessageDialog: FC<{
     }
     try {
       setIsSubmitting(true);
+      
       const token = localStorage.getItem("token");
+      const navigate = useNavigate();
+   if(!token){
+    navigate("/login")
+   }
       await api.post(
         "/contact",
         { message, contactMethod: "email", recipient: nutritionistEmail },
@@ -347,6 +365,10 @@ const ClientNut: FC = () => {
       try {
         setIsLoading(true);
         const token = localStorage.getItem("token");
+        const navigate = useNavigate();
+           if(!token){
+            navigate("/login")
+           }
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const email = encodeURIComponent(user.email);
 

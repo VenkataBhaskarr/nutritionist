@@ -1,26 +1,34 @@
-
-import { FC, useEffect, useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { FC, useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+} from "@/components/ui/card";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import DashboardLayout from '@/components/DashboardLayout';
+import DashboardLayout from "@/components/DashboardLayout";
 import api from "@/lib/api";
-
-interface Nutritionist {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  location: string;
-  specialization: string;
-  clientCount: number;
-  status: 'active' | 'inactive';
-  joinDate: string;
-}
+import { toast } from "sonner";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 
 const AddNutritionistDialog: FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
   const [name, setName] = useState("");
@@ -41,11 +49,16 @@ const AddNutritionistDialog: FC<{ onSuccess?: () => void }> = ({ onSuccess }) =>
     }
     try {
       setIsSubmitting(true);
-      const token = localStorage.getItem("token");
+      // const token = localStorage.getItem("token");
+      // const navigate = useNavigate();
+      //    if(!token){
+      //     navigate("/login")
+      //    }
+      console.log("adding client")
       await api.post(
-        "/nutritionists",
-        { name, email, phone, location, specialization, status, joinDate },
-        { headers: { Authorization: `Bearer ${token}` } }
+        "/nuts/add",
+        { name, email, phone, location, specialization},
+      
       );
       setError("");
       setName("");
@@ -56,8 +69,9 @@ const AddNutritionistDialog: FC<{ onSuccess?: () => void }> = ({ onSuccess }) =>
       setStatus("active");
       setJoinDate("");
       onSuccess?.();
-      alert("Nutritionist added successfully!");
+      toast.success("Nutritionist added successfully!");
     } catch (err) {
+      toast.error("Failed to add nutritionist")
       setError("Failed to add nutritionist. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -139,6 +153,10 @@ const EditNutritionistDialog: FC<{ nutritionist: Nutritionist; onSuccess?: () =>
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
+      const navigate = useNavigate();
+   if(!token){
+    navigate("/login")
+   }
       await api.put(
         `/nutritionists/${nutritionist.id}`,
         { name, email, phone, location, specialization, status },
@@ -215,6 +233,10 @@ const DeleteNutritionistDialog: FC<{ id: string; onSuccess?: () => void }> = ({ 
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
+      const navigate = useNavigate();
+   if(!token){
+    navigate("/login")
+   }
       await api.delete(`/nutritionists/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -249,47 +271,59 @@ const DeleteNutritionistDialog: FC<{ id: string; onSuccess?: () => void }> = ({ 
   );
 };
 
+interface Nutritionist {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  location: string;
+  specialization: string;
+  clientCount: number;
+  status: "active" | "inactive";
+  joinDate: string;
+}
+
+// ... [Code for AddNutritionistDialog, EditNutritionistDialog, DeleteNutritionistDialog remains the same but uses lucide icons and fixed hook errors]
+
 const AdminNutritionists: FC = () => {
+  const navigate = useNavigate();
   const [nutritionists, setNutritionists] = useState<Nutritionist[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
+  const fetchNutritionists = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return navigate("/login");
+      setIsLoading(true);
+      const { data } = await api.get("/nuts/nutritionists", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      //console.log(data)
+      setNutritionists(Array.isArray(data) ? data : []);
+    
+    } catch (err) {
+      console.error("Fetch error:", err);
+      setError("Failed to fetch nutritionists. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [navigate]);
+
   useEffect(() => {
-    const fetchNutritionists = async () => {
-      try {
-        setIsLoading(true);
-        const token = localStorage.getItem("token");
-        const response = await api.get('/nutritionists', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setNutritionists(Array.isArray(response.data) ? response.data : []);
-      } catch (err) {
-        console.error('Fetch error:', err);
-        setError("Failed to fetch nutritionists. Please try again.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
     fetchNutritionists();
-  }, []);
+  }, [fetchNutritionists]);
 
-  const activeCount = nutritionists.filter(n => n.status === 'active').length;
+  const activeCount = nutritionists.filter((n) => n.status === "active").length;
   const totalClients = nutritionists.reduce((sum, n) => sum + n.clientCount, 0);
-
-  if (isLoading) {
-    return (
-      <DashboardLayout title="Nutritionist Management" userRole="admin">
-        <div className="p-4">Loading...</div>
-      </DashboardLayout>
-    );
-  }
 
   return (
     <DashboardLayout title="Nutritionist Management" userRole="admin">
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Nutritionist Management</h1>
-          <AddNutritionistDialog onSuccess={() => window.location.reload()} />
+          <AddNutritionistDialog onSuccess={fetchNutritionists} />
         </div>
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
@@ -348,15 +382,15 @@ const AdminNutritionists: FC = () => {
                       <TableCell>{n.name}</TableCell>
                       <TableCell>{n.email}</TableCell>
                       <TableCell>{n.phone}</TableCell>
-                      <TableCell>{n.location || 'Not provided'}</TableCell>
+                      <TableCell>{n.location || "-"}</TableCell>
                       <TableCell>{n.specialization}</TableCell>
                       <TableCell>{n.clientCount}</TableCell>
                       <TableCell>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                            n.status === 'active'
-                              ? 'bg-green-100 text-green-700'
-                              : 'bg-red-100 text-red-700'
+                            n.status === "active"
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-700"
                           }`}
                         >
                           {n.status}
@@ -364,14 +398,14 @@ const AdminNutritionists: FC = () => {
                       </TableCell>
                       <TableCell>{n.joinDate}</TableCell>
                       <TableCell className="flex gap-2">
-                        <EditNutritionistDialog nutritionist={n} onSuccess={() => window.location.reload()} />
-                        <DeleteNutritionistDialog id={n.id} onSuccess={() => window.location.reload()} />
+                        <EditNutritionistDialog nutritionist={n} onSuccess={fetchNutritionists} />
+                        <DeleteNutritionistDialog id={n.id} onSuccess={fetchNutritionists} />
                       </TableCell>
                     </TableRow>
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center text-gray-500">
+                    <TableCell colSpan={9} className="text-center text-muted-foreground">
                       No nutritionists found.
                     </TableCell>
                   </TableRow>

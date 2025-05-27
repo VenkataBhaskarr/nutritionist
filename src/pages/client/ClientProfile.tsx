@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import DashboardLayout from '@/components/DashboardLayout';
 import api from "@/lib/api";
+import { useNavigate } from 'react-router-dom';
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false };
@@ -79,6 +80,10 @@ const AddGoalDialog: FC<{
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
+      const navigate = useNavigate();
+      if(!token){
+        navigate("/login")
+      }
       await api.post(
         "/goals",
         { clientId, type, target, progress: parseFloat(progress), deadline },
@@ -181,6 +186,10 @@ const AddMetricDialog: FC<{
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
+      const navigate = useNavigate();
+   if(!token){
+    navigate("/login")
+   }
       await api.post(
         "/progress",
         {
@@ -301,6 +310,10 @@ const ClientProfile: FC = () => {
       try {
         setIsLoading(true);
         const token = localStorage.getItem("token");
+        const navigate = useNavigate();
+           if(!token){
+            navigate("/login")
+           }
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         const email = encodeURIComponent(user.email);
 
@@ -351,6 +364,10 @@ const ClientProfile: FC = () => {
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
+      const navigate = useNavigate();
+      if(!token){
+        navigate("/login")
+      }
       await api.put(
         `/client/${clientInfo.id}`,
         {

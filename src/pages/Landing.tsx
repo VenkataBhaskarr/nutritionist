@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
+import "../App.css"
+
 import {
   CheckIcon,
   ArrowRight,
@@ -17,7 +19,14 @@ const Landing = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <NavBar />
-
+        <a
+          href="https://wa.me/919398036704?text=Hello%20I%20am%20from%20livinsignificant%20site%20can%20we%20please%20talk%20about%20the%20process%20"
+          className="whatsapp-float"
+          target="_blank"
+        >
+            <img src="https://img.icons8.com/color/48/000000/whatsapp--v1.png" alt="WhatsApp Chat" />
+        </a>
+     
       <section id="home" className="hero-gradient pt-20 pb-32">
         <div className="container mx-auto px-4">
           <div className="flex flex-col-reverse md:flex-row items-center md:items-center md:justify-center gap-32">
@@ -52,7 +61,7 @@ const Landing = () => {
                   ))}
                 </div>
                 <p className="text-sm text-gray-600">
-                  <span className="font-bold">2,000+</span> active users
+                  <span className="font-bold">10+</span> active users
                 </p>
               </div>
             </div>

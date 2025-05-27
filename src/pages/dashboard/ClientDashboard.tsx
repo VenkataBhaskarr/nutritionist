@@ -47,7 +47,7 @@ const ScheduleAppointmentDialog: React.FC<{
   const [time, setTime] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const navigate = useNavigate()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!date || !time) {
@@ -58,6 +58,9 @@ const ScheduleAppointmentDialog: React.FC<{
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
+      if(!token){
+        navigate("/login")
+      }
       await api.post(
         "/appointments",
         { clientId, date, time, nutritionistId },

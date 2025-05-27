@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import DashboardLayout from '@/components/DashboardLayout';
 import api from "@/lib/api";
+import { useNavigate } from 'react-router-dom';
 
 interface Client {
   id: string;
@@ -41,6 +42,10 @@ const AddClientDialog: FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
     const fetchNutritionists = async () => {
       try {
         const token = localStorage.getItem("token");
+        const navigate = useNavigate();
+           if(!token){
+            navigate("/login")
+           }
         const response = await api.get('/nutritionists', {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -65,6 +70,10 @@ const AddClientDialog: FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
+      const navigate = useNavigate();
+   if(!token){
+    navigate("/login")
+   }
       await api.post(
         "/clients",
         {
@@ -202,6 +211,10 @@ const EditClientDialog: FC<{ client: Client; onSuccess?: () => void }> = ({ clie
     const fetchNutritionists = async () => {
       try {
         const token = localStorage.getItem("token");
+        const navigate = useNavigate();
+   if(!token){
+    navigate("/login")
+   }
         const response = await api.get('/nutritionists', {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -226,6 +239,10 @@ const EditClientDialog: FC<{ client: Client; onSuccess?: () => void }> = ({ clie
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
+      const navigate = useNavigate();
+   if(!token){
+    navigate("/login")
+   }
       await api.put(
         `/clients/${client.id}`,
         {
@@ -341,6 +358,10 @@ const DeleteClientDialog: FC<{ id: string; onSuccess?: () => void }> = ({ id, on
     try {
       setIsSubmitting(true);
       const token = localStorage.getItem("token");
+      const navigate = useNavigate();
+   if(!token){
+    navigate("/login")
+   }
       await api.delete(`/clients/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -385,6 +406,10 @@ const AdminClients: FC = () => {
       try {
         setIsLoading(true);
         const token = localStorage.getItem("token");
+        const navigate = useNavigate();
+   if(!token){
+    navigate("/login")
+   }
         const response = await api.get('/clients', {
           headers: { Authorization: `Bearer ${token}` },
         });

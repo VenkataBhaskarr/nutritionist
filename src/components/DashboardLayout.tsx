@@ -10,6 +10,7 @@ import {
   Menu,
   ArrowLeft,
   Settings,
+  MessageCircleMore,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -37,14 +38,14 @@ const DashboardLayout = ({ children, title, userRole }: DashboardLayoutProps) =>
           { icon: LayoutDashboard, name: "Dashboard", path: "/dashboard/nutritionist" },
           { icon: Users, name: "My Clients", path: "/dashboard/nutritionist/clients" },
           { icon: User, name: "Profile", path: "/dashboard/nutritionist/profile" },
-          { icon: Settings, name: "Settings", path: "/dashboard/nutritionist/settings" }
+          { icon: MessageCircleMore, name: "Messages", path: "/dashboard/nutritionist/messages" }
         ];
       case "client":
         return [
           { icon: LayoutDashboard, name: "Dashboard", path: "/dashboard/client" },
           { icon: User, name: "My Profile", path: "/dashboard/client/profile" },
           { icon: User, name: "My Nutritionist", path: "/dashboard/client/nutritionist" },
-          { icon: Settings, name: "Settings", path: "/dashboard/client/settings" }
+          { icon: MessageCircleMore, name: "Messages", path: "/dashboard/client/messages" }
         ];
     }
   };

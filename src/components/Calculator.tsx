@@ -4,6 +4,7 @@ import NavBar from "@/components/NavBar";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import "../App.css"
 
 const Calculator = () => {
   const [tab, setTab] = useState<"BMI" | "BMR">("BMI");
@@ -56,6 +57,13 @@ const Calculator = () => {
   return (
     <div id="calculator" className="min-h-screen flex flex-col">
       <NavBar />
+       <a
+          href="https://wa.me/919398036704?text=Hello%20I%20am%20from%20livinsignificant%20site%20can%20we%20please%20talk%20about%20the%20process%20"
+          className="whatsapp-float"
+          target="_blank"
+        >
+          <img src="https://img.icons8.com/color/48/000000/whatsapp--v1.png" alt="WhatsApp Chat" />
+        </a>
 
       <section className="pt-20 pb-12 bg-white">
         <div className="container mx-auto px-4">

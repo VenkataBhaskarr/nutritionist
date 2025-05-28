@@ -64,7 +64,9 @@ const Login = () => {
     <div className="w-full max-w-md space-y-6">
       <Link to="/" className="flex justify-center items-center space-x-2">
         <div className="w-10 h-10 rounded-full bg-primary-500 flex items-center justify-center shadow-md">
-          <span className="text-white font-semibold text-lg">N</span>
+          <span className="text-white font-semibold text-lg">
+            <img src="logo.png"></img>
+          </span>
         </div>
         <span className="text-3xl font-bold tracking-tight text-gray-800">
           Livin Significant

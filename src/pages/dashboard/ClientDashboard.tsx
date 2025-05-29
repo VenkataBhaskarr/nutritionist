@@ -400,7 +400,7 @@ const ClientDashboard = () => {
               <div className="md:w-3/4">
                 <h3 className="text-xl font-bold mb-2">{nutData.name}</h3>
                 <p className="text-gray-600 mb-4">Email: {nutData.email}</p>
-                <div className="space-x-4">
+                <div className="md:space-x-4 max-md:space-y-5 max-md:flex flex-col">
                   <ContactNutritionistDialog nutritionistEmail={nutData.email} />
                   <ScheduleAppointmentDialog clientId={clientData.id} nutritionistId={nutData.id} />
                 </div>

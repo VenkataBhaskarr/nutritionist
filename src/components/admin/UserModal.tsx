@@ -4,14 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from 'sonner';
-import { Nutritionist, Client } from '@/api/admin';
-import { getAllNutritionists } from '@/api/nutritionist';
+import { Nutritionist, getAllNutritionists } from '@/api/nutritionist';
+import { Client as AdminClient } from '@/api/client';
+import { Client as NutritionistClient } from '@/api/nutritionist';
+
+type ModalClient = AdminClient | NutritionistClient;
 
 interface UserModalProps {
   isOpen: boolean;
   onClose: () => void;
-  user: Nutritionist | Client | null;
-  onSave: (formData: Omit<Nutritionist, 'id' | 'clientCount'> | Omit<Client, 'id' | 'nutritionist'>) => Promise<void>;
+  user: Nutritionist | ModalClient | null;
+  onSave: (formData: Omit<Nutritionist, 'id' | 'clientCount'> | Omit<ModalClient, 'id' | 'nutritionist'>) => Promise<void>;
   userType: 'nutritionist' | 'client';
   nutritionists?: Nutritionist[];
 }
@@ -29,6 +32,8 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user, onSave, us
     age: '',
     gender: '',
     nutritionistId: '',
+    lastCheckIn: '',
+    progress: '',
   });
   const [nutritionists, setNutritionists] = useState<Nutritionist[]>([]);
   const [error, setError] = useState('');
@@ -52,18 +57,23 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user, onSave, us
 
   useEffect(() => {
     if (user) {
+      const isAdminClient = 'nutritionist' in user; // AdminClient has 'nutritionist' field
+      const isNutritionistClient = 'lastCheckIn' in user; // NutritionistClient has 'lastCheckIn'
+
       setFormData({
         name: user.name || '',
         email: user.email || '',
         phone: user.phone || '',
         address: user.address || '',
         specialization: (user as Nutritionist).specialization || '',
-        status: (user as Nutritionist | Client).status|| 'active',
-        joinDate: (user as Nutritionist | Client).joinDate || '',
-        plan: (user as Client).plan || '',
-        age: (user as Client).age ? (user as Client).age.toString() : '',
-        gender: (user as Client).gender || '',
-        nutritionistId: (user as Client).nutritionistId ? (user as Client).nutritionistId.toString() : '',
+        status: (user as Nutritionist | ModalClient).status || 'active',
+        joinDate: (user as Nutritionist | ModalClient).joinDate || '',
+        plan: (user as AdminClient | NutritionistClient).plan || '',
+        age: isAdminClient && (user as AdminClient).age ? (user as AdminClient).age.toString() : '',
+        gender: isAdminClient ? (user as AdminClient).gender || '' : '',
+        nutritionistId: isAdminClient && (user as AdminClient).nutritionistId ? (user as AdminClient).nutritionistId.toString() : '',
+        lastCheckIn: isNutritionistClient ? (user as NutritionistClient).lastCheckIn || '' : '',
+        progress: isNutritionistClient ? (user as NutritionistClient).progress || '' : '',
       });
     } else {
       setFormData({
@@ -78,6 +88,8 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user, onSave, us
         age: '',
         gender: '',
         nutritionistId: '',
+        lastCheckIn: '',
+        progress: '',
       });
     }
   }, [user]);
@@ -87,7 +99,7 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user, onSave, us
     setError('');
     const requiredFields = userType === 'nutritionist'
       ? ['name', 'email', 'phone', 'specialization', 'status', 'joinDate']
-      : ['name', 'email', 'phone', 'age', 'gender', 'nutritionistId', 'status', 'joinDate'];
+      : ['name', 'email', 'phone', 'status', 'joinDate'];
     if (requiredFields.some(field => !formData[field as keyof typeof formData])) {
       setError('Please fill in all required fields.');
       return;
@@ -109,12 +121,15 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user, onSave, us
             email: formData.email,
             phone: formData.phone,
             address: formData.address,
-            age: parseInt(formData.age),
-            gender: formData.gender,
-            nutritionistId: parseInt(formData.nutritionistId),
+            age: formData.age ? parseInt(formData.age) : undefined,
+            gender: formData.gender || undefined,
+            nutritionistId: formData.nutritionistId ? parseInt(formData.nutritionistId) : undefined,
             status: formData.status,
             joinDate: formData.joinDate,
-            plan: formData.plan,
+            plan: formData.plan || undefined,
+            lastCheckIn: formData.lastCheckIn || undefined,
+            progress: formData.progress || undefined,
+            nutritionist: undefined, // Will be set by backend in AdminClient context
           };
       await onSave(data);
       onClose();
@@ -216,13 +231,32 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user, onSave, us
                 />
               </div>
               <div>
+                <Label htmlFor="lastCheckIn">Last Check-in</Label>
+                <Input
+                  id="lastCheckIn"
+                  type="date"
+                  value={formData.lastCheckIn}
+                  onChange={(e) => setFormData({ ...formData, lastCheckIn: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="progress">Progress (%)</Label>
+                <Input
+                  id="progress"
+                  type="number"
+                  value={formData.progress}
+                  onChange={(e) => setFormData({ ...formData, progress: e.target.value })}
+                  min="0"
+                  max="100"
+                />
+              </div>
+              <div>
                 <Label htmlFor="age">Age</Label>
                 <Input
                   id="age"
                   type="number"
                   value={formData.age}
                   onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                  required
                 />
               </div>
               <div>
@@ -232,7 +266,6 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user, onSave, us
                   value={formData.gender}
                   onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
                   className="w-full p-2 border rounded-md"
-                  required
                 >
                   <option value="">Select Gender</option>
                   <option value="Male">Male</option>
@@ -247,7 +280,6 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user, onSave, us
                   value={formData.nutritionistId}
                   onChange={(e) => setFormData({ ...formData, nutritionistId: e.target.value })}
                   className="w-full p-2 border rounded-md"
-                  required
                 >
                   <option value="">Select Nutritionist</option>
                   {nutritionists.map((n) => (

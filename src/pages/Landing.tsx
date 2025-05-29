@@ -14,6 +14,7 @@ import {
   Settings
 } from "lucide-react";
 import MarqueeDemo from "@/components/Testimonials";
+import FullStackFlowchart from "./FlowChart";
 
 const Landing = () => {
   return (
@@ -133,8 +134,7 @@ const Landing = () => {
           <MarqueeDemo />
         </div>
       </section>
-
-
+      {/* <FullStackFlowchart/> */}
       {/* CTA Section */}
       <section id="pricing" className="py-20">
         <div className="container mx-auto px-4">

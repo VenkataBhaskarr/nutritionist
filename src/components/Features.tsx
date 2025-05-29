@@ -1,38 +1,19 @@
-'use client';
+import React, { useRef } from 'react';
+import { motion, useInView } from 'framer-motion';
+import { 
+  Utensils, 
+  UserCheck, 
+  ClipboardList, 
+  BookOpen, 
+  Heart, 
+  GraduationCap,
+  ArrowRight,
+  Sparkles
+} from 'lucide-react';
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Utensils, UserCheck, ClipboardList, BookOpen, Heart, GraduationCap, ArrowRight } from 'lucide-react';
-
-const NutritionFeatures = () => {
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        duration: 0.5,
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: 'easeOut' },
-    },
-  };
-
-  const cardVariants = {
-    hidden: { opacity: 0, scale: 0.9 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      transition: { duration: 0.4, ease: 'easeOut' },
-    },
-  };
+const ServicesSection = () => {
+  const sectionRef = useRef(null);
+  const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
   const featureDetails = [
     {
@@ -40,7 +21,7 @@ const NutritionFeatures = () => {
       title: 'Personalized Nutrition Plans',
       value: 'Tailored meal plans designed to meet your unique health goals, crafted by expert nutritionists.',
       color: 'from-blue-500 to-blue-600',
-      bgColor: 'from-blue-50 to-blue_BGColor',
+      bgColor: 'from-blue-50 to-blue-100',
       hasAction: false,
     },
     {
@@ -49,6 +30,7 @@ const NutritionFeatures = () => {
       value: 'One-on-one support from certified coaches to guide you through your wellness journey.',
       color: 'from-purple-500 to-purple-600',
       bgColor: 'from-purple-50 to-purple-100',
+      hasAction: true,
     },
     {
       icon: ClipboardList,
@@ -56,6 +38,7 @@ const NutritionFeatures = () => {
       value: 'Log meals and analyze nutritional intake with intuitive tools for better health decisions.',
       color: 'from-green-500 to-green-600',
       bgColor: 'from-green-50 to-green-100',
+      hasAction: true,
     },
     {
       icon: BookOpen,
@@ -63,6 +46,7 @@ const NutritionFeatures = () => {
       value: 'Access a library of healthy recipes and plan meals effortlessly to stay on track.',
       color: 'from-orange-500 to-orange-600',
       bgColor: 'from-orange-50 to-orange-100',
+      hasAction: true,
     },
     {
       icon: Heart,
@@ -70,6 +54,7 @@ const NutritionFeatures = () => {
       value: 'Build sustainable habits with expert coaching on lifestyle and behavior changes.',
       color: 'from-red-500 to-red-600',
       bgColor: 'from-red-50 to-red-100',
+      hasAction: true,
     },
     {
       icon: GraduationCap,
@@ -81,109 +66,173 @@ const NutritionFeatures = () => {
     },
   ];
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1,
+        duration: 0.6,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { 
+      opacity: 0, 
+      y: 60,
+      scale: 0.9
+    },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
+  };
+
+  const headerVariants = {
+    hidden: { opacity: 0, y: -30 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: {
+        duration: 0.8,
+        ease: [0.4, 0, 0.2, 1],
+      },
+    },
+  };
+
+  const floatingVariants = {
+    initial: { y: 0 },
+    animate: {
+      y: [-10, 10, -10],
+      transition: {
+        duration: 4,
+        repeat: Infinity,
+        ease: "easeInOut",
+      },
+    },
+  };
+
   return (
-    <section className="relative py-12 px-4 bg-gradient-to-br from-slate-50 via-white to-gray-50 overflow-hidden" aria-label="Nutrition Features section">
-      <div className="absolute inset-0">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 50, repeat: Infinity, ease: 'linear' }}
-          className="absolute top-16 left-8 w-24 h-24 bg-gradient-to-r from-blue-100 to-purple-100 rounded-full opacity-20 blur-xl"
-        />
-        <motion.div
-          animate={{ rotate: -360 }}
-          transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
-          className="absolute bottom-16 right-8 w-32 h-32 bg-gradient-to-r from-green-100 to-teal-100 rounded-full opacity-15 blur-2xl"
-        />
-      </div>
-
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '-50px' }}
-        className="relative z-10 max-w-6xl mx-auto"
+    <section 
+      ref={sectionRef}
+      className="relative py-20 lg:py-32 overflow-hidden"
+    >
+      <motion.div 
+        className="absolute top-20 left-10 opacity-10"
+        variants={floatingVariants}
+        initial="initial"
+        animate="animate"
       >
+        <Sparkles size={80} className="text-white" />
+      </motion.div>
+      
+      <motion.div 
+        className="absolute bottom-20 right-10 opacity-10"
+        variants={floatingVariants}
+        initial="initial"
+        animate="animate"
+        transition={{ delay: 2 }}
+      >
+        <Heart size={60} className="text-white" />
+      </motion.div>
+
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
-        <motion.div variants={itemVariants} className="text-center mb-10">
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 dark:border-gray-700/20 rounded-full px-4 py-2 mb-4 shadow-sm"
-          >
-            <span className="text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wide">
-              Our Features
+        <motion.div
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          variants={headerVariants}
+          className="text-center mb-16 lg:mb-20"
+        >
+         
+          <h2 className="text-4xl font-bold text-black mb-6">
+            Transform Your{' '}
+            <span className="text-primary-500">
+              Wellness Journey
             </span>
-          </motion.div>
-          <h2 className="text-2xl md:text-3xl font-semibold text-gray-900 dark:text-white">
-            Why Choose Our <span className="bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">Nutrition Platform</span>
           </h2>
+          
+          <p className="text-lg text-gray-500 max-w-3xl mx-auto leading-relaxed">
+            Discover comprehensive wellness solutions designed to help you achieve your health goals 
+            with personalized support every step of the way.
+          </p>
         </motion.div>
 
         <motion.div
-          variants={itemVariants}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 lg:gap-20 gap-5"
+          initial="hidden"
+          animate={isInView ? "visible" : "hidden"}
+          variants={containerVariants}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
-          {featureDetails.map((detail) => (
-            <motion.div
-              key={detail.title}
-              variants={cardVariants}
-              whileHover={{
-                y: -5,
-                scale: 1.02,
-                transition: { type: 'spring', stiffness: 300 },
-              }}
-              className="group relative"
-            >
-              {/* Card Background */}
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${detail.bgColor} rounded-xl opacity-40 group-hover:opacity-60 transition-opacity duration-300`}
-              />
-              {/* Card Content */}
-              <div className="relative bg-white/10 dark:bg-gray-800/10 backdrop-blur-md border border-white/20 dark:border-gray-700/20 rounded-xl p-5 shadow-md group-hover:shadow-lg transition-all duration-300">
-                {/* Icon */}
-                <motion.div
-                  whileHover={{ rotate: 360 }}
-                  transition={{ duration: 0.5 }}
-                  className={`w-10 h-10 bg-gradient-to-r ${detail.color} rounded-lg flex items-center justify-center mb-4 shadow-sm`}
-                >
-                  <detail.icon className="h-5 w-5 text-white" />
-                </motion.div>
-                {/* Content */}
-                <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-gray-800 dark:text-white uppercase tracking-wide">
-                    {detail.title}
-                  </h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-300">
-                    {detail.value}
-                  </p>
-                </div>
-                {/* Action Button */}
-                {detail.hasAction && (
-                  <motion.a
-                    href="/learn-more"
-                    whileHover={{ scale: 1.05, x: 3 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="mt-3 inline-flex items-center gap-1 text-green-700 dark:text-green-300 hover:text-green-800 dark:hover:text-green-400 font-medium text-xs group-hover:underline transition-colors"
-                  >
-                    <span>Learn More</span>
+          {featureDetails.map((feature, index) => {
+            const Icon = feature.icon;
+            
+            return (
+              <motion.div
+                key={index}
+                variants={itemVariants}
+                whileHover={{ 
+                  y: -8,
+                  transition: { duration: 0.3 }
+                }}
+                className="group relative"
+              >
+                <div className="relative h-full bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-100 overflow-hidden">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${feature.bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}></div>
+                  
+                  <div className="relative z-10">
                     <motion.div
-                      animate={{ x: [0, 2, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
+                      whileHover={{ rotate: 10, scale: 1.1 }}
+                      transition={{ duration: 0.3 }}
+                      className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-r ${feature.color} mb-6 shadow-lg`}
                     >
-                      <ArrowRight className="h-3 w-3" />
+                      <Icon className="w-8 h-8 text-white" />
                     </motion.div>
-                  </motion.a>
-                )}
-                {/* Hover Glow Effect */}
-                <div
-                  className={`absolute inset-0 bg-gradient-to-r ${detail.color} rounded-xl opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
-                />
-              </div>
-            </motion.div>
-          ))}
+
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-gray-800 transition-colors">
+                      {feature.title}
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-gray-600 leading-relaxed mb-6 group-hover:text-gray-700 transition-colors">
+                      {feature.value}
+                    </p>
+
+                    {/* Action Button */}
+                    {feature.hasAction !== false && (
+                      <motion.button
+                        whileHover={{ x: 5 }}
+                        whileTap={{ scale: 0.95 }}
+                        className={`inline-flex items-center gap-2 text-sm font-semibold bg-gradient-to-r ${feature.color} bg-clip-text text-transparent hover:opacity-80 transition-opacity group-hover:translate-x-1 transform transition-transform duration-300`}
+                      >
+                        Learn More
+                        <ArrowRight className="w-4 h-4" />
+                      </motion.button>
+                    )}
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
+                </div>
+              </motion.div>
+            );
+          })}
         </motion.div>
-      </motion.div>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
+          transition={{ duration: 0.8, delay: 0.8 }}
+          className="text-center mt-16 lg:mt-20"
+        >
+        </motion.div>
+      </div>
     </section>
   );
 };
 
-export default NutritionFeatures;
+export default ServicesSection;

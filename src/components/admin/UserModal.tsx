@@ -99,7 +99,7 @@ const UserModal: React.FC<UserModalProps> = ({ isOpen, onClose, user, onSave, us
     setError('');
     const requiredFields = userType === 'nutritionist'
       ? ['name', 'email', 'phone', 'specialization', 'status', 'joinDate']
-      : ['name', 'email', 'phone', 'status', 'joinDate'];
+      : ['name', 'email', 'phone', 'status', 'joinDate', 'age', 'gender'];
     if (requiredFields.some(field => !formData[field as keyof typeof formData])) {
       setError('Please fill in all required fields.');
       return;

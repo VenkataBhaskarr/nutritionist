@@ -39,6 +39,12 @@ export interface Message {
   content: string;
 }
 
+export interface Nutritionist {
+
+}
+export const getAllNutritionists = async() => {
+
+}
 export const getNutritionistProfile = async (): Promise<NutritionistProfile> => {
   try {
     const user = JSON.parse(localStorage.getItem('user') || '{}');

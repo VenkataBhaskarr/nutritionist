@@ -32,32 +32,32 @@ const testimonials = [
   {
     text: "The real-time analytics help me monitor my clients’ progress and tweak their plans instantly. It’s a game-changer for my practice.",
     imageSrc: avatar4,
-    name: "Ramya Iyer",
+    name: "Rohit Iyer",
     username: "Nutritionist",
   },
   {
     text: "The personalized meal plans from my nutritionist are amazing, and the app makes it so simple to follow them daily.",
     imageSrc: avatar5,
-    name: "Sirisha Reddy",
+    name: "Reena",
     username: "Client",
   },
   {
     text: "This platform’s data insights allow me to make informed decisions for my clients, improving their outcomes significantly.",
     imageSrc: avatar6,
-    name: "Vikram Singh",
+    name: "Preethi Reddy",
     username: "Nutritionist",
   },
   {
     text: "As a client, I appreciate how user-friendly the app is. It keeps me motivated with clear progress tracking and tips.",
     imageSrc: avatar7,
-    name: "Neha Gupta",
+    name: "Arjun Desai",
     username: "Client",
   },
   {
     text: "Managing multiple nutritionists and their schedules is effortless with this platform’s robust admin tools.",
     imageSrc: avatar8,
-    name: "Arjun Desai",
-    username: "Admin",
+    name: "Neha Gupta",
+    username: "Nutritionist",
   },
   {
     text: "The app’s reminders and meal logging features have made sticking to my nutrition plan so much easier!",

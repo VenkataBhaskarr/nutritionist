@@ -120,30 +120,31 @@ const ServicesSection = () => {
 
   return (
     <section 
+      id="features"
       ref={sectionRef}
       className="relative py-20 lg:py-32 overflow-hidden"
     >
-      <motion.div 
+      {/* <motion.div 
         className="absolute top-20 left-10 opacity-10"
         variants={floatingVariants}
         initial="initial"
         animate="animate"
       >
-        <Sparkles size={80} className="text-white" />
-      </motion.div>
+        <Sparkles size={80} className="text-black" />
+         
+      </motion.div> */}
       
-      <motion.div 
-        className="absolute bottom-20 right-10 opacity-10"
-        variants={floatingVariants}
-        initial="initial"
-        animate="animate"
-        transition={{ delay: 2 }}
-      >
-        <Heart size={60} className="text-white" />
-      </motion.div>
+       <motion.div 
+            className="absolute bottom-20 right-10 opacity-10"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1, y: [0, -20, 0] }}
+            transition={{ duration: 4, repeat: Infinity }}
+        >
+            <Heart size={80} className="text-pink-600" />
+        </motion.div>
 
       
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
         {/* Header */}
         <motion.div
           initial="hidden"
@@ -169,7 +170,7 @@ const ServicesSection = () => {
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
           variants={containerVariants}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+          className="grid grid-cols-1 md:grid-cols-3 gap-8"
         >
           {featureDetails.map((feature, index) => {
             const Icon = feature.icon;

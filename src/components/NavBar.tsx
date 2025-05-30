@@ -25,36 +25,44 @@ const NavBar = () => {
 
         <nav className="hidden md:flex items-center space-x-8">
           <HashLink smooth to="/#home" className="text-gray-700 hover:text-primary-500 font-medium">
-            <Home className="inline-block w-5 h-5 mr-1" /> Home
+             Home
           </HashLink>
           <HashLink
             smooth
-            to="/#features"
+            to="/#services"
             className="text-gray-700 hover:text-primary-500 font-medium"
           >
-            <Star className="inline-block w-5 h-5 mr-1" /> Features
-          </HashLink>
-          <HashLink
-            smooth
-            to="/blogs"
-            className="text-gray-700 hover:text-primary-500 font-medium"
-          >
-            <Book className="inline-block w-5 h-5 mr-1" /> Blogs
-          </HashLink>
-          <HashLink
-            smooth
-            to="/calculator"
-            className="text-gray-700 hover:text-primary-500 font-medium"
-          >
-            <Calculator className="inline-block w-5 h-5 mr-1" /> Calculator
+            Services
           </HashLink>
           <HashLink
             smooth
             to="/#testimonials"
             className="text-gray-700 hover:text-primary-500 font-medium"
           >
-            <Star className="inline-block w-5 h-5 mr-1" /> Testimonials
+             Testimonials
           </HashLink>
+          <HashLink
+            smooth
+            to="/#our-team"
+            className="text-gray-700 hover:text-primary-500 font-medium"
+          >
+             Our Team
+          </HashLink>
+          <HashLink
+            smooth
+            to="/blogs"
+            className="text-gray-700 hover:text-primary-500 font-medium"
+          >
+            Blogs
+          </HashLink>
+          <HashLink
+            smooth
+            to="/calculator"
+            className="text-gray-700 hover:text-primary-500 font-medium"
+          >
+             Calculator
+          </HashLink>
+          
           <Link to="/login">
             <Button className="bg-primary-500 text-white hover:bg-primary-600">
               <LogIn className="inline-block w-5 h-5 mr-1" /> UserLogin
@@ -79,15 +87,15 @@ const NavBar = () => {
               className="text-gray-700 hover:text-primary-500 font-medium flex items-center"
               onClick={handleLinkClick}
             >
-              <Home className="w-6 h-6" />
+               Home
             </HashLink>
             <HashLink
               smooth
-              to="/#features"
+              to="/#services"
               className="text-gray-700 hover:text-primary-500 font-medium flex items-center"
               onClick={handleLinkClick}
             >
-              <Star className="w-6 h-6" />
+              Services
             </HashLink>
             <HashLink
               smooth
@@ -95,7 +103,7 @@ const NavBar = () => {
               className="text-gray-700 hover:text-primary-500 font-medium flex items-center"
               onClick={handleLinkClick}
             >
-              <Book className="w-6 h-6" />
+               Blogs
             </HashLink>
             <HashLink
               smooth
@@ -103,7 +111,7 @@ const NavBar = () => {
               className="text-gray-700 hover:text-primary-500 font-medium flex items-center"
               onClick={handleLinkClick}
             >
-              <Calculator className="w-6 h-6" />
+               Calculator
             </HashLink>
             <HashLink
               smooth
@@ -111,7 +119,15 @@ const NavBar = () => {
               className="text-gray-700 hover:text-primary-500 font-medium flex items-center"
               onClick={handleLinkClick}
             >
-              <Star className="w-6 h-6" />
+               Testimonials
+            </HashLink>
+            <HashLink
+              smooth
+              to="/#our-team"
+              className="text-gray-700 hover:text-primary-500 font-medium flex items-center"
+              onClick={handleLinkClick}
+            >
+              Team
             </HashLink>
             <Link
               to="/login"
@@ -122,7 +138,7 @@ const NavBar = () => {
                 variant="outline"
                 className="border-primary-500 text-primary-500 hover:bg-primary-50 w-full flex justify-center"
               >
-                <LogIn className="w-6 h-6" />
+                <LogIn className="w-6 h-6" /> Login
               </Button>
             </Link>
           </nav>

@@ -11,11 +11,17 @@ import {
   ArrowRight,
   Users,
   LayoutDashboard,
-  Settings
+  Settings,
+  BriefcaseMedical,
+  HeartPulse,
+  PersonStanding,
+  BicepsFlexed
 } from "lucide-react";
 import MarqueeDemo from "@/components/Testimonials";
 import FullStackFlowchart from "./FlowChart";
 import ServicesSection from "@/components/Features";
+import FeaturesSection from "@/components/Services";
+import OurTeamSection from "@/components/Team";
 
 const Landing = () => {
   return (
@@ -81,55 +87,23 @@ const Landing = () => {
       </section>
 
 
-      <section id="features" className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Comprehensive Nutrition Platform</h2>
-            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Our platform connects clients with professional nutritionists under the supervision of admin experts.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 card-hover">
-              <div className="w-14 h-14 bg-primary-100 rounded-lg flex items-center justify-center mb-6">
-                <Users className="h-7 w-7 text-primary-500" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">User Role Management</h3>
-              <p className="text-gray-600">
-                Separate dashboards and capabilities for administrators, nutritionists, and clients with appropriate access controls.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 card-hover">
-              <div className="w-14 h-14 bg-primary-100 rounded-lg flex items-center justify-center mb-6">
-                <LayoutDashboard className="h-7 w-7 text-primary-500" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Intuitive Dashboards</h3>
-              <p className="text-gray-600">
-                Role-specific dashboards that provide the right information and tools for administrators, nutritionists, and clients.
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 card-hover">
-              <div className="w-14 h-14 bg-primary-100 rounded-lg flex items-center justify-center mb-6">
-                <Settings className="h-7 w-7 text-primary-500" />
-              </div>
-              <h3 className="text-xl font-bold mb-3">Client Management</h3>
-              <p className="text-gray-600">
-                Comprehensive tools for nutritionists to manage their clients and for administrators to oversee the entire system.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+      
+      <FeaturesSection/>
 
       <ServicesSection/>
+
+
 
       <section id="testimonials" className="py-20 bg-gray-50">
         <div className="w-full mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Trusted by Health Professionals</h2>
+            {/* <h2 className="text-3xl md:text-4xl font-bold mb-4">Trusted by Health Professionals</h2> */}
+             <h2 className="text-4xl font-bold text-black mb-6">
+            Trusted by{' '}
+            <span className="text-primary-500">
+              Health Professionals
+            </span>
+          </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
               See what our users have to say about their experience with our nutrition platform.
             </p>
@@ -137,6 +111,8 @@ const Landing = () => {
           <MarqueeDemo />
         </div>
       </section>
+
+      <OurTeamSection />
       {/* <FullStackFlowchart/> */}
       {/* CTA Section */}
       <section id="pricing" className="py-20">
@@ -155,6 +131,8 @@ const Landing = () => {
           </div>
         </div>
       </section>
+
+
 
       <Footer />
     </div>

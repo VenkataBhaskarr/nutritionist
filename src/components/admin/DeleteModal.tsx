@@ -6,7 +6,7 @@ interface DeleteConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => Promise<void>;
-  type: 'nutritionist' | 'client';
+  type: 'nutritionist' | 'client' | 'appointment';
 }
 
 const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({ isOpen, onClose, onConfirm, type }) => {

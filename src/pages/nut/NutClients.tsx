@@ -7,6 +7,18 @@ import DashboardLayout from '@/components/DashboardLayout';
 import api from '@/lib/api';
 import { useNavigate } from 'react-router-dom';
 import { Users, Activity, CalendarClock } from "lucide-react"
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   PlusCircle,
   UserRound,
@@ -27,9 +39,78 @@ interface Client {
 }
 
 const NutClients: FC = () => {
+   const [dialogOpen, setDialogOpen] = useState(false);
+   const [Cusername, setCuserName] = useState("")
+   const [Cpassword, setCPassword] = useState("")
    const user = JSON.parse(localStorage.getItem("user") || "{}");
    const token = localStorage.getItem("token");
    const navigate = useNavigate();
+   const [formData, setFormData] = useState({
+       name: "",
+       age: "",
+       email: "",
+       phone: "",
+       gender: "",
+       location: "",
+       nextSession: "",
+       plan: "",
+       issue: "",
+     });
+    const handleAddClient = async () => {
+        const { name, age, email, phone, gender, location, issue, plan } = formData;
+        if (!name || !age || !email || !phone || !gender || !location || !issue || !plan) {
+          toast.error("Please fill in all the fields.");
+          return;
+        }
+
+        try {
+          const nutDetails = await api.get(`/nuts/email`, {
+            params: { email: user.email },
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          const newClient = {
+            ...formData,
+            nId: nutDetails.data[0].id,
+          };
+
+
+          const response = await api.post(`/client/add`, newClient, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          
+          // setCuserName(email);
+          // setCPassword(response.data.password);
+
+          alert("username is " + response.data.email +" and " + " password: " + response.data.password)
+
+          setClients((prev) => [...prev, newClient]);
+          setFormData({
+            name: "",
+            age: "",
+            email: "",
+            phone: "",
+            gender: "",
+            plan: "",
+            location: "",
+            issue: "",
+            nextSession: "",
+          });
+
+          toast.success("Client added successfully!");
+          setDialogOpen(false);
+
+          const updatedClients = await api.get(`/client/byNutId`, {
+            params: { id: nutDetails.data[0].id },
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          setClients(updatedClients.data);
+        } catch (error) {
+          toast.error("Failed to add client.");
+        }
+  };
+
    if(!token){
     navigate("/login")
    }
@@ -78,6 +159,8 @@ const NutClients: FC = () => {
           <div className="space-x-4">
             <Button variant="outline" className='bg-primary-500 text-white'>Send Bulk Message</Button>
             {/* <Button className="bg-primary-500">Add New Client</Button> */}
+            <Button variant="outline" className="bg-primary-500 text-white"  onClick={() => setDialogOpen(true)}>Add Client</Button> 
+        
           </div>
         </div>
 
@@ -103,8 +186,9 @@ const NutClients: FC = () => {
                   <TableHead className="text-muted-foreground text-xs uppercase">Progress</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase">Last Session</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase">Next Session</TableHead>
-                  <TableHead className="text-muted-foreground text-xs uppercase">Status</TableHead>
+                  {/* <TableHead className="text-muted-foreground text-xs uppercase">Status</TableHead> */}
                   <TableHead className="text-muted-foreground text-xs uppercase">Actions</TableHead>
+                  
                 </TableRow>
               </TableHeader>
 
@@ -135,7 +219,7 @@ const NutClients: FC = () => {
                     <TableCell className="text-sm text-gray-600">{client.nextSession}</TableCell>
 
                     {/* Status Badge */}
-                    <TableCell>
+                    {/* <TableCell>
                       <span
                         className={`px-2 py-1 text-xs rounded-full font-medium ${
                           client.status === "active"
@@ -147,11 +231,11 @@ const NutClients: FC = () => {
                       >
                         {client.status}
                       </span>
-                    </TableCell>
+                    </TableCell> */}
 
                     {/* Actions */}
                     <TableCell>
-                      <TooltipProvider>
+                      {/* <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button variant="ghost" size="icon" className="hover:text-primary-500">
@@ -162,7 +246,25 @@ const NutClients: FC = () => {
                             <p>Schedule</p>
                           </TooltipContent>
                         </Tooltip>
-                      </TooltipProvider>
+                      </TooltipProvider> */}
+                      <div className="flex items-center gap-2">
+                         <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-primary-600 hover:text-primary-700"
+                        >
+                          Add Mealplan
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          className="text-white bg-red-500"
+                          
+                        >
+                          Delete User
+                        </Button>
+                       
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -170,6 +272,59 @@ const NutClients: FC = () => {
             </Table>
           </CardContent>
         </Card>
+
+
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogContent
+            className="max-w-md w-full max-h-[90vh] overflow-y-auto rounded-2xl p-6 sm:p-8"
+          >
+            <DialogHeader>
+              <DialogTitle className="text-xl sm:text-2xl">Add New Client</DialogTitle>
+            </DialogHeader>
+
+            <div className="space-y-4 mt-4">
+              {[
+                "name",
+                "age",
+                "email",
+                "phone",
+                "gender",
+                "location",
+                "issue",
+                "plan",
+                "nextSession",
+              ].map((field) => (
+                <div key={field} className="space-y-2">
+                  <Label htmlFor={field} className="text-sm font-medium text-gray-700">
+                    {field.charAt(0).toUpperCase() + field.slice(1)}
+                  </Label>
+                  <Input
+                    id={field}
+                    type={
+                      field === "age"
+                        ? "number"
+                        : field === "nextSession"
+                        ? "date"
+                        : "text"
+                    }
+                    value={(formData as any)[field]}
+                    onChange={(e) =>
+                      setFormData({ ...formData, [field]: e.target.value })
+                    }
+                    className="w-full"
+                  />
+                </div>
+              ))}
+            </div>
+
+            <DialogFooter className="mt-6">
+              <Button onClick={handleAddClient} className="w-full sm:w-auto">
+                Generate Credentials
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
       </div>
     </DashboardLayout>
   );

@@ -112,17 +112,17 @@ const AdminDashboard: React.FC = () => {
         setLoading(true);
         const token = localStorage.getItem('token');
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-        const [nutritionistsData, clientsData, profileData] = await Promise.all([
-          api.get('/nutritionists', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data),
-          api.get('/clients', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data),
-          api.get('/admin/profile', {
-            params: { email: user.email },
-            headers: { Authorization: `Bearer ${token}` },
-          }).then(res => res.data),
+        const [nutritionistsData, clientsData] = await Promise.all([
+          api.get('/nuts/nutritionists', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data),
+          api.get('/client/clients', { headers: { Authorization: `Bearer ${token}` } }).then(res => res.data),
+          // api.get('/admin/profile', {
+          //   params: { email: user.email },
+          //   headers: { Authorization: `Bearer ${token}` },
+          // }).then(res => res.data),
         ]);
         setNutritionists(Array.isArray(nutritionistsData) ? nutritionistsData : []);
         setClients(Array.isArray(clientsData) ? clientsData : []);
-        setAdminProfile(profileData || null);
+        // setAdminProfile(profileData || null);
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'An error occurred';
         setError(errorMessage);

@@ -92,6 +92,8 @@ const Landing = () => {
 
       <ServicesSection/>
 
+      {/* <FullStackFlowchart /> */}
+
 
 
       <section id="testimonials" className="py-20 bg-gray-50">

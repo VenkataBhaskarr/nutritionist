@@ -21,7 +21,7 @@ import NutSettings from "./pages/nut/NutMessages";
 
 import ClientNut from "./pages/client/ClientNut";
 import ClientProfile from "./pages/client/ClientProfile";
-import ClientSettings from "./pages/client/ClientSettings";
+import ClientMessages from "./pages/client/ClientMessages";
 
 import NotFound from "./pages/NotFound";
 import Signup from "./pages/SignUp";
@@ -50,7 +50,7 @@ const App = () => (
           <Route path="/dashboard/nutritionist/messages" element={<NutSettings/>} />
           <Route path="/dashboard/client/profile" element={<ClientProfile/>} />
           <Route path="/dashboard/client/nutritionist" element={<ClientNut/>} />
-          <Route path="/dashboard/client/messages" element={<ClientSettings/>} />
+          <Route path="/dashboard/client/messages" element={<ClientMessages/>} />
           <Route path="/dashboard/nutritionist" element={<NutritionistDashboard />} />
           <Route path="/dashboard/client" element={<ClientDashboard />} />
           <Route

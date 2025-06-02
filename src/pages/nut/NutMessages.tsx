@@ -3,63 +3,123 @@ import { Card, CardContent } from "@/components/ui/card";
 import DashboardLayout from '@/components/DashboardLayout';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import api from '@/lib/api';
 
-interface Chat {
-  id: string;
-  name: string;
-  messages: { sender: string; text: string; timestamp: string }[];
+interface Message {
+  senderId: number;
+  receiverId: number;
+  content: string;
+  sentAt: string; // ISO timestamp
 }
 
-const mockChats: Chat[] = [
-  {
-    id: "1",
-    name: "John Doe",
-    messages: [
-      { sender: "John", text: "Hey! Got my new plan?", timestamp: "10:00 AM" },
-      { sender: "You", text: "Yes, sent it yesterday. Check your email!", timestamp: "10:05 AM" },
-      { sender: "John", text: "Thanks for the meal plan!", timestamp: "10:07 AM" },
-    ],
-  },
-  {
-    id: "2",
-    name: "Jane Smith",
-    messages: [
-      { sender: "Jane", text: "Had a great session today!", timestamp: "9:00 AM" },
-      { sender: "You", text: "Happy to hear that!", timestamp: "9:05 AM" },
-      { sender: "Jane", text: "See you next week.", timestamp: "9:07 AM" },
-    ],
-  },
-];
+interface Chat {
+  id: number; // client ID
+  name: string; // client name
+  messages: Message[];
+}
 
 const NutMessages: FC = () => {
-  const [selectedChatId, setSelectedChatId] = useState<string>(mockChats[0].id);
-  const [chats, setChats] = useState<Chat[]>(mockChats);
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [selectedChatId, setSelectedChatId] = useState<number | null>(null);
   const [messageText, setMessageText] = useState<string>('');
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
-  const selectedChat = chats.find(chat => chat.id === selectedChatId)!;
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const token = localStorage.getItem("token");
 
-  const sendMessage = () => {
-    if (!messageText.trim()) return;
+  const [nutId, setNutId] = useState<number | null>(null);
 
-    const newMessage = {
-      sender: "You",
-      text: messageText.trim(),
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const nutDetails = await api.get(`/nuts/email`, {
+          params: { email: user.email },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const _nutId = nutDetails.data[0]?.id;
+        setNutId(_nutId);
+
+        const clientDetails = await api.get(`/client/byNutId`, {
+          params: { id: _nutId },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const clients = clientDetails.data;
+
+        const chatPromises = clients.map(async (client: any) => {
+          const [nutMessages, clientMessages] = await Promise.all([
+            api.post(
+              `/nuts/messagesFromNut`,
+              { nId: _nutId, cId: client.id },
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+            api.post(
+              `/nuts/messagesFromClient`,
+              { nId: _nutId, cId: client.id },
+              { headers: { Authorization: `Bearer ${token}` } }
+            ),
+          ]);
+
+          const combinedMessages = [...nutMessages.data, ...clientMessages.data];
+
+          combinedMessages.sort(
+            (a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime()
+          );
+
+          return {
+            id: client.id,
+            name: client.name,
+            messages: combinedMessages,
+          };
+        });
+
+        const chatsData = await Promise.all(chatPromises);
+        setChats(chatsData);
+        setSelectedChatId(chatsData[0]?.id || null);
+      } catch (error) {
+        console.error("Error fetching chat data:", error);
+      }
     };
 
-    const updatedChats = chats.map(chat => {
-      if (chat.id === selectedChatId) {
-        return { ...chat, messages: [...chat.messages, newMessage] };
-      }
-      return chat;
-    });
+    fetchData();
+  }, []);
 
-    setChats(updatedChats);
-    setMessageText('');
-    setTimeout(() => {
-      messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 50);
+  const selectedChat = chats.find(chat => chat.id === selectedChatId);
+
+  const sendMessage = async () => {
+    if (!messageText.trim() || !selectedChat || !nutId) return;
+
+    const content = messageText.trim();
+
+    try {
+      await api.post(
+        `/nuts/sendMessage`,
+        { nId: nutId, cId: selectedChat.id, content },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const newMessage: Message = {
+        senderId: nutId,
+        receiverId: selectedChat.id,
+        content,
+        sentAt: new Date().toISOString(),
+      };
+
+      const updatedChats = chats.map(chat =>
+        chat.id === selectedChat.id
+          ? { ...chat, messages: [...chat.messages, newMessage] }
+          : chat
+      );
+
+      setChats(updatedChats);
+      setMessageText('');
+      setTimeout(() => {
+        messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 50);
+    } catch (err) {
+      console.error("Failed to send message:", err);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -86,47 +146,60 @@ const NutMessages: FC = () => {
             >
               <p className="font-medium">{chat.name}</p>
               <p className="text-sm text-gray-500 truncate">
-                {chat.messages[chat.messages.length - 1]?.text}
+                {chat.messages[chat.messages.length - 1]?.content}
               </p>
             </div>
           ))}
         </div>
 
-        {/* Selected Chat Window */}
+        {/* Chat Window */}
         <div className="flex-1 flex flex-col">
-          <div className="flex items-center justify-between px-4 py-3 border-b bg-white">
-            <h2 className="text-lg font-semibold">{selectedChat.name}</h2>
-          </div>
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-            {selectedChat.messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`flex flex-col ${
-                  msg.sender === 'You' ? 'items-end' : 'items-start'
-                }`}
-              >
-                <div
-                  className={`px-4 py-2 rounded-2xl text-sm max-w-xs ${
-                    msg.sender === 'You' ? 'bg-blue-500 text-white' : 'bg-white text-black border'
-                  }`}
-                >
-                  {msg.text}
-                </div>
-                <span className="text-xs text-gray-400 mt-1">{msg.timestamp}</span>
+          {selectedChat ? (
+            <>
+              <div className="flex items-center justify-between px-4 py-3 border-b bg-white">
+                <h2 className="text-lg font-semibold">{selectedChat.name}</h2>
               </div>
-            ))}
-            <div ref={messageEndRef} />
-          </div>
-          <div className="p-3 border-t bg-white flex items-center gap-2">
-            <Input
-              placeholder="Type a message"
-              value={messageText}
-              onChange={(e) => setMessageText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              className="flex-1"
-            />
-            <Button onClick={sendMessage}>Send</Button>
-          </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                {selectedChat.messages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={`flex flex-col ${
+                      msg.senderId === nutId ? 'items-end' : 'items-start'
+                    }`}
+                  >
+                    <div
+                      className={`px-4 py-2 rounded-2xl text-sm max-w-xs ${
+                        msg.senderId === nutId ? 'bg-blue-500 text-white' : 'bg-white text-black border'
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                    <span className="text-xs text-gray-400 mt-1">
+                      {new Date(msg.sentAt).toLocaleTimeString([], {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}
+                    </span>
+                  </div>
+                ))}
+                <div ref={messageEndRef} />
+              </div>
+              <div className="p-3 border-t bg-white flex items-center gap-2">
+                <Input
+                  placeholder="Type a message"
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  className="flex-1"
+                />
+                <Button onClick={sendMessage}>Send</Button>
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex items-center justify-center text-gray-500">
+              No chat selected
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>

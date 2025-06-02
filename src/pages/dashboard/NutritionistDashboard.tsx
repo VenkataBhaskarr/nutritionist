@@ -1,296 +1,4 @@
-// import axios from "axios";
-// import React, { useEffect, useState } from "react";
-// import { useNavigate } from "react-router-dom";
-// import DashboardLayout from "@/components/DashboardLayout";
-// import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-// import { Button } from "@/components/ui/button";
-// import { Users, ClipboardCheck, Calendar, Plus } from "lucide-react";
-// import { toast } from "sonner";
-// import api from "@/lib/api";
-// import {
-//   Dialog,
-//   DialogTrigger,
-//   DialogContent,
-//   DialogHeader,
-//   DialogTitle,
-//   DialogFooter,
-// } from "@/components/ui/dialog";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
-
-// // const MOCK_CLIENTS = [
-// //   { id: 1, name: "Michael Brown", email: "michael@example.com", plan: "Weight Loss", lastCheckIn: "2023-05-10", progress: "Good" },
-// //   { id: 2, name: "Jennifer Wilson", email: "jennifer@example.com", plan: "Muscle Gain", lastCheckIn: "2023-05-14", progress: "Excellent" },
-// //   { id: 3, name: "David Thompson", email: "david@example.com", plan: "Sports Performance", lastCheckIn: "2023-05-12", progress: "Fair" },
-// //   { id: 4, name: "Lisa Martinez", email: "lisa@example.com", plan: "General Health", lastCheckIn: "2023-05-15", progress: "Good" }
-// // ];
-
-// // const MOCK_APPOINTMENTS = [
-// //   { id: 1, clientName: "Michael Brown", date: "2023-05-20", time: "10:00 AM", type: "Follow-up" },
-// //   { id: 2, clientName: "Jennifer Wilson", date: "2023-05-21", time: "2:30 PM", type: "Initial Consultation" },
-// //   { id: 3, clientName: "Lisa Martinez", date: "2023-05-22", time: "11:15 AM", type: "Progress Review" }
-// // ];
-
-// const NutritionistDashboard = () => {
-//   const navigate = useNavigate();
-//   const [clients, setClients] = useState([]);
-//   const [appointments, setAppointments] = useState([]);
-//   const [dialogOpen, setDialogOpen] = useState(false);
-//   const [formData, setFormData] = useState({
-//     name: "",
-//     age: "",
-//     email: "",
-//     phone: "",
-//     gender: "",
-//     location: "",
-//     nextSession: "",
-//     issue: "",
-//   });
-
-//   const user = JSON.parse(localStorage.getItem("user") || "{}");
-//   const token = localStorage.getItem("token");
-//   if(!token){
-//     navigate("/login")
-//   }
-
-//   useEffect(() => {
-//     const fetchDetails = async () => {
-//       try {
-//         const nutDetails = await api.get(`/nuts/email`, {
-//           params: { email: user.email },
-//           headers: { Authorization: `Bearer ${token}` },
-//         });
-
-//         const appoints = await api.get('/nuts/appointments',{
-//           params: { id: nutDetails.data[0].id },
-//           headers: { Authorization: `Bearer ${token}` },
-//         });
-//         setAppointments(appoints.data)
-
-//         const clientDetails = await api.get(`/client/byNutId`, {
-//           params: { id: nutDetails.data[0].id },
-//           headers: { Authorization: `Bearer ${token}` },
-//         });
-
-//         setClients(clientDetails.data);
-//       } catch (error) {
-//         console.error("Failed to fetch clients", error);
-//       }
-//     };
-//     fetchDetails();
-//   }, []);
-
-//   const handleAddClient = async () => {
-//     const { name, age, email, phone, gender, location, issue } = formData;
-//     console.log(formData)
-//     if (!name || !age || !email || !phone || !gender || !location || !issue) {
-//       toast.error("Please fill in all the fields.");
-//       return;
-//     }
-
-//     try {
-//       const nutDetails = await api.get(`/nuts/email`, {
-//         params: { email: user.email },
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-
-//       const newClient = {
-//         ...formData,
-//         nId: nutDetails.data[0].id,
-//       };
-
-
-//       await api.post(`/client/add`, newClient, {
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-
-//       setClients((prev) => [...prev, newClient]);
-//       setFormData({
-//               name: "",
-//               age: "",
-//               email: "",
-//               phone: "",
-//               gender: "",
-//               location: "",
-//               issue: "",
-//               nextSession: "",
-//             });
-     
-//       toast.success("Client added successfully!");
-//       setDialogOpen(false);
-      
-
-//       // Optionally refetch clients
-//       const updatedClients = await api.get(`/client/byNutId`, {
-//         params: { id: nutDetails.data[0].id },
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       setClients(updatedClients.data);
-//     } catch (error) {
-//       toast.error("Failed to add client.");
-//     }
-//   };
-
-//   return (
-//     <DashboardLayout title="Nutritionist Dashboard" userRole="nutritionist">
-//       {/* Toast setup */}
-//       <div>
-//         <div className="space-y-6">
-//           {/* Stats Cards */}
-//           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-//   {/* Total Clients */}
-//             <Card className="shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-//               <CardHeader className="pb-4 flex flex-row items-center justify-between space-y-0">
-//                 <div>
-//                   <CardTitle className="text-xs uppercase tracking-wide text-muted-foreground">
-//                     Total Clients
-//                   </CardTitle>
-//                   <div className="text-2xl font-semibold text-gray-800 mt-1">{clients.length}</div>
-//                 </div>
-//                 <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-//                   <Users className="w-5 h-5 text-primary-500" />
-//                 </div>
-//               </CardHeader>
-//             </Card>
-
-//             {/* Appointments */}
-//             <Card className="shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-//               <CardHeader className="pb-4 flex flex-row items-center justify-between space-y-0">
-//                 <div>
-//                   <CardTitle className="text-xs uppercase tracking-wide text-muted-foreground">
-//                     Upcoming Appointments
-//                   </CardTitle>
-//                   <div className="text-2xl font-semibold text-gray-800 mt-1">{clients.length}</div>
-//                 </div>
-//                 <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-//                   <Calendar className="w-5 h-5 text-primary-500" />
-//                 </div>
-//               </CardHeader>
-//             </Card>
-
-//             {/* Plans Created */}
-//             <Card className="shadow-sm hover:shadow-md transition-shadow border border-gray-100">
-//               <CardHeader className="pb-4 flex flex-row items-center justify-between space-y-0">
-//                 <div>
-//                   <CardTitle className="text-xs uppercase tracking-wide text-muted-foreground">
-//                     Plans Created
-//                   </CardTitle>
-//                   <div className="text-2xl font-semibold text-gray-800 mt-1">{clients.length}</div>
-//                 </div>
-//                 <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-//                   <ClipboardCheck className="w-5 h-5 text-primary-500" />
-//                 </div>
-//               </CardHeader>
-//             </Card>
-//           </div>
-
-
-//           {/* Clients Table */}
-//           <Card className="shadow-sm border border-gray-100">
-//   <CardHeader className="flex flex-row items-center justify-between pb-3">
-//     <CardTitle className="text-lg font-semibold text-gray-800">Clients</CardTitle>
-//     <Button
-//       size="sm"
-//       onClick={() => setDialogOpen(true)}
-//       className="bg-primary-500 hover:bg-primary-600 text-white flex items-center gap-1"
-//     >
-//       <Plus className="w-4 h-4" />
-//       Add Client
-//     </Button>
-//   </CardHeader>
-
-//   <CardContent>
-//     <div className="overflow-x-auto">
-//       <table className="min-w-full text-sm text-gray-700">
-//         <thead className="text-xs font-semibold uppercase bg-gray-50 text-gray-500">
-//           <tr>
-//             <th className="px-4 py-3 text-left">Name</th>
-//             <th className="px-4 py-3 text-left">Email</th>
-//             <th className="px-4 py-3 text-left">Plan</th>
-//             <th className="px-4 py-3 text-left">Next Session</th>
-//             <th className="px-4 py-3 text-left">Progress</th>
-//             <th className="px-4 py-3 text-left">Actions</th>
-//           </tr>
-//         </thead>
-//         <tbody className="divide-y divide-gray-100">
-//           {clients.map((client) => (
-//             <tr key={client.id} className="hover:bg-gray-50 transition-colors">
-//               <td className="px-4 py-3 whitespace-nowrap">{client.name}</td>
-//               <td className="px-4 py-3 whitespace-nowrap">{client.email}</td>
-//               <td className="px-4 py-3 whitespace-nowrap">{client.plan}</td>
-//               <td className="px-4 py-3 whitespace-nowrap">{client.nextSession}</td>
-//               <td className="px-4 py-3">
-//                 <span
-//                   className={`px-2 py-1 rounded-full text-xs font-medium ${
-//                     client.progress === "Excellent"
-//                       ? "bg-green-100 text-green-700"
-//                       : client.progress === "Good"
-//                       ? "bg-blue-100 text-blue-700"
-//                       : "bg-yellow-100 text-yellow-700"
-//                   }`}
-//                 >
-//                   {client.progress}
-//                 </span>
-//               </td>
-//               <td className="px-4 py-3">
-//                 <div className="flex items-center gap-2">
-//                   <Button
-//                     variant="ghost"
-//                     size="sm"
-//                     className="text-primary-600 hover:text-primary-700"
-//                   >
-//                     Message
-//                   </Button>
-//                 </div>
-//               </td>
-//             </tr>
-//           ))}
-//         </tbody>
-//       </table>
-//     </div>
-//   </CardContent>
-// </Card>
-
-
-//           {/* Add Client Dialog */}
-//           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-//             <DialogContent>
-//               <DialogHeader>
-//                 <DialogTitle>Add New Client</DialogTitle>
-//               </DialogHeader>
-//              <div className="space-y-4">
-//                 {["name", "age", "email", "phone", "gender", "location", "issue", "nextSession"].map((field) => (
-//                   <div key={field} className="space-y-2">
-//                     <Label htmlFor={field}>{field.charAt(0).toUpperCase() + field.slice(1)}</Label>
-//                     <Input
-//                       id={field}
-//                       type={
-//                         field === "age"
-//                           ? "number"
-//                           : field === "nextSession"
-//                           ? "date"
-//                           : "text"
-//                       }
-//                       value={(formData as any)[field]}
-//                       onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
-//                     />
-//                   </div>
-//                 ))}
-//               </div>
-
-//               <DialogFooter>
-//                 <Button onClick={handleAddClient}>Submit</Button>
-//               </DialogFooter>
-//             </DialogContent>
-//           </Dialog>
-//         </div>
-//       </div>
-//     </DashboardLayout>
-//   );
-// };
-
-// export default NutritionistDashboard;
-
+import confetti from 'canvas-confetti';
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -298,6 +6,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Users, ClipboardCheck, Calendar, Plus } from "lucide-react";
+import { ChevronDown, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import {
@@ -315,23 +24,15 @@ import { Textarea } from "@/components/ui/textarea";
 const NutritionistDashboard = () => {
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
+  const [clientId, setClientId] = useState("");
   const [appointments, setAppointments] = useState([]);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
   const [messageDialog, setMessageDialog] = useState({ open: false, client: null });
   const [messageText, setMessageText] = useState("");
+  const [appointmentDate, setAppointmentDate] = useState("")
+  const [showCompletedContent, setShowCompletedContent] = useState(true);
 
-  const [formData, setFormData] = useState({
-    name: "",
-    age: "",
-    email: "",
-    phone: "",
-    gender: "",
-    location: "",
-    nextSession: "",
-    plan: "",
-    issue: "",
-  });
-
+  
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
   if (!token) navigate("/login");
@@ -344,62 +45,125 @@ const NutritionistDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const appoints = await api.get("/nuts/appointments", {
+        // const appoints = await api.get("/nuts/appointments", {
+        //   params: { id: nutDetails.data[0].id },
+        //   headers: { Authorization: `Bearer ${token}` },
+        // });
+        
+
+       const clientDetails = await api.get(`/client/byNutId`, {
           params: { id: nutDetails.data[0].id },
           headers: { Authorization: `Bearer ${token}` },
         });
-        setAppointments(appoints.data);
 
-        const clientDetails = await api.get(`/client/byNutId`, {
-          params: { id: nutDetails.data[0].id },
-          headers: { Authorization: `Bearer ${token}` },
+        // Sort by session date
+        const sortedClients = clientDetails.data.sort(
+          (a, b) => new Date(a.nextSession).getTime() - new Date(b.nextSession).getTime()
+        );
+
+        // Normalize dates to midnight (to compare by day, not time)
+        const normalizeDate = (dateStr: string | Date) => {
+          const d = new Date(dateStr);
+          d.setHours(0, 0, 0, 0);
+          return d;
+        };
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const oneWeekFromNow = new Date(today);
+        oneWeekFromNow.setDate(today.getDate() + 7);
+
+        // Filter appointments within 7 days
+        const appointmentsThisWeek = sortedClients.filter((client) => {
+          const sessionDate = normalizeDate(client.nextSession);
+          return sessionDate >= today && sessionDate <= oneWeekFromNow;
         });
 
-        setClients(clientDetails.data);
+        console.log("appointmentsThisWeek 👉", appointmentsThisWeek);
+
+        setAppointments(appointmentsThisWeek);
+        setClients(sortedClients);
+
+        //setClients(clientDetails.data);
       } catch (error) {
         console.error("Failed to fetch clients", error);
       }
     };
     fetchDetails();
   }, []);
+  const handleCompleteAppointment = (id: number) => {
+  // Confetti + Toast
+  showConffeti();
+  toast.success("Appointment marked as completed");
 
-  const handleAddClient = async () => {
-    const { name, age, email, phone, gender, location, issue, plan } = formData;
-    if (!name || !age || !email || !phone || !gender || !location || !issue || !plan) {
-      toast.error("Please fill in all the fields.");
+  // Remove from appointments list
+  setAppointments((prev) => prev.filter((appt) => appt.id !== id));
+
+  // Optional: Update the client state if you want to reflect 'completed' on UI
+  setClients((prevClients) =>
+    prevClients.map((client) =>
+      client.id === id ? { ...client, completed: true } : client
+    )
+  );
+};
+
+  const showConffeti = () => {
+      confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#34d399', '#10b981', '#6ee7b7'], // green-themed 🎯
+        });
+
+        // Optional: small burst after delay for extra flair
+        setTimeout(() => {
+          confetti({
+            particleCount: 50,
+            spread: 100,
+            origin: { y: 0.4 },
+            scalar: 0.8,
+            colors: ['#34d399', '#a7f3d0'],
+          });
+        }, 300);
+  }
+
+  
+  const handleAddAppointment = async () => {
+    if (!clientId) {
+      toast.error("Client ID is required");
       return;
     }
-
     try {
+
+      // update the nextSession Date of the client here
+     
       const nutDetails = await api.get(`/nuts/email`, {
         params: { email: user.email },
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const newClient = {
-        ...formData,
-        nId: nutDetails.data[0].id,
-      };
+       const updateSessionDate = await api.post(`/client/updateSession`, {
+        cId: clientId,
+        appointmentDate,
+      },
+       {
+        headers: { Authorization: `Bearer ${token}` },
+      })
 
-      await api.post(`/client/add`, newClient, {
+      
+
+      await api.post(`/appointments/add`, {
+        appointmentDate,
+        nId: nutDetails.data[0].id,
+        cId: clientId,
+      }, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      setClients((prev) => [...prev, newClient]);
-      setFormData({
-        name: "",
-        age: "",
-        email: "",
-        phone: "",
-        gender: "",
-        plan: "",
-        location: "",
-        issue: "",
-        nextSession: "",
-      });
-
-      toast.success("Client added successfully!");
-      setDialogOpen(false);
+      toast.success("Appointment added successfully");
+      setAppointmentDialogOpen(false);
+      setClientId("");
 
       const updatedClients = await api.get(`/client/byNutId`, {
         params: { id: nutDetails.data[0].id },
@@ -407,7 +171,7 @@ const NutritionistDashboard = () => {
       });
       setClients(updatedClients.data);
     } catch (error) {
-      toast.error("Failed to add client.");
+      toast.error("Failed to add appointment");
     }
   };
 
@@ -430,7 +194,7 @@ const NutritionistDashboard = () => {
   };
 
   return (
-    <DashboardLayout title="Nutritionist Dashboard" userRole="nutritionist">
+    <DashboardLayout title="Appointments" userRole="nutritionist">
       <div className="space-y-6">
         {/* Stats */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -469,7 +233,7 @@ const NutritionistDashboard = () => {
             <CardHeader className="pb-4 flex flex-row items-center justify-between space-y-0">
               <div>
                 <CardTitle className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Plans Created
+                  Completed Appointments
                 </CardTitle>
                 <div className="text-2xl font-semibold text-gray-800 mt-1">{clients.length}</div>
               </div>
@@ -480,29 +244,31 @@ const NutritionistDashboard = () => {
           </Card>
         </div>
 
-        {/* Clients Table */}
-        <Card className="shadow-sm border border-gray-100">
-          <CardHeader className="flex flex-row items-center justify-between pb-3">
-            <CardTitle className="text-lg font-semibold text-gray-800">Clients</CardTitle>
-            <Button
-              size="sm"
-              onClick={() => setDialogOpen(true)}
-              className="bg-primary-500 hover:bg-primary-600 text-white flex items-center gap-1"
-            >
-              <Plus className="w-4 h-4" />
-              Add Client
-            </Button>
-          </CardHeader>
+        {/* Top Buttons */}
+        <div className="flex justify-end mb-4">
+          <Button onClick={() => setAppointmentDialogOpen(true)} className="bg-green-600 hover:bg-green-700">
+            <Plus className="w-4 h-4 mr-2" /> Add Appointment
+          </Button>
+        </div>
 
+        {/* Clients Table */}
+        
+
+        {/* Upcoming Appointments */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-lg font-semibold">My Appointments</CardTitle>
+          </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
               <table className="min-w-full text-sm text-gray-700">
                 <thead className="text-xs font-semibold uppercase bg-gray-50 text-gray-500">
                   <tr>
+                    <th className="px-4 py-3 text-left">Id</th>
                     <th className="px-4 py-3 text-left">Name</th>
                     <th className="px-4 py-3 text-left">Email</th>
                     <th className="px-4 py-3 text-left">Plan</th>
-                    <th className="px-4 py-3 text-left">Next Session</th>
+                    <th className="px-4 py-3 text-left">Next Appointment</th>
                     <th className="px-4 py-3 text-left">Progress</th>
                     <th className="px-4 py-3 text-left">Actions</th>
                   </tr>
@@ -510,10 +276,69 @@ const NutritionistDashboard = () => {
                 <tbody className="divide-y divide-gray-100">
                   {clients.map((client) => (
                     <tr key={client.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-4 py-3 whitespace-nowrap">{client.id}</td>
                       <td className="px-4 py-3 whitespace-nowrap">{client.name}</td>
                       <td className="px-4 py-3 whitespace-nowrap">{client.email}</td>
                       <td className="px-4 py-3 whitespace-nowrap">{client.plan}</td>
-                      <td className="px-4 py-3 whitespace-nowrap">{client.nextSession}</td>
+                      <td className="px-4 py-3 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <span>{client.nextSession}</span>
+                          {(() => {
+                            const today = new Date();
+                            const sessionDate = new Date(client.nextSession);
+                            const diffInMs = sessionDate.getTime() - today.getTime();
+                            const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+                            
+                            const isToday = sessionDate.toDateString() === today.toDateString();
+                            const isThisWeek =
+                              sessionDate > today &&
+                              sessionDate <= new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+                            
+                            if(client.completed){
+                              return (
+                                <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-green-500 text-white">
+                                  Completed
+                                </span>
+                              )
+                            }
+                            if (isToday) {
+                              return (
+                                <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-red-500 text-white">
+                                  Today
+                                </span>
+                              );
+                            }
+
+                            if (isThisWeek) {
+                              return (
+                                <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-orange-100 text-orange-700">
+                                  This Week
+                                </span>
+                              );
+                            }
+
+                            if (diffInDays > 7) {
+                              return (
+                                <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-green-100 text-green-700">
+                                  Upcoming
+                                </span>
+                              );
+                            }
+
+                            if (diffInDays < 0) {
+                              return (
+                                <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-gray-200 text-gray-500">
+                                  Past
+                                </span>
+                              );
+                            }
+
+                            return null;
+                          })()}
+                        </div>
+                      </td>
+
+
                       <td className="px-4 py-3">
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -537,6 +362,23 @@ const NutritionistDashboard = () => {
                           >
                             Message
                           </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            disabled={client.completed}
+                            className={`text-primary-600 hover:text-primary-700 ${client.completed ? "opacity-50 cursor-not-allowed" : ""}`}
+                            onClick={() => handleCompleteAppointment(client.id)}
+                          >
+                            {client.completed ? "Completed" : "Complete"}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-primary-600 hover:text-primary-700"
+                            onClick={() => setMessageDialog({ open: true, client })}
+                          >
+                            Schedule
+                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -547,30 +389,86 @@ const NutritionistDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Add Client Dialog */}
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Add New Client</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              {["name", "age", "email", "phone", "gender", "location", "issue","plan", "nextSession"].map((field) => (
-                <div key={field} className="space-y-2">
-                  <Label htmlFor={field}>{field.charAt(0).toUpperCase() + field.slice(1)}</Label>
-                  <Input
-                    id={field}
-                    type={field === "age" ? "number" : field === "nextSession" ? "date" : "text"}
-                    value={(formData as any)[field]}
-                    onChange={(e) => setFormData({ ...formData, [field]: e.target.value })}
-                  />
-                </div>
-              ))}
-            </div>
-            <DialogFooter>
-              <Button onClick={handleAddClient}>Submit</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        {/* Completed Appointments WIP */}
+        <Card>
+  <CardHeader className="flex flex-row items-center justify-between cursor-pointer"
+    onClick={() => setShowCompletedContent(!showCompletedContent)}
+  >
+    <CardTitle className="text-lg font-semibold">Completed Appointments</CardTitle>
+    {showCompletedContent ? (
+      <ChevronDown className="w-5 h-5 text-gray-500" />
+    ) : (
+      <ChevronRight className="w-5 h-5 text-gray-500" />
+    )}
+  </CardHeader>
+
+  {showCompletedContent && (
+    <CardContent>
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm text-gray-700">
+          <thead className="text-xs font-semibold uppercase bg-gray-50 text-gray-500">
+            <tr>
+              <th className="px-4 py-3 text-left">Id</th>
+              <th className="px-4 py-3 text-left">Name</th>
+              <th className="px-4 py-3 text-left">Email</th>
+              <th className="px-4 py-3 text-left">Plan</th>
+              <th className="px-4 py-3 text-left">Appointment Date</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {clients.map((client) => (
+              <tr
+                key={client.id}
+                className="hover:bg-gray-100 bg-white border-b transition-colors text-gray-500 line-through"
+              >
+                <td className="px-4 py-3 whitespace-nowrap">{client.id}</td>
+                <td className="px-4 py-3 whitespace-nowrap">{client.name}</td>
+                <td className="px-4 py-3 whitespace-nowrap">{client.email}</td>
+                <td className="px-4 py-3 whitespace-nowrap">{client.plan}</td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  <div className="flex items-center gap-2">
+                    <span>{client.nextSession}</span>
+                    <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-green-500 text-white">
+                      Completed
+                    </span>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </CardContent>
+  )}
+        </Card>
+        
+
+        {/* Add Appointment fresh Dialog */}
+      <Dialog open={appointmentDialogOpen} onOpenChange={setAppointmentDialogOpen}>
+        <DialogContent className="max-w-md w-full">
+          <DialogHeader>
+            <DialogTitle>Add New Appointment</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <Input
+              type="text"
+              placeholder="Enter Client ID"
+              value={clientId}
+              onChange={(e) => setClientId(e.target.value)}
+            />
+            <Input
+              type="date"
+              placeholder="Select Date"
+              value={appointmentDate}
+              onChange={(e) => setAppointmentDate(e.target.value)}
+            />
+          </div>
+          <DialogFooter className="mt-4">
+            <Button onClick={handleAddAppointment}>Add Appointment</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
 
         {/* Message Dialog */}
         <Dialog open={messageDialog.open} onOpenChange={(open) => setMessageDialog({ open, client: messageDialog.client })}>
@@ -593,6 +491,7 @@ const NutritionistDashboard = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
       </div>
     </DashboardLayout>
   );

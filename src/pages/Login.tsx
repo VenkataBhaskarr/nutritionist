@@ -38,7 +38,7 @@ const Login = () => {
         password,
         role,
       });
-
+      console.log(response)
       const { token, user } = response.data;
 
       localStorage.setItem("token", token);
@@ -49,6 +49,7 @@ const Login = () => {
 
       toast.success(`Logged in as ${user.role}`);
       navigate(`/dashboard/${user.role}`);
+      //navigate(`/dashboard/client`);
     } catch (error) {
       const errorMessage = error.response?.data?.message || "Invalid credentials";
       toast.error(errorMessage);

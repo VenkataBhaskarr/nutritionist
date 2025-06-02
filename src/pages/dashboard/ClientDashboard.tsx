@@ -11,7 +11,7 @@ import { Calendar, ClipboardList, TrendingUp, User } from "lucide-react";
 
 const MOCK_CLIENT = {
   id: 1,
-  name: "Michael Brown",
+  name: "Madhusudan",
   email: "michael@example.com",
   plan: "Weight Loss",
   startDate: "2023-04-01",

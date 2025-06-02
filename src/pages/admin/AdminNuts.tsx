@@ -36,14 +36,13 @@ const AddNutritionistDialog: FC<{ onSuccess?: () => void }> = ({ onSuccess }) =>
   const [phone, setPhone] = useState("");
   const [location, setLocation] = useState("");
   const [specialization, setSpecialization] = useState("");
-  const [status, setStatus] = useState<"active" | "inactive">("active");
-  const [joinDate, setJoinDate] = useState("");
+  
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !email || !phone || !specialization || !joinDate) {
+    if (!name || !email || !phone || !specialization ) {
       setError("Required fields are missing.");
       return;
     }
@@ -55,19 +54,17 @@ const AddNutritionistDialog: FC<{ onSuccess?: () => void }> = ({ onSuccess }) =>
       //     navigate("/login")
       //    }
       console.log("adding client")
-      await api.post(
+      const response = await api.post(
         "/nuts/add",
         { name, email, phone, location, specialization},
-      
       );
+      alert("username is " + response.data.email + " password is " + response.data.password)
       setError("");
       setName("");
       setEmail("");
       setPhone("");
       setLocation("");
       setSpecialization("");
-      setStatus("active");
-      setJoinDate("");
       onSuccess?.();
       toast.success("Nutritionist added successfully!");
     } catch (err) {
@@ -101,29 +98,14 @@ const AddNutritionistDialog: FC<{ onSuccess?: () => void }> = ({ onSuccess }) =>
             <Input id="phone" type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required />
           </div>
           <div>
-            <Label htmlFor="location">Address</Label>
+            <Label htmlFor="location">Location</Label>
             <Input id="location" value={location} onChange={(e) => setLocation(e.target.value)} />
           </div>
           <div>
             <Label htmlFor="specialization">Specialization</Label>
             <Input id="specialization" value={specialization} onChange={(e) => setSpecialization(e.target.value)} required />
           </div>
-          <div>
-            <Label htmlFor="status">Status</Label>
-            <select
-              id="status"
-              value={status}
-              onChange={(e) => setStatus(e.target.value as 'active' | 'inactive')}
-              className="w-full p-2 border rounded-md"
-            >
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
-          </div>
-          <div>
-            <Label htmlFor="joinDate">Join Date</Label>
-            <Input id="joinDate" type="date" value={joinDate} onChange={(e) => setJoinDate(e.target.value)} required />
-          </div>
+         
           {error && <p className="text-red-500 text-sm">{error}</p>}
           <Button type="submit" disabled={isSubmitting} className="w-full bg-primary-500 hover:bg-primary-600">
             {isSubmitting ? "Adding..." : "Add Nutritionist"}
@@ -370,8 +352,7 @@ const AdminNutritionists: FC = () => {
                   <TableHead>Address</TableHead>
                   <TableHead>Specialization</TableHead>
                   <TableHead>Clients</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Join Date</TableHead>
+                 
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -396,7 +377,7 @@ const AdminNutritionists: FC = () => {
                           {n.status}
                         </span>
                       </TableCell>
-                      <TableCell>{n.joinDate}</TableCell>
+                     
                       <TableCell className="flex gap-2">
                         <EditNutritionistDialog nutritionist={n} onSuccess={fetchNutritionists} />
                         <DeleteNutritionistDialog id={n.id} onSuccess={fetchNutritionists} />

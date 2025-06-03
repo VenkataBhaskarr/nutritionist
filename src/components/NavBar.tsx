@@ -29,6 +29,13 @@ const NavBar = () => {
           </HashLink>
           <HashLink
             smooth
+            to="/#package"
+            className="text-gray-700 hover:text-primary-500 font-medium"
+          >
+             Pricing
+          </HashLink>
+          <HashLink
+            smooth
             to="/#services"
             className="text-gray-700 hover:text-primary-500 font-medium"
           >

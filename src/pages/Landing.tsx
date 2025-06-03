@@ -22,6 +22,7 @@ import FullStackFlowchart from "./FlowChart";
 import ServicesSection from "@/components/Features";
 import FeaturesSection from "@/components/Services";
 import OurTeamSection from "@/components/Team";
+import PackagesSection from "@/components/PackageSection";
 
 const Landing = () => {
   return (
@@ -86,17 +87,7 @@ const Landing = () => {
         </div>
       </section>
 
-
-      
-      <FeaturesSection/>
-
-      <ServicesSection/>
-
-      {/* <FullStackFlowchart /> */}
-
-
-
-      <section id="testimonials" className="py-20 bg-gray-50">
+       <section id="testimonials" className="py-20 bg-gray-50">
         <div className="w-full mx-auto px-4">
           <div className="text-center mb-16">
             {/* <h2 className="text-3xl md:text-4xl font-bold mb-4">Trusted by Health Professionals</h2> */}
@@ -113,6 +104,19 @@ const Landing = () => {
           <MarqueeDemo />
         </div>
       </section>
+
+      
+      <FeaturesSection/>
+
+      <ServicesSection/>
+
+      <PackagesSection/>
+
+      {/* <FullStackFlowchart /> */}
+
+
+
+     
 
       <OurTeamSection />
       {/* <FullStackFlowchart/> */}

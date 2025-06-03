@@ -73,7 +73,7 @@ const NutritionistDashboard = () => {
           })
         );
        // console.log("printing here ...")
-        //console.log(appointmentsWithClients[0].client[0].id)
+        //console.log(appointmentsWithClients[0].client)
 
         setCompletedAppointments(appointmentsWithClients);
         
@@ -531,7 +531,7 @@ const NutritionistDashboard = () => {
                         <td className="px-4 py-3 whitespace-nowrap">{appointment.client[0].name}</td>
                         <td className="px-4 py-3 whitespace-nowrap">{appointment.client[0].email}</td>
                         <td className="px-4 py-3 whitespace-nowrap">{appointment.client[0].plan}</td>
-                        <td className="px-4 py-3 whitespace-nowrap">{appointment.client[0].note}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">{appointment.notes}</td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <span>{appointment.client[0].lastSession}</span>

@@ -16,6 +16,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,11 +27,14 @@ const NutritionistDashboard = () => {
   const [clients, setClients] = useState([]);
   const [clientId, setClientId] = useState("");
   const [appointments, setAppointments] = useState([]);
+  const [completedAppointments, setCompletedAppointments] = useState([])
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
   const [messageDialog, setMessageDialog] = useState({ open: false, client: null });
   const [messageText, setMessageText] = useState("");
   const [appointmentDate, setAppointmentDate] = useState("")
   const [showCompletedContent, setShowCompletedContent] = useState(true);
+  const [notesDialog, setNotesDialog] = useState({ open: false, client: null });
+  const [meetingNotes, setMeetingNotes] = useState("");
 
   
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -45,10 +49,33 @@ const NutritionistDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // const appoints = await api.get("/nuts/appointments", {
-        //   params: { id: nutDetails.data[0].id },
-        //   headers: { Authorization: `Bearer ${token}` },
-        // });
+        const appoints = await api.get("/nuts/appointmentsCompleted", {
+          params: { id: nutDetails.data[0].id },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        // console.log(appoints.data)
+        const appointmentsWithClients = await Promise.all(
+          appoints.data.map(async (appointment) => {
+            try {
+              const clientRes = await api.get("/client/clientById", {
+                params: { id: appointment.clientId },
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              //console.log(clientRes.data)
+              return {
+                ...appointment,
+                client: clientRes.data, // attach full client object
+              };
+            } catch (err) {
+              console.error(`Error fetching client ${appointment.clientId}`, err);
+              return appointment; // fallback to original if error
+            }
+          })
+        );
+       // console.log("printing here ...")
+        //console.log(appointmentsWithClients[0].client[0].id)
+
+        setCompletedAppointments(appointmentsWithClients);
         
 
        const clientDetails = await api.get(`/client/byNutId`, {
@@ -80,7 +107,8 @@ const NutritionistDashboard = () => {
           return sessionDate >= today && sessionDate <= oneWeekFromNow;
         });
 
-        console.log("appointmentsThisWeek 👉", appointmentsThisWeek);
+
+        //console.log("appointmentsThisWeek 👉", appointmentsThisWeek);
 
         setAppointments(appointmentsThisWeek);
         setClients(sortedClients);
@@ -92,21 +120,98 @@ const NutritionistDashboard = () => {
     };
     fetchDetails();
   }, []);
-  const handleCompleteAppointment = (id: number) => {
+
+   // handling message here.
+    const sendMessage = async (client) => {
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const nutDetails = await api.get(`/nuts/email`, {
+        params: { email: user.email },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!messageText.trim()) return;
+      const content = messageText.trim();
+
+      try {
+        const newMessage = {
+          nId: nutDetails.data[0].id,
+          cId: messageDialog.client.id,
+          content,
+          sentAt: new Date().toISOString(),
+        };
+        await api.post(
+          `/nuts/sendMessage`,
+           newMessage,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setMessageText('');
+        toast.success(`Message sent to ${messageDialog.client.name}`);
+        setMessageDialog({ open: false, client: null });
+      } catch (err) {
+        console.error("Failed to send message:", err);
+        toast.error(`unable to send message to ${messageDialog.client.name}`);
+      }
+    }; 
+   // handling message ends here.
+   const handleActionComplete = async() => {
+          // clientId, nutId, sessionDate, notes, 
+          const client = notesDialog.client
+          const nutDetails = await api.get(`/nuts/email`, {
+            params: { email: user.email },
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          try {
+            setNotesDialog({ open: false, client: null });
+            setMeetingNotes("");
+            toast.success("Appointment marked as completed 🎯");
+            const {
+              id,
+              nextSession,
+            } = notesDialog.client;
+
+            const payload = {
+              clientId: id,
+              scheduledAt: nextSession,
+              notes: meetingNotes,
+              nutritionistId: nutDetails.data[0].id,
+            };
+
+            const clientUpdatePayload = {
+              id: id,
+              nextSession: "2025-07-30",
+              prevSession: nextSession,
+            }
+
+            await api.post("/appointments/complete", payload, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            await api.post("client/updateDetails", clientUpdatePayload, {
+               headers: { Authorization: `Bearer ${token}` },
+            })
+            setAppointments((prev) => prev.filter((appt) => appt.id !== client.id));
+            setClients((prevClients) =>
+              prevClients.map((c) =>
+                c.id === notesDialog.client.id ? { ...c, completed: true } : c
+              )
+            );
+            
+        } catch (error) {
+          console.error("Error completing appointment", error);
+          toast.error("Could not complete appointment ❌");
+        }
+
+
+        // TODO After completing i have to update nextsession date to after 1Week Default, prevSession to currentSESSion date for the client 
+        
+
+   }
+  const handleCompleteAppointment = (client) => {
   // Confetti + Toast
-  showConffeti();
-  toast.success("Appointment marked as completed");
+      showConffeti();
+      setNotesDialog({ open: true, client });
+  };
 
-  // Remove from appointments list
-  setAppointments((prev) => prev.filter((appt) => appt.id !== id));
-
-  // Optional: Update the client state if you want to reflect 'completed' on UI
-  setClients((prevClients) =>
-    prevClients.map((client) =>
-      client.id === id ? { ...client, completed: true } : client
-    )
-  );
-};
+  
 
   const showConffeti = () => {
       confetti({
@@ -367,7 +472,7 @@ const NutritionistDashboard = () => {
                             size="sm"
                             disabled={client.completed}
                             className={`text-primary-600 hover:text-primary-700 ${client.completed ? "opacity-50 cursor-not-allowed" : ""}`}
-                            onClick={() => handleCompleteAppointment(client.id)}
+                            onClick={() => handleCompleteAppointment(client)}
                           >
                             {client.completed ? "Completed" : "Complete"}
                           </Button>
@@ -375,7 +480,7 @@ const NutritionistDashboard = () => {
                             variant="ghost"
                             size="sm"
                             className="text-primary-600 hover:text-primary-700"
-                            onClick={() => setMessageDialog({ open: true, client })}
+                            onClick={() => window.open('https://meet.google.com/landing', '_blank')}
                           >
                             Schedule
                           </Button>
@@ -391,55 +496,55 @@ const NutritionistDashboard = () => {
 
         {/* Completed Appointments WIP */}
         <Card>
-  <CardHeader className="flex flex-row items-center justify-between cursor-pointer"
-    onClick={() => setShowCompletedContent(!showCompletedContent)}
-  >
-    <CardTitle className="text-lg font-semibold">Completed Appointments</CardTitle>
-    {showCompletedContent ? (
-      <ChevronDown className="w-5 h-5 text-gray-500" />
-    ) : (
-      <ChevronRight className="w-5 h-5 text-gray-500" />
-    )}
-  </CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between cursor-pointer"
+            onClick={() => setShowCompletedContent(!showCompletedContent)}
+          >
+            <CardTitle className="text-lg font-semibold">Completed Appointments</CardTitle>
+            {showCompletedContent ? (
+              <ChevronDown className="w-5 h-5 text-gray-500" />
+            ) : (
+              <ChevronRight className="w-5 h-5 text-gray-500" />
+            )}
+          </CardHeader>
 
-  {showCompletedContent && (
-    <CardContent>
-      <div className="overflow-x-auto">
-        <table className="min-w-full text-sm text-gray-700">
-          <thead className="text-xs font-semibold uppercase bg-gray-50 text-gray-500">
-            <tr>
-              <th className="px-4 py-3 text-left">Id</th>
-              <th className="px-4 py-3 text-left">Name</th>
-              <th className="px-4 py-3 text-left">Email</th>
-              <th className="px-4 py-3 text-left">Plan</th>
-              <th className="px-4 py-3 text-left">Appointment Date</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {clients.map((client) => (
-              <tr
-                key={client.id}
-                className="hover:bg-gray-100 bg-white border-b transition-colors text-gray-500 line-through"
-              >
-                <td className="px-4 py-3 whitespace-nowrap">{client.id}</td>
-                <td className="px-4 py-3 whitespace-nowrap">{client.name}</td>
-                <td className="px-4 py-3 whitespace-nowrap">{client.email}</td>
-                <td className="px-4 py-3 whitespace-nowrap">{client.plan}</td>
-                <td className="px-4 py-3 whitespace-nowrap">
-                  <div className="flex items-center gap-2">
-                    <span>{client.nextSession}</span>
-                    <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-green-500 text-white">
-                      Completed
-                    </span>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </CardContent>
-  )}
+          {showCompletedContent && (
+            <CardContent>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm text-gray-700">
+                  <thead className="text-xs font-semibold uppercase bg-gray-50 text-gray-500">
+                    <tr>
+                      <th className="px-4 py-3 text-left">Id</th>
+                      <th className="px-4 py-3 text-left">Name</th>
+                      <th className="px-4 py-3 text-left">Email</th>
+                      <th className="px-4 py-3 text-left">Plan</th>
+                      <th className="px-4 py-3 text-left">Appointment Date</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {completedAppointments.map((appointment) => (
+                      <tr
+                        key={appointment.id}
+                        className="hover:bg-gray-100 bg-white border-b transition-colors text-gray-500 line-through"
+                      >
+                        <td className="px-4 py-3 whitespace-nowrap">{appointment.client[0].id}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">{appointment.client[0].name}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">{appointment.client[0].email}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">{appointment.client[0].plan}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <span>{appointment.client[0].lastSession}</span>
+                            <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-green-500 text-white">
+                              Completed
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </CardContent>
+          )}
         </Card>
         
 
@@ -469,6 +574,34 @@ const NutritionistDashboard = () => {
         </DialogContent>
       </Dialog>
 
+       {/* Notes Dialog for Completing the Appointment    */}
+      <Dialog open={notesDialog.open} onOpenChange={(open) => !open && setNotesDialog({ open: false, client: null })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Meeting Notes</DialogTitle>
+            <DialogDescription>
+              Add a short summary of your session with <strong>{notesDialog.client?.name}</strong>.
+            </DialogDescription>
+          </DialogHeader>
+
+          <Textarea
+            value={meetingNotes}
+            onChange={(e) => setMeetingNotes(e.target.value)}
+            placeholder="e.g. Discussed diet, revised meal plan, advised workout change..."
+            className="mt-2"
+          />
+
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="ghost" onClick={() => setNotesDialog({ open: false, client: null })}>
+              Cancel
+            </Button>
+            <Button onClick={handleActionComplete} disabled={!meetingNotes.trim()}>
+              Submit Notes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
 
         {/* Message Dialog */}
         <Dialog open={messageDialog.open} onOpenChange={(open) => setMessageDialog({ open, client: messageDialog.client })}>
@@ -487,7 +620,7 @@ const NutritionistDashboard = () => {
               />
             </div>
             <DialogFooter>
-              <Button onClick={handleSendMessage}>Send</Button>
+              <Button onClick={sendMessage}>Send</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

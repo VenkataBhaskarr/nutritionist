@@ -39,9 +39,9 @@ interface Client {
 }
 
 const NutClients: FC = () => {
+   const [messageDialogOpen, setMessageDialogOpen] = useState(false)
    const [dialogOpen, setDialogOpen] = useState(false);
-   const [Cusername, setCuserName] = useState("")
-   const [Cpassword, setCPassword] = useState("")
+   const [messageText, setMessageText] = useState("")
    const user = JSON.parse(localStorage.getItem("user") || "{}");
    const token = localStorage.getItem("token");
    const navigate = useNavigate();
@@ -56,6 +56,44 @@ const NutClients: FC = () => {
        plan: "",
        issue: "",
      });
+    const handleBulkMessage = async() => {
+      if (!messageText.trim()) return;
+      const content = messageText.trim();
+
+      try {
+        const nutDetails = await api.get(`/nuts/email`, {
+          params: { email: user.email },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const nutritionistId = nutDetails.data[0].id;
+        const clientDetails = await api.get(`/client/byNutId`, {
+          params: { id: nutritionistId },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const clients = clientDetails.data;
+        const now = new Date().toISOString();
+        // Loop through all clients and send message
+        await Promise.all(
+          clients.map(async (client) => {
+            const messagePayload = {
+              nId: nutritionistId,
+              cId: client.id,
+              content,
+              sentAt: now,
+            };
+            return api.post(`/nuts/sendMessage`, messagePayload, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+          })
+        );
+        setMessageText('');
+        toast.success(`Message sent to all ${clients.length} clients ✅`);
+        setMessageDialogOpen(false);
+      } catch (err) {
+        console.error("Failed to send bulk messages:", err);
+        toast.error("Failed to send messages ❌");
+      }
+    } 
     const handleAddClient = async () => {
         const { name, age, email, phone, gender, location, issue, plan } = formData;
         if (!name || !age || !email || !phone || !gender || !location || !issue || !plan) {
@@ -157,7 +195,7 @@ const NutClients: FC = () => {
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Client Management</h1>
           <div className="space-x-4">
-            <Button variant="outline" className='bg-primary-500 text-white'>Send Bulk Message</Button>
+            <Button variant="outline" className='bg-primary-500 text-white' onClick={() => setMessageDialogOpen(true)}>Send Bulk Message</Button>
             {/* <Button className="bg-primary-500">Add New Client</Button> */}
             <Button variant="outline" className="bg-primary-500 text-white"  onClick={() => setDialogOpen(true)}>Add Client</Button> 
         
@@ -272,6 +310,27 @@ const NutClients: FC = () => {
             </Table>
           </CardContent>
         </Card>
+
+        <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
+           <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Sending Bulk Message to all your clients</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4">
+                <Label htmlFor="message">Your Message</Label>
+                <Textarea
+                  id="message"
+                  rows={4}
+                  value={messageText}
+                  onChange={(e) => setMessageText(e.target.value)}
+                  placeholder="Type your message..."
+                />
+              </div>
+              <DialogFooter>
+                <Button onClick={handleBulkMessage}>Send</Button>
+              </DialogFooter>
+            </DialogContent>
+        </Dialog>
 
 
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

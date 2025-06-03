@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
+  DialogDescription
 } from "@/components/ui/dialog";
 import {
   PlusCircle,
@@ -39,12 +40,27 @@ interface Client {
 }
 
 const NutClients: FC = () => {
+  const [deleteDialog, setDeleteDialog] = useState<{
+  open: boolean;
+  client: any | null;
+}>({ open: false, client: null });
    const [messageDialogOpen, setMessageDialogOpen] = useState(false)
    const [dialogOpen, setDialogOpen] = useState(false);
    const [messageText, setMessageText] = useState("")
    const user = JSON.parse(localStorage.getItem("user") || "{}");
    const token = localStorage.getItem("token");
    const navigate = useNavigate();
+   const [mealPlanDialog, setMealPlanDialog] = useState<{
+      open: boolean;
+      client: any | null;
+    }>({ open: false, client: null });
+
+    const [mealInputs, setMealInputs] = useState({
+      breakfast: "",
+      lunch: "",
+      snack: "",
+      dinner: "",
+    });
    const [formData, setFormData] = useState({
        name: "",
        age: "",
@@ -56,6 +72,31 @@ const NutClients: FC = () => {
        plan: "",
        issue: "",
      });
+     const handleDeleteClient = async () => {
+        if (!deleteDialog.client) return;
+
+        try {
+          const data = {
+            cId: deleteDialog.client.id,
+            email: deleteDialog.client.email,
+          }
+          await api.post("/nuts/deleteClient", data, { headers: { Authorization: `Bearer ${token}` }});
+
+          toast.success(`Deleted ${deleteDialog.client.name} ✅`);
+          
+          // Refresh client list or remove from local state if you want
+          // setClients((prev) => prev.filter(c => c.id !== deleteDialog.client?.id));
+           setClients((prev) =>
+             prev.filter((client) => client.id !== deleteDialog.client?.id)
+           );
+
+          setDeleteDialog({ open: false, client: null });
+        } catch (err) {
+          console.error("Delete failed:", err);
+          toast.error("Failed to delete user ❌");
+        }
+      };
+
     const handleBulkMessage = async() => {
       if (!messageText.trim()) return;
       const content = messageText.trim();
@@ -120,8 +161,12 @@ const NutClients: FC = () => {
           
           // setCuserName(email);
           // setCPassword(response.data.password);
-
-          alert("username is " + response.data.email +" and " + " password: " + response.data.password)
+          
+          // await api.post("/users/sendmail", {
+            
+          // });
+     
+          // alert("username is " + response.data.email +" and " + " password: " + response.data.password)
 
           setClients((prev) => [...prev, newClient]);
           setFormData({
@@ -149,6 +194,40 @@ const NutClients: FC = () => {
         }
   };
 
+  const submitMealPlan = async () => {
+    const nutDetails = await api.get(`/nuts/email`, {
+      params: { email: user.email },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!mealPlanDialog.client) return;
+    try {
+      const payload = {
+        nId: nutDetails.data[0].id,
+        cId: mealPlanDialog.client.id,
+        meals: mealInputs,
+      };
+      console.log(payload)
+      await api.post("/nuts/addMealPlan", payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      toast.success("Meal plan sent 🍽️");
+
+      // Reset state
+      setMealInputs({
+        breakfast: "",
+        lunch: "",
+        snack: "",
+        dinner: "",
+      });
+      setMealPlanDialog({ open: false, client: null });
+    } catch (err) {
+      console.error("Error sending meal plan", err);
+      toast.error("Failed to send meal plan ❌");
+    }
+  };
+
+
    if(!token){
     navigate("/login")
    }
@@ -167,7 +246,7 @@ const NutClients: FC = () => {
         setClients(clientDetails.data);
       } 
       fetchData()
-   })
+   }, [])
   // const clients: Client[] = [
   //   {
   //     id: '1',
@@ -256,40 +335,14 @@ const NutClients: FC = () => {
                     <TableCell className="text-sm text-gray-600">{client.lastSession}</TableCell>
                     <TableCell className="text-sm text-gray-600">{client.nextSession}</TableCell>
 
-                    {/* Status Badge */}
-                    {/* <TableCell>
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full font-medium ${
-                          client.status === "active"
-                            ? "bg-green-100 text-green-700"
-                            : client.status === "pending"
-                            ? "bg-yellow-100 text-yellow-700"
-                            : "bg-blue-100 text-blue-700"
-                        }`}
-                      >
-                        {client.status}
-                      </span>
-                    </TableCell> */}
-
                     {/* Actions */}
                     <TableCell>
-                      {/* <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="ghost" size="icon" className="hover:text-primary-500">
-                              <CalendarClock className="w-4 h-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Schedule</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider> */}
                       <div className="flex items-center gap-2">
                          <Button
                           variant="ghost"
                           size="sm"
                           className="text-primary-600 hover:text-primary-700"
+                          onClick={() => setMealPlanDialog({ open: true, client })}
                         >
                           Add Mealplan
                         </Button>
@@ -297,7 +350,7 @@ const NutClients: FC = () => {
                           variant="destructive"
                           size="sm"
                           className="text-white bg-red-500"
-                          
+                          onClick={() => setDeleteDialog({ open: true, client })}
                         >
                           Delete User
                         </Button>
@@ -310,6 +363,59 @@ const NutClients: FC = () => {
             </Table>
           </CardContent>
         </Card>
+
+
+        <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ open, client: null })}>
+          <DialogContent className="sm:max-w-[400px]">
+            <DialogHeader>
+              <DialogTitle className="text-red-600">Delete Client</DialogTitle>
+              <DialogDescription>
+                This action is <span className="font-bold">permanent</span> and <span className="font-bold">cannot be undone</span>.
+                Are you sure you want to delete <span className="font-medium">{deleteDialog.client?.name}</span>?
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter className="flex justify-between mt-4">
+              <Button variant="ghost" onClick={() => setDeleteDialog({ open: false, client: null })}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteClient}>
+                Yes, Delete
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={mealPlanDialog.open} onOpenChange={(open) => setMealPlanDialog({ open, client: null })}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Add Meal Plan for {mealPlanDialog.client?.name}</DialogTitle>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              {["breakfast", "lunch", "snack", "dinner"].map((meal) => (
+                <div key={meal} className="flex flex-col gap-1">
+                  <Label className="capitalize">{meal}</Label>
+                  <Input
+                    placeholder={`Enter ${meal} food`}
+                    value={mealInputs[meal as keyof typeof mealInputs]}
+                    onChange={(e) =>
+                      setMealInputs((prev) => ({
+                        ...prev,
+                        [meal]: e.target.value,
+                      }))
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+
+            <DialogFooter>
+              <Button onClick={submitMealPlan}>Send Plan</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
 
         <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
            <DialogContent>

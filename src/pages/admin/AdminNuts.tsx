@@ -58,7 +58,7 @@ const AddNutritionistDialog: FC<{ onSuccess?: () => void }> = ({ onSuccess }) =>
         "/nuts/add",
         { name, email, phone, location, specialization},
       );
-      alert("username is " + response.data.email + " password is " + response.data.password)
+      // alert("username is " + response.data.email + " password is " + response.data.password)
       setError("");
       setName("");
       setEmail("");

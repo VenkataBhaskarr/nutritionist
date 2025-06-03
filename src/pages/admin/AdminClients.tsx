@@ -102,7 +102,7 @@ const AddClientDialog: FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    alert("username is " + response.data.email + " password is " + response.data.password)
+    // alert("username is " + response.data.email + " password is " + response.data.password)
 
     setError("");
     // Clear form

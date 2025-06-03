@@ -6,8 +6,9 @@ import {
   BriefcaseMedical,
   HeartPulse,
   PersonStanding,
-  BicepsFlexed,
   Sparkles,
+  Check,
+  ArrowRight,
 } from 'lucide-react';
 
 const FeaturesSection = () => {
@@ -17,10 +18,13 @@ const FeaturesSection = () => {
   const features = [
     {
       icon: Users,
-      title: 'Obesity',
-      desc: 'Struggling with weight? We tailor sustainable plans just for you. Lose fat, gain confidence—with no crash diets involved.',
+      title: 'Weight Management',
+      desc: 'Struggling with overweight? We tailor sustainable plans just for you. Lose fat, gain confidence—with no crash diets involved.',
       color: 'from-pink-500 to-pink-600',
       bgColor: 'from-pink-50 to-pink-100',
+      price: '₹1,299',
+      period: 'per month',
+      features: ['Personalized meal plans', 'Weekly progress tracking', '24/7 nutritionist support', 'Recipe suggestions']
     },
     {
       icon: LayoutDashboard,
@@ -28,13 +32,19 @@ const FeaturesSection = () => {
       desc: 'Take control of your sugar levels with personalized nutrition plans. Live healthy, energized, and in charge every single day.',
       color: 'from-yellow-500 to-yellow-600',
       bgColor: 'from-yellow-50 to-yellow-100',
+      price: '₹1,599',
+      period: 'per month',
+      features: ['Blood sugar monitoring', 'Carb counting guidance', 'Meal timing optimization', 'Doctor consultation']
     },
     {
       icon: BriefcaseMedical,
       title: 'PCOD/PCOS',
-      desc: 'Hormonal imbalances don’t have to rule your life. We help you eat right, feel right, and thrive.',
+      desc: `Hormonal imbalances don't have to rule your life. We help you eat right, feel right, and thrive.`,
       color: 'from-indigo-500 to-indigo-600',
       bgColor: 'from-indigo-50 to-indigo-100',
+      price: '₹1,799',
+      period: 'per month',
+      features: ['Hormone-balancing foods', 'Cycle tracking support', 'Anti-inflammatory diet', 'Lifestyle coaching']
     },
     {
       icon: HeartPulse,
@@ -42,20 +52,29 @@ const FeaturesSection = () => {
       desc: 'Your liver, heart, and kidneys deserve top-notch care. Support your organs with food that heals and protects.',
       color: 'from-rose-500 to-rose-600',
       bgColor: 'from-rose-50 to-rose-100',
+      price: '₹1,499',
+      period: 'per month',
+      features: ['Detox meal plans', 'Organ-specific nutrition', 'Regular health assessments', 'Supplement guidance']
     },
     {
       icon: PersonStanding,
       title: 'Kids Health',
-      desc: 'Nutrition shapes your child’s future—make every bite count. Smart, tasty plans designed for growing minds and bodies',
+      desc: `Nutrition shapes your child's future—make every bite count. Smart, tasty plans designed for growing minds and bodies`,
       color: 'from-green-500 to-green-600',
       bgColor: 'from-green-50 to-green-100',
+      price: '₹999',
+      period: 'per month',
+      features: ['Age-appropriate meals', 'Fun recipe activities', 'Growth tracking', 'Parent guidance sessions']
     },
     {
-      icon: BicepsFlexed,
-      title: 'Muscle Gain',
-      desc: 'Muscles are built in the kitchen as much as the gym. Get the right fuel to power your strength and recovery.',
+      icon: HeartPulse,
+      title: 'Thyroid Health',
+      desc: 'Balance your hormones with personalized nutrition.',
       color: 'from-blue-500 to-blue-600',
       bgColor: 'from-blue-50 to-blue-100',
+      price: '₹1,399',
+      period: 'per month',
+      features: ['Thyroid-friendly foods', 'Metabolism boosting', 'Hormone optimization', 'Energy level tracking']
     },
   ];
 
@@ -86,38 +105,35 @@ const FeaturesSection = () => {
     },
   };
 
-  const floatingVariants = {
-    initial: { y: 0 },
-    animate: {
-      y: [-10, 10, -10],
-      transition: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
-    },
-  };
-
   return (
     <section id="services" ref={sectionRef} className="relative py-20 bg-white overflow-hidden">
-        <motion.div 
-            className="absolute top-10 left-10 opacity-10"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1, y: [0, -20, 0] }}
-            transition={{ duration: 6, repeat: Infinity }}
-        >
-            <Sparkles size={80} className="text-primary-500" />
-        </motion.div>
+      <motion.div 
+        className="absolute top-10 left-10 opacity-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, y: [0, -20, 0] }}
+        transition={{ duration: 6, repeat: Infinity }}
+      >
+        <Sparkles size={80} className="text-primary-500" />
+      </motion.div>
+      
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial="hidden"
-          animate={isInView ? 'visible' : 'hidden'}
+          animate={isInView ? "visible" : "hidden"}
           variants={headerVariants}
           className="text-center mb-16 lg:mb-20"
         >
           <h2 className="text-4xl font-bold text-black mb-6">
-            Comprehensive{' '}
-            <span className="text-primary-500">Nutrition Platform</span>
+            Transform Your{' '}
+            <span className="text-primary-500">
+              Wellness Journey
+            </span>
           </h2>
-          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
-            Our platform connects clients with professional nutritionists under the supervision of admin experts.
+          
+          <p className="text-lg text-gray-500 max-w-3xl mx-auto leading-relaxed">
+            Discover comprehensive wellness solutions designed to help you achieve your health goals 
+            with personalized support every step of the way.
           </p>
         </motion.div>
 
@@ -134,32 +150,76 @@ const FeaturesSection = () => {
               <motion.div
                 key={index}
                 variants={itemVariants}
-                whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                className="group relative"
+                className="group relative h-80 [perspective:1000px]"
               >
-                <div className="relative h-full bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-500 border border-gray-100 overflow-hidden">
-                  <div
-                    className={`absolute inset-0 bg-gradient-to-br ${feature.bgColor} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
-                  ></div>
+                <div className="relative h-full w-full transition-transform duration-1000 ease-out [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                  {/* Front Side */}
+                  <div className="absolute inset-0 h-full w-full rounded-2xl [backface-visibility:hidden]">
+                    <div className="relative h-full bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-700 border border-gray-100 overflow-hidden">
+                      <div
+                        className={`absolute inset-0 bg-gradient-to-br ${feature.bgColor} opacity-0 group-hover:opacity-30 transition-opacity duration-700`}
+                      ></div>
 
-                  <div className="relative z-10">
-                    <motion.div
-                      whileHover={{ rotate: 10, scale: 1.1 }}
-                      transition={{ duration: 0.3 }}
-                      className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-r ${feature.color} mb-6 shadow-lg`}
-                    >
-                      <Icon className="w-8 h-8 text-white" />
-                    </motion.div>
+                      <div className="relative z-10">
+                        <motion.div
+                          className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-r ${feature.color} mb-6 shadow-lg`}
+                        >
+                          <Icon className="w-8 h-8 text-white" />
+                        </motion.div>
 
-                    <h3 className="text-xl font-bold text-gray-900 mb-4 group-hover:text-gray-800 transition-colors">
-                      {feature.title}
-                    </h3>
+                        <h3 className="text-xl font-bold text-gray-900 mb-4">
+                          {feature.title}
+                        </h3>
 
-                    <p className="text-gray-600 leading-relaxed group-hover:text-gray-700 transition-colors">
-                      {feature.desc}
-                    </p>
+                        <p className="text-gray-600 leading-relaxed text-sm">
+                          {feature.desc}
+                        </p>
+
+                        <div className="absolute bottom-6 right-6 opacity-60">
+                          <ArrowRight className="w-5 h-5 text-gray-400" />
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
+
+                  {/* Back Side */}
+                  <div className="absolute inset-0 h-full w-full rounded-2xl [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                    <div className={`relative h-full bg-gradient-to-br ${feature.color} rounded-2xl p-8 shadow-xl text-white overflow-hidden`}>
+                      <div className="absolute inset-0 bg-black/10 rounded-2xl"></div>
+                      
+                      <div className="relative z-10 h-full flex flex-col justify-between">
+                        <div>
+                          <div className="flex items-center justify-between mb-6">
+                            <Icon className="w-8 h-8 text-white/90" />
+                            <div className="text-right">
+                              <div className="text-2xl font-bold">{feature.price}</div>
+                              <div className="text-sm text-white/80">{feature.period}</div>
+                            </div>
+                          </div>
+
+                          <h3 className="text-lg font-bold mb-4">{feature.title}</h3>
+                          
+                          <div className="space-y-2">
+                            {feature.features.map((feat, idx) => (
+                              <div key={idx} className="flex items-start gap-2">
+                                <Check className="w-4 h-4 mt-0.5 text-white/90 flex-shrink-0" />
+                                <span className="text-sm text-white/90">{feat}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* <motion.button
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                          transition={{ duration: 0.3, ease: "easeOut" }}
+                          className="mt-2 w-full bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-500 border border-white/20"
+                        >
+                          Get Started
+                        </motion.button> */}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
             );

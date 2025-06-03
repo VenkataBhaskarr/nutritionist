@@ -465,10 +465,10 @@ const ClientNut: FC = () => {
                 </div>
                 <Separator />
                 <div className="space-y-2">
-                  <p className="text-sm"><strong>Experience:</strong> {nutritionist.experience}</p>
+                  <p className="text-sm"><strong>Name:</strong> {nutritionist.phone}</p>
                   <p className="text-sm"><strong>Email:</strong> {nutritionist.email}</p>
-                  <p className="text-sm"><strong>Phone:</strong> {nutritionist.phone}</p>
-                  <p className="text-sm"><strong>Address:</strong> {nutritionist.address}</p>
+                  <p className="text-sm"><strong>Experience:</strong> {nutritionist.experience}</p>
+                  <p className="text-sm"><strong>Location:</strong> {nutritionist.address}</p>
                   <SendMessageDialog nutritionistEmail={nutritionist.email} onSuccess={() => window.location.reload()} />
                 </div>
               </CardContent>

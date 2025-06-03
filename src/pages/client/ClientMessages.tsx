@@ -1,6 +1,6 @@
 // import { FC, useState, useRef, useEffect } from 'react';
 // import { Card, CardContent } from "@/components/ui/card";
-// import DashboardLayout from '@/components/DashboardLayout';
+import DashboardLayout from '@/components/DashboardLayout';
 // import { Input } from "@/components/ui/input";
 // import { Button } from "@/components/ui/button";
 // import api from '@/lib/api';
@@ -211,9 +211,11 @@
 
 function ClientMessages() {
   return (
-    <div>
-        hI
-    </div>
+    <DashboardLayout title="Messages" userRole="client">
+        <div>
+          Hi
+        </div>
+    </DashboardLayout>
   )
 }
 

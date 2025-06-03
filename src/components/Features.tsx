@@ -146,26 +146,22 @@ const ServicesSection = () => {
       
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
         {/* Header */}
-        <motion.div
+
+         <motion.div
           initial="hidden"
-          animate={isInView ? "visible" : "hidden"}
+          animate={isInView ? 'visible' : 'hidden'}
           variants={headerVariants}
           className="text-center mb-16 lg:mb-20"
         >
-         
           <h2 className="text-4xl font-bold text-black mb-6">
-            Transform Your{' '}
-            <span className="text-primary-500">
-              Wellness Journey
-            </span>
+            Comprehensive{' '}
+            <span className="text-primary-500">Nutrition Platform</span>
           </h2>
-          
-          <p className="text-lg text-gray-500 max-w-3xl mx-auto leading-relaxed">
-            Discover comprehensive wellness solutions designed to help you achieve your health goals 
-            with personalized support every step of the way.
+          <p className="text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            Our platform connects clients with professional nutritionists under the supervision of admin experts.
           </p>
         </motion.div>
-
+        
         <motion.div
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
@@ -207,16 +203,7 @@ const ServicesSection = () => {
                     </p>
 
                     {/* Action Button */}
-                    {feature.hasAction !== false && (
-                      <motion.button
-                        whileHover={{ x: 5 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`inline-flex items-center gap-2 text-sm font-semibold bg-gradient-to-r ${feature.color} bg-clip-text text-transparent hover:opacity-80 transition-opacity group-hover:translate-x-1 transform transition-transform duration-300`}
-                      >
-                        Learn More
-                        <ArrowRight className="w-4 h-4" />
-                      </motion.button>
-                    )}
+                  
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl"></div>
                 </div>

@@ -323,7 +323,7 @@ const NutritionistDashboard = () => {
             <CardHeader className="pb-4 flex flex-row items-center justify-between space-y-0">
               <div>
                 <CardTitle className="text-xs uppercase tracking-wide text-muted-foreground">
-                  Upcoming Appointments
+                   Appointments In the Week
                 </CardTitle>
                 <div className="text-2xl font-semibold text-gray-800 mt-1">{appointments.length}</div>
               </div>
@@ -517,6 +517,7 @@ const NutritionistDashboard = () => {
                       <th className="px-4 py-3 text-left">Name</th>
                       <th className="px-4 py-3 text-left">Email</th>
                       <th className="px-4 py-3 text-left">Plan</th>
+                      <th className="px-4 py-3 text-left">Notes</th>
                       <th className="px-4 py-3 text-left">Appointment Date</th>
                     </tr>
                   </thead>
@@ -530,6 +531,7 @@ const NutritionistDashboard = () => {
                         <td className="px-4 py-3 whitespace-nowrap">{appointment.client[0].name}</td>
                         <td className="px-4 py-3 whitespace-nowrap">{appointment.client[0].email}</td>
                         <td className="px-4 py-3 whitespace-nowrap">{appointment.client[0].plan}</td>
+                        <td className="px-4 py-3 whitespace-nowrap">{appointment.client[0].note}</td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="flex items-center gap-2">
                             <span>{appointment.client[0].lastSession}</span>

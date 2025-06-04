@@ -22,7 +22,7 @@ const FeaturesSection = () => {
       desc: 'Struggling with overweight? We tailor sustainable plans just for you. Lose fat, gain confidence—with no crash diets involved.',
       color: 'from-pink-500 to-pink-600',
       bgColor: 'from-pink-50 to-pink-100',
-      price: '₹2500',
+      price: 'Gold Plan',
       period: 'per month',
       features: ['Personalized meal plans', 'Weekly progress tracking', '24/7 nutritionist support', 'Recipe suggestions']
     },
@@ -32,7 +32,7 @@ const FeaturesSection = () => {
       desc: 'Take control of your sugar levels with personalized nutrition plans. Live healthy, energized, and in charge every single day.',
       color: 'from-yellow-500 to-yellow-600',
       bgColor: 'from-yellow-50 to-yellow-100',
-      price: '₹2500',
+      price: 'Gold Plan',
       period: 'per month',
       features: ['Blood sugar monitoring', 'Carb counting guidance', 'Meal timing optimization', 'Doctor consultation']
     },
@@ -42,7 +42,7 @@ const FeaturesSection = () => {
       desc: `Hormonal imbalances don't have to rule your life. We help you eat right, feel right, and thrive.`,
       color: 'from-indigo-500 to-indigo-600',
       bgColor: 'from-indigo-50 to-indigo-100',
-      price: '₹2500',
+      price: 'Gold Plan',
       period: 'per month',
       features: ['Hormone-balancing foods', 'Cycle tracking support', 'Anti-inflammatory diet', 'Lifestyle coaching']
     },
@@ -52,7 +52,7 @@ const FeaturesSection = () => {
       desc: 'Your liver, heart, and kidneys deserve top-notch care. Support your organs with food that heals and protects.',
       color: 'from-rose-500 to-rose-600',
       bgColor: 'from-rose-50 to-rose-100',
-      price: '₹2500',
+      price: 'Gold Plan',
       period: 'per month',
       features: ['Detox meal plans', 'Organ-specific nutrition', 'Regular health assessments', 'Supplement guidance']
     },
@@ -62,7 +62,7 @@ const FeaturesSection = () => {
       desc: `Nutrition shapes your child's future—make every bite count. Smart, tasty plans designed for growing minds and bodies`,
       color: 'from-green-500 to-green-600',
       bgColor: 'from-green-50 to-green-100',
-      price: '₹2500',
+      price: 'Gold Plan',
       period: 'per month',
       features: ['Age-appropriate meals', 'Fun recipe activities', 'Growth tracking', 'Parent guidance sessions']
     },
@@ -72,7 +72,7 @@ const FeaturesSection = () => {
       desc: 'Balance your hormones with personalized nutrition.',
       color: 'from-blue-500 to-blue-600',
       bgColor: 'from-blue-50 to-blue-100',
-      price: '₹2500',
+      price: 'Gold Plan',
       period: 'per month',
       features: ['Thyroid-friendly foods', 'Metabolism boosting', 'Hormone optimization', 'Energy level tracking']
     },

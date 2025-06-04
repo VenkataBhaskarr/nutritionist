@@ -116,11 +116,11 @@ const PackagesSection = () => {
                 </div>
               )}
 
-              {!pkg.refund && (
+              {/* {!pkg.refund && (
                 <div className='font-thin text-sm'>
                   *financial support available
                  </div>
-              )}
+              )} */}
 
               
             </motion.div>

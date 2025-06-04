@@ -273,24 +273,6 @@ const NutProfile: FC = () => {
 
         <Separator />
 
-        {/* Qualifications */}
-        {/* <Card>
-          <CardHeader><CardTitle>Qualifications</CardTitle></CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {profile.qualifications.map((q, i) => (
-                <div key={i} className="flex justify-between items-center bg-gray-50 p-2 rounded-md">
-                  <span>{q}</span>
-                  <Button variant="ghost" size="sm" className="text-red-500" onClick={() => handleQualificationRemove(i)}>Remove</Button>
-                </div>
-              ))}
-              <div className="flex gap-2">
-                <Input placeholder="Add new qualification" value={newQualification} onChange={e => setNewQualification(e.target.value)} />
-                <Button onClick={handleQualificationAdd} size="sm" variant="outline">Add</Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card> */}
       </div>
     </DashboardLayout>
   );

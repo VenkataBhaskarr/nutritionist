@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState, Component, ReactNode } from 'react';
+import React, { FC, useEffect, useState, Component, ReactNode, useRef } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label";
 import DashboardLayout from '@/components/DashboardLayout';
 import api from "@/lib/api";
 import { useNavigate } from 'react-router-dom';
+import { Weight } from 'lucide-react';
+import { toast } from "sonner";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false };
@@ -52,6 +54,11 @@ interface ClientInfo {
   phone: string;
   address: string;
   age: number;
+  height: number;
+  weight: number;
+  diet: string;
+  profilePicture?: string;
+  allergies: string;
   issue: {
     height?: string;
     weight?: string;
@@ -95,7 +102,7 @@ const AddGoalDialog: FC<{
       setProgress("0");
       setDeadline("");
       onSuccess?.();
-      alert("Goal added successfully!");
+      toast.success("Goal added successfully!");
     } catch (err) {
       setError("Failed to add goal. Please try again.");
     } finally {
@@ -165,130 +172,6 @@ const AddGoalDialog: FC<{
   );
 };
 
-const AddMetricDialog: FC<{
-  clientId: number;
-  onSuccess?: () => void;
-}> = ({ clientId, onSuccess }) => {
-  const [date, setDate] = useState("");
-  const [weight, setWeight] = useState("");
-  const [bodyFat, setBodyFat] = useState("");
-  const [calories, setCalories] = useState("");
-  const [water, setWater] = useState("");
-  const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!date || !weight) {
-      setError("Date and weight are required.");
-      return;
-    }
-    try {
-      setIsSubmitting(true);
-      const token = localStorage.getItem("token");
-      const navigate = useNavigate();
-   if(!token){
-    navigate("/login")
-   }
-      await api.post(
-        "/progress",
-        {
-          clientId,
-          date,
-          weight: parseFloat(weight),
-          bodyFat: bodyFat ? parseFloat(bodyFat) : null,
-          calories: calories ? parseInt(calories) : null,
-          water: water ? parseFloat(water) : null,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setError("");
-      setDate("");
-      setWeight("");
-      setBodyFat("");
-      setCalories("");
-      setWater("");
-      onSuccess?.();
-      alert("Metric added successfully!");
-    } catch (err) {
-      setError("Failed to add metric. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="w-full border-primary-500 text-primary-500 hover:bg-primary-50">
-          Add New Measurement
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add Progress Metric</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="date">Date</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="weight">Weight (kg)</Label>
-            <Input
-              id="weight"
-              type="number"
-              step="0.1"
-              value={weight}
-              onChange={(e) => setWeight(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="bodyFat">Body Fat (%)</Label>
-            <Input
-              id="bodyFat"
-              type="number"
-              step="0.1"
-              value={bodyFat}
-              onChange={(e) => setBodyFat(e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="calories">Calories (kcal)</Label>
-            <Input
-              id="calories"
-              type="number"
-              value={calories}
-              onChange={(e) => setCalories(e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="water">Water Intake (L)</Label>
-            <Input
-              id="water"
-              type="number"
-              step="0.1"
-              value={water}
-              onChange={(e) => setWater(e.target.value)}
-            />
-          </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <Button type="submit" disabled={isSubmitting} className="w-full bg-primary-500 hover:bg-primary-600">
-            {isSubmitting ? "Adding..." : "Add Metric"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
 const ClientProfile: FC = () => {
   const [clientInfo, setClientInfo] = useState<ClientInfo>({
     id: 0,
@@ -297,61 +180,80 @@ const ClientProfile: FC = () => {
     phone: "",
     address: "",
     age: 0,
+    height: 0,
+    weight: 0,
+    diet: "",
+    profilePicture: "",
     issue: {},
+    allergies: "",
   });
   const [goals, setGoals] = useState<Goal[]>([]);
   const [metrics, setMetrics] = useState<ProgressMetric[]>([]);
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Image upload states - similar to NutProfile
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [profileImage, setProfileImage] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  const navigate = useNavigate();
+
+  const triggerFileInput = () => fileInputRef.current?.click();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
         const token = localStorage.getItem("token");
-        const navigate = useNavigate();
-           if(!token){
-            navigate("/login")
-           }
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const email = encodeURIComponent(user.email);
 
+        if(!token){
+        navigate("/login")
+        }
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        const email = user.email
+        
         // Fetch client info
         const clientResponse = await api.get(`/client/email`, {
           params: { email },
           headers: { Authorization: `Bearer ${token}` },
         });
+        
+        const clientData = clientResponse.data[0];
         setClientInfo({
-          id: clientResponse.data[0].id,
-          name: clientResponse.data[0].name,
-          email: clientResponse.data[0].email,
-          phone: clientResponse.data[0].phone,
-          address: clientResponse.data[0].location,
-          age: clientResponse.data[0].age,
-          issue: clientResponse.data[0].issue || {},
+          id: clientData.id,
+          name: clientData.name,
+          email: clientData.email,
+          phone: clientData.phone,
+          address: clientData.location,
+          age: clientData.age,
+          issue: clientData.issue || {},
+          height: clientData.height,
+          weight: clientData.weight,
+          diet: clientData.diet,
+          profilePicture: clientData.profilePicture || "",
+          allergies: clientData.allergies,
         });
 
+        // Set profile image if it exists
+        setProfileImage(clientData.profilePicUrl || null);
+
         // Fetch goals
-        const goalsResponse = await api.get(`/goals/client`, {
-          params: { clientId: clientResponse.data[0].id },
+        const goalsResponse = await api.get(`/client/goals`, {
+          params: { clientId: clientData.id },
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log('Goals response:', goalsResponse.data); // Debug log
         setGoals(Array.isArray(goalsResponse.data) ? goalsResponse.data : []);
 
         // Fetch progress metrics
-        const metricsResponse = await api.get(`/progress/client`, {
-          params: { clientId: clientResponse.data[0].id },
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        console.log('Metrics response:', metricsResponse.data); // Debug log
-        setMetrics(Array.isArray(metricsResponse.data) ? metricsResponse.data : []);
+       
       } catch (err) {
         console.error('Fetch error:', err);
         setError("Failed to fetch data. Please try again.");
-        setGoals([]); // Ensure goals is an array
-        setMetrics([]); // Ensure metrics is an array
+        setGoals([]);
+        setMetrics([]);
       } finally {
         setIsLoading(false);
       }
@@ -359,30 +261,76 @@ const ClientProfile: FC = () => {
     fetchData();
   }, []);
 
+  // Image change handler - similar to NutProfile
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const validTypes = ['image/jpeg', 'image/png'];
+      if (!validTypes.includes(file.type)) {
+        toast.error('Only JPG and PNG formats are allowed.');
+        return;
+      }
+
+      if (file.size > 1024 * 1024) {
+        toast.error('Image must be less than 1MB.');
+        return;
+      }
+
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+
+      const reader = new FileReader();
+      reader.onloadend = () => setProfileImage(reader.result as string);
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const token = localStorage.getItem("token");
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      const token = localStorage.getItem("token");
-      const navigate = useNavigate();
+      console.log(clientInfo) 
       if(!token){
         navigate("/login")
       }
-      await api.put(
-        `/client/${clientInfo.id}`,
-        {
-          name: clientInfo.name,
-          email: clientInfo.email,
-          phone: clientInfo.phone,
-          location: clientInfo.address,
-          age: clientInfo.age,
-          issue: clientInfo.issue,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
+
+      // Use FormData for multipart form data - similar to NutProfile
+      const formData = new FormData();
+      
+      formData.append("name", clientInfo.name);
+      formData.append("email", clientInfo.email);
+      formData.append("phone", clientInfo.phone);
+      formData.append("location", clientInfo.address);
+      formData.append("age", clientInfo.age.toString());
+      formData.append("height", clientInfo.height.toString());
+      formData.append("Weight", clientInfo.weight.toString());
+      formData.append("diet", clientInfo.diet);
+      
+      // Handle allergies
+      const allergs = clientInfo.allergies;
+      formData.append("allergies", allergs);
+
+      // Add image file if it exists
+      if (imageFile) {
+        formData.append("profilePicture", imageFile);
+      }
+
+      await api.post(
+        `/client/updateProfile`,
+        formData,
+        { 
+          headers: { 
+            'Content-Type': 'multipart/form-data',
+            Authorization: `Bearer ${token}` 
+          } 
+        }
       );
-      alert("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
     } catch (err) {
+      console.error("Failed to save profile:", err);
       setError("Failed to update profile. Please try again.");
+      toast.error("Update failed.");
     } finally {
       setIsSubmitting(false);
     }
@@ -421,12 +369,32 @@ const ClientProfile: FC = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex flex-col items-center">
-                    <div className="w-32 h-32 rounded-full bg-primary-100 flex items-center justify-center mb-4">
-                      <span className="text-4xl text-primary-500">
-                        {clientInfo.name ? clientInfo.name.slice(0, 2).toUpperCase() : "JD"}
-                      </span>
+                    <div className="w-32 h-32 rounded-full bg-primary-100 overflow-hidden flex items-center justify-center mb-4">
+                      {imagePreview || profileImage ? (
+                        <img 
+                          src={imagePreview || profileImage} 
+                          className="object-cover w-full h-full" 
+                          alt="Profile" 
+                        />
+                      ) : (
+                        <span className="text-4xl text-primary-500">
+                          {clientInfo.name ? clientInfo.name.slice(0, 2).toUpperCase() : "JD"}
+                        </span>
+                      )}
                     </div>
-                    <Button variant="outline" size="sm" className="border-primary-500 text-primary-500 hover:bg-primary-50">
+                    <input 
+                      ref={fileInputRef} 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={handleImageChange} 
+                    />
+                    <Button 
+                      onClick={triggerFileInput}
+                      variant="outline" 
+                      size="sm" 
+                      className="border-primary-500 text-primary-500 hover:bg-primary-50"
+                    >
                       Change Photo
                     </Button>
                   </div>
@@ -446,6 +414,7 @@ const ClientProfile: FC = () => {
                       <Input
                         id="email"
                         type="email"
+                        readOnly
                         value={clientInfo.email}
                         onChange={(e) => setClientInfo({ ...clientInfo, email: e.target.value })}
                         required
@@ -497,26 +466,16 @@ const ClientProfile: FC = () => {
                       <Label htmlFor="height">Height</Label>
                       <Input
                         id="height"
-                        value={clientInfo.issue.height || ""}
-                        onChange={(e) =>
-                          setClientInfo({
-                            ...clientInfo,
-                            issue: { ...clientInfo.issue, height: e.target.value },
-                          })
-                        }
+                        value={clientInfo.height || ""}
+                        onChange={(e) => setClientInfo({ ...clientInfo, height: parseInt(e.target.value) || 0 })}
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="weight">Weight</Label>
                       <Input
                         id="weight"
-                        value={clientInfo.issue.weight || ""}
-                        onChange={(e) =>
-                          setClientInfo({
-                            ...clientInfo,
-                            issue: { ...clientInfo.issue, weight: e.target.value },
-                          })
-                        }
+                        value={clientInfo.weight || ""}
+                        onChange={(e) => setClientInfo({ ...clientInfo, weight: parseInt(e.target.value) || 0 })}
                       />
                     </div>
                     <div className="space-y-2">
@@ -524,13 +483,8 @@ const ClientProfile: FC = () => {
                       <select
                         id="diet"
                         className="w-full p-2 border rounded-md"
-                        value={clientInfo.issue.diet || ""}
-                        onChange={(e) =>
-                          setClientInfo({
-                            ...clientInfo,
-                            issue: { ...clientInfo.issue, diet: e.target.value },
-                          })
-                        }
+                        value={clientInfo.diet || ""}
+                        onChange={(e) => setClientInfo({ ...clientInfo, diet: e.target.value })}
                       >
                         <option value="">Select Diet</option>
                         <option value="Vegetarian">Vegetarian</option>
@@ -543,15 +497,12 @@ const ClientProfile: FC = () => {
                       <Label htmlFor="allergies">Allergies (comma-separated)</Label>
                       <Input
                         id="allergies"
-                        value={clientInfo.issue.allergies?.join(", ") || ""}
+                        value={clientInfo.allergies}
                         onChange={(e) =>
                           setClientInfo({
                             ...clientInfo,
-                            issue: {
-                              ...clientInfo.issue,
-                              allergies: e.target.value.split(",").map((a) => a.trim()),
-                            },
-                          })
+                              allergies: e.target.value,
+                            })
                         }
                       />
                     </div>
@@ -590,46 +541,6 @@ const ClientProfile: FC = () => {
                       <p className="text-gray-500">No goals found.</p>
                     )}
                     <AddGoalDialog clientId={clientInfo.id} onSuccess={() => window.location.reload()} />
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Progress Metrics</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {metrics.length > 0 ? (
-                      metrics.map((metric) => (
-                        <div key={metric.id} className="p-4 bg-primary-50 rounded-lg">
-                          <div className="flex justify-between items-center mb-2">
-                            <h3 className="font-medium">{metric.date}</h3>
-                          </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div>
-                              <p className="text-sm text-gray-500">Weight</p>
-                              <p className="font-medium">{metric.weight} kg</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">Body Fat</p>
-                              <p className="font-medium">{metric.bodyFat ? `${metric.bodyFat}%` : '-'}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">Calories</p>
-                              <p className="font-medium">{metric.calories ? `${metric.calories} kcal` : '-'}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">Water</p>
-                              <p className="font-medium">{metric.water ? `${metric.water} L` : '-'}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-gray-500">No progress metrics found.</p>
-                    )}
-                    <AddMetricDialog clientId={clientInfo.id} onSuccess={() => window.location.reload()} />
                   </div>
                 </CardContent>
               </Card>

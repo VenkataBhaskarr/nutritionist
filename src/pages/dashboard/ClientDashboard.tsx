@@ -8,126 +8,164 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import api from "@/lib/api";
 import { Calendar, ClipboardList, TrendingUp, User } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import {toast} from "sonner"
 
-const ScheduleAppointmentDialog: React.FC<{
-  clientId: number;
-  nutritionistId: number;
-  onSuccess?: () => void;
-}> = ({ clientId, nutritionistId, onSuccess }) => {
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const navigate = useNavigate()
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!date || !time) {
-      setError("Date and time are required.");
-      return;
-    }
+// const ScheduleAppointmentDialog: React.FC<{
+//   clientId: number;
+//   nutritionistId: number;
+//   onSuccess?: () => void;
+// }> = ({ clientId, nutritionistId, onSuccess }) => {
+//   const [date, setDate] = useState("");
+//   const [time, setTime] = useState("");
+//   const [error, setError] = useState("");
+//   const [isSubmitting, setIsSubmitting] = useState(false);
+//   const navigate = useNavigate()
+//   const handleSubmit = async (e: React.FormEvent) => {
+//     e.preventDefault();
+//     if (!date || !time) {
+//       setError("Date and time are required.");
+//       return;
+//     }
 
-    try {
-      setIsSubmitting(true);
-      const token = localStorage.getItem("token");
-      if(!token){
-        navigate("/login")
-      }
-      await api.post(
-        "/appointments",
-        { clientId, date, time, nutritionistId },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      setError("");
-      setDate("");
-      setTime("");
-      onSuccess?.();
-      alert("Appointment scheduled successfully!");
-    } catch (err) {
-      setError("Failed to schedule appointment. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+//     try {
+//       setIsSubmitting(true);
+//       const token = localStorage.getItem("token");
+//       if(!token){
+//         navigate("/login")
+//       }
+//       await api.post(
+//         "/appointments",
+//         { clientId, date, time, nutritionistId },
+//         {
+//           headers: { Authorization: `Bearer ${token}` },
+//         }
+//       );
+//       setError("");
+//       setDate("");
+//       setTime("");
+//       onSuccess?.();
+//       alert("Appointment scheduled successfully!");
+//     } catch (err) {
+//       setError("Failed to schedule appointment. Please try again.");
+//     } finally {
+//       setIsSubmitting(false);
+//     }
+//   };
 
-  return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="border-primary-500 text-primary-500 hover:bg-primary-50">
-          Schedule Appointment
-        </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Schedule Appointment</DialogTitle>
-        </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="date">Date</Label>
-            <Input
-              id="date"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="time">Time</Label>
-            <Input
-              id="time"
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              required
-            />
-          </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <Button type="submit" disabled={isSubmitting} className="w-full bg-primary-500 hover:bg-primary-600">
-            {isSubmitting ? "Scheduling..." : "Schedule"}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
-  );
-};
+//   return (
+//     <Dialog>
+//       <DialogTrigger asChild>
+//         <Button variant="outline" className="border-primary-500 text-primary-500 hover:bg-primary-50">
+//           Schedule Appointment
+//         </Button>
+//       </DialogTrigger>
+//       <DialogContent>
+//         <DialogHeader>
+//           <DialogTitle>Schedule Appointment</DialogTitle>
+//         </DialogHeader>
+//         <form onSubmit={handleSubmit} className="space-y-4">
+//           <div>
+//             <Label htmlFor="date">Date</Label>
+//             <Input
+//               id="date"
+//               type="date"
+//               value={date}
+//               onChange={(e) => setDate(e.target.value)}
+//               required
+//             />
+//           </div>
+//           <div>
+//             <Label htmlFor="time">Time</Label>
+//             <Input
+//               id="time"
+//               type="time"
+//               value={time}
+//               onChange={(e) => setTime(e.target.value)}
+//               required
+//             />
+//           </div>
+//           {error && <p className="text-red-500 text-sm">{error}</p>}
+//           <Button type="submit" disabled={isSubmitting} className="w-full bg-primary-500 hover:bg-primary-600">
+//             {isSubmitting ? "Scheduling..." : "Schedule"}
+//           </Button>
+//         </form>
+//       </DialogContent>
+//     </Dialog>
+//   );
+// };
 
 // Contact Nutritionist Dialog Component
-const ContactNutritionistDialog: React.FC<{
-  nutritionistEmail: string;
-  onSuccess?: () => void;
-}> = ({ nutritionistEmail, onSuccess }) => {
+const ContactNutritionistDialog: React.FC<Props> = ({
+  nutritionistEmail,
+  onSuccess,
+}) => {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nutritionistId, setNutritionistId] = useState<number | null>(null);
+  const [nutritionistName, setNutritionistName] = useState("")
+  const [clientId, setClientId] = useState<string>("");
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const token = localStorage.getItem("token");
+
+  useEffect(() => {
+    const fetchIds = async () => {
+      try {
+        const clientRes = await api.get("/client/email", {
+          params: { email: user.email },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        setClientId(clientRes.data[0].id);
+
+        const nutRes = await api.get("/nuts/id", {
+          params: { id: clientRes.data[0].nId },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        
+        setNutritionistId(nutRes.data[0].id);
+        setNutritionistName(nutRes.data[0].name);
+        console.log(nutritionistId)
+      } catch (err) {
+        console.error("Error fetching IDs:", err);
+        setError("Unable to fetch contact information.");
+      }
+    };
+
+    fetchIds();
+  }, [nutritionistEmail]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message) {
-      setError("Message is required.");
+    if (!message.trim()) {
+      setError("Message cannot be empty.");
+      return;
+    }
+    if (!nutritionistId || !clientId) {
+      setError("Missing user info. Try again later.");
       return;
     }
 
     try {
       setIsSubmitting(true);
-      const token = localStorage.getItem("token");
       await api.post(
-        "/contact",
+        "/client/sendMessage",
         {
-          message,
-          contactMethod: "email",
-          recipient: nutritionistEmail,
+          nId: nutritionistId,
+          cId: clientId,
+          content: message.trim(),
         },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
-      setError("");
+
       setMessage("");
+      setError("");
       onSuccess?.();
-      alert("Message sent successfully!");
+      toast.success("Message sent successfully!");
     } catch (err) {
+      console.error("Message send failed:", err);
       setError("Failed to send message. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -137,32 +175,41 @@ const ContactNutritionistDialog: React.FC<{
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button className="bg-primary-500 hover:bg-primary-600">Contact Nutritionist</Button>
+        <Button className="bg-primary-500 hover:bg-primary-600">
+          Contact Nutritionist
+        </Button>
       </DialogTrigger>
-      <DialogContent>
+
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Contact Your Nutritionist</DialogTitle>
+          <DialogTitle>Message {nutritionistName}</DialogTitle>
         </DialogHeader>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <Label>Contact Method</Label>
-            <div className="flex items-center">
-              <span>Email: {nutritionistEmail}</span>
-            </div>
+            <Label className="text-sm">Email</Label>
+            <p className="text-sm text-muted-foreground">{nutritionistEmail}</p>
           </div>
+
           <div>
-            <Label htmlFor="message">Message</Label>
-            <textarea
+            <Label htmlFor="message">Your Message</Label>
+            <Textarea
               id="message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              className="w-full p-2 border rounded-md"
               rows={4}
+              className="mt-1"
               required
             />
           </div>
+
           {error && <p className="text-red-500 text-sm">{error}</p>}
-          <Button type="submit" disabled={isSubmitting} className="w-full bg-primary-500 hover:bg-primary-600">
+
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full bg-primary-500 hover:bg-primary-600"
+          >
             {isSubmitting ? "Sending..." : "Send Message"}
           </Button>
         </form>
@@ -203,30 +250,29 @@ const ClientDashboard = () => {
 
         setNutData(nutRes.data[0]);
 
-        // const progressRes = await api.get(`/client/progress`, {
-        //   params: {id: client.id},
-        //   headers: { Authorization: `Bearer ${token}` },
-        // });
+        const progressRes = await api.get(`/client/progress`, {
+          params: {id: client.id},
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-        const dummyProgressData =  [
-          { week: "Week 1", weight: 100 },
-          { week: "Week 2", weight: 90 },
-          { week: "Week 3", weight: 80 },
-          { week: "Week 4", weight: 65 },
-        ]
-        //setProgressData(progressRes.data || []);
-        setProgressData(dummyProgressData)
-        console.log(progressData)
+        // const dummyProgressData =  [
+        //   { week: "Week 1", weight: 100 },
+        //   { week: "Week 2", weight: 90 },
+        //   { week: "Week 3", weight: 80 },
+        //   { week: "Week 4", weight: 65 },
+        // ]
+        setProgressData(progressRes.data || []);
+        //setProgressData(dummyProgressData)
+        //console.log(progressData)
 
-        const mealPlanRes = await api.get(`/mealplan/${client.id}`, {
+        const mealPlanRes = await api.get(`/client/meal`, {
+          params: {id: client.id},
           headers: { Authorization: `Bearer ${token}` },
         });
         setMealPlan(mealPlanRes.data || []);
 
-        const appointmentRes = await api.get(`/appointments/latest/${client.id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setAppointment(appointmentRes.data);
+        
+        setAppointment(client.nextSession);
       } catch (err) {
         console.error("Error loading client dashboard", err);
       }
@@ -254,9 +300,9 @@ const ClientDashboard = () => {
 
         {/* Stat Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard title="Next Appointment" icon={<Calendar />} value={appointment?.date || "N/A"} sub={appointment?.time || ""} />
-          <StatCard title="Current Plan" icon={<ClipboardList />} value={clientData.plan} sub={`Started ${clientData.startDate}`} />
-          <StatCard title="Progress" icon={<TrendingUp />} value={`-${getWeightLoss(progressData)} lbs`} sub="Last 4 weeks" />
+          <StatCard title="Next Appointment" icon={<Calendar />} value={appointment || "N/A"} sub={appointment?.time || ""} />
+          <StatCard title="Current Plan" icon={<ClipboardList />} value={clientData.plan} />
+          <StatCard title="Progress" icon={<TrendingUp />} value={`${getWeightLoss(progressData)} lbs`} sub="Last 4 weeks" />
           <StatCard title="Nutritionist" icon={<User />} value={nutData.name} sub={nutData.specialization || ""} />
         </div>
 
@@ -281,7 +327,8 @@ const ClientDashboard = () => {
                 <p className="text-gray-600 mb-4">Email: {nutData.email}</p>
                 <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
                   <ContactNutritionistDialog nutritionistEmail={nutData.email} />
-                  <ScheduleAppointmentDialog clientId={clientData.id} nutritionistId={nutData.id} />
+                  {/* <ScheduleAppointmentDialog clientId={clientData.id} nutritionistId={nutData.id} /> */}
+                  <Button  onClick={() => window.open('https://meet.google.com/landing', '_blank')} className="bg-primary-500">Schedule G-Meet</Button>
                 </div>
               </div>
             </div>
@@ -322,7 +369,7 @@ const ProgressGraph = ({ progress }: { progress: any[] }) => {
           <CardDescription>Tracking over the past 4 weeks</CardDescription>
         </CardHeader>
         <CardContent className="text-center text-gray-500 py-16">
-          No progress data available.
+          No progress data available, Contact Nutritionist.
         </CardContent>
       </Card>
     );
@@ -368,8 +415,22 @@ const ProgressGraph = ({ progress }: { progress: any[] }) => {
     </Card>
   );
 };
-const MealPlanSection = ({ meals, nutName }: { meals: any[], nutName: string }) => (
-  <Card>
+const MealPlanSection = ({ meals, nutName }: { meals: any[], nutName: string }) => {
+  if(!meals.length){
+    return (
+      <Card>
+    <CardHeader>
+      <CardTitle>Today's Meal Plan</CardTitle>
+      <CardDescription>Recommended by {nutName}</CardDescription>
+    </CardHeader>
+    <CardContent className="text-center text-gray-500 py-16">
+          No Meal Plans available, Contact Nutritionist.
+        </CardContent>
+  </Card>
+    )
+  }
+  return (
+<Card>
     <CardHeader>
       <CardTitle>Today's Meal Plan</CardTitle>
       <CardDescription>Recommended by {nutName}</CardDescription>
@@ -388,7 +449,8 @@ const MealPlanSection = ({ meals, nutName }: { meals: any[], nutName: string }) 
       ))}
     </CardContent>
   </Card>
-);
+  )
+};
 
 const getWeightLoss = (progress: any[]) => {
   if (progress.length < 2) return 0;

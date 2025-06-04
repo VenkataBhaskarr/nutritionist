@@ -11,7 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
+
   Dialog,
   DialogTrigger,
   DialogContent,
@@ -46,10 +48,17 @@ const NutClients: FC = () => {
 }>({ open: false, client: null });
    const [messageDialogOpen, setMessageDialogOpen] = useState(false)
    const [dialogOpen, setDialogOpen] = useState(false);
-   const [messageText, setMessageText] = useState("")
+   const [messageText, setMessageText] = useState("");
+   const [selectedWeek, setSelectedWeek] = useState("");
+const [weight, setWeight] = useState("");
    const user = JSON.parse(localStorage.getItem("user") || "{}");
    const token = localStorage.getItem("token");
+   const weeks = ["Week 1", "Week 2", "Week 3", "Week 4"];
    const navigate = useNavigate();
+   const [progressDialog, setProgressDialog] = useState<{
+      open: boolean;
+      client: any | null;
+    }>({ open: false, client: null });
    const [mealPlanDialog, setMealPlanDialog] = useState<{
       open: boolean;
       client: any | null;
@@ -72,6 +81,35 @@ const NutClients: FC = () => {
        plan: "",
        issue: "",
      });
+     const submitProgress = async () => {
+        if (!selectedWeek || !weight) {
+          toast.error("Please select week and enter weight.");
+          return;
+        }
+
+        try {
+          await api.post(
+            "/client/progress", // adjust your backend route here
+            {
+              clientId: progressDialog.client?.id,
+              week: selectedWeek,
+              weight: parseFloat(weight),
+            },
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+
+          toast.success("Progress updated successfully!");
+          setProgressDialog({ open: false, client: null });
+          setSelectedWeek("");
+          setWeight("");
+          // Refresh list or trigger data reload
+        } catch (error) {
+          console.error(error);
+          toast.error("Failed to update progress.");
+        }
+      };
      const handleDeleteClient = async () => {
         if (!deleteDialog.client) return;
 
@@ -243,7 +281,28 @@ const NutClients: FC = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        setClients(clientDetails.data);
+        const clients = clientDetails.data;
+        console.log(clients)
+
+// Fetch all client goals in parallel
+        const clientsWithGoals = await Promise.all(
+          clients.map(async (client) => {
+            try {
+              const goalRes = await api.get(`/client/goal`, {
+                params: { clientId: client.id },
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              const goal = goalRes.data?.[0]?.title ?? ""
+              const progress = goalRes.data?.[0]?.progress ?? 0; // fallback to 0 if no goal
+              return { ...client, progress, goal };
+            } catch (error) {
+              console.error(`Failed to fetch goals for client ${client.id}`, error);
+              return { ...client, progress: 0, goal: "" };
+            }
+          })
+        );
+
+        setClients(clientsWithGoals);
       } 
       fetchData()
    }, [])
@@ -338,6 +397,14 @@ const NutClients: FC = () => {
                     {/* Actions */}
                     <TableCell>
                       <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-primary-600 hover:text-primary-700"
+                          onClick={() => setProgressDialog({ open: true, client })}
+                        >
+                          Add Progress
+                        </Button>
                          <Button
                           variant="ghost"
                           size="sm"
@@ -382,6 +449,53 @@ const NutClients: FC = () => {
               <Button variant="destructive" onClick={handleDeleteClient}>
                 Yes, Delete
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={progressDialog.open} onOpenChange={(open) => setProgressDialog({open, client: null})}>
+          <DialogContent className="sm:max-w-[400px]">
+            <DialogHeader>
+              <DialogTitle>
+                Update Progress for {progressDialog.client?.name}
+              </DialogTitle>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              {/* Week Selector */}
+              <div className="flex flex-col gap-1">
+                <Label>Select Week</Label>
+                <Select
+                  value={selectedWeek}
+                  onValueChange={(val) => setSelectedWeek(val)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose a week" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {weeks.map((week, idx) => (
+                      <SelectItem key={idx} value={week}>
+                        {week}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Weight Input */}
+              <div className="flex flex-col gap-1">
+                <Label>Weight (kg)</Label>
+                <Input
+                  type="number"
+                  placeholder="Enter weight in kgs"
+                  value={weight}
+                  onChange={(e) => setWeight(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button onClick={submitProgress}>Submit Progress</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

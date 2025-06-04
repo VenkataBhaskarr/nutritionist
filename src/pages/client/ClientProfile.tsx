@@ -80,36 +80,64 @@ const AddGoalDialog: FC<{
   const [deadline, setDeadline] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [hasGoal, setHasGoal] = useState<boolean>(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const token = localStorage.getItem("token");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const checkGoal = async () => {
+      try {
+        const res = await api.get(`/client/goal`, {
+          params: { clientId },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.data.length > 0) {
+          setHasGoal(true);
+        } else {
+          setHasGoal(false);
+        }
+      } catch (err) {
+        console.error("Error checking existing goals:", err);
+      }
+    };
+
+    if (dialogOpen) {
+      checkGoal();
+    }
+  }, [clientId, token, dialogOpen]);
+
   const handleSubmit = async (e: React.FormEvent) => {
-   
     e.preventDefault();
+
     if (!type || !target || !deadline) {
       setError("Type, target, and deadline are required.");
       return;
     }
+
     try {
-      setIsSubmitting(true);  
-      if(!token){
-        navigate("/login")
+      setIsSubmitting(true);
+      if (!token) {
+        navigate("/login");
+        return;
       }
-      const resp = await api.post(
+
+      await api.post(
         "/client/goal",
         { clientId, type, target, progress: parseFloat(progress), deadline },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      console.log(resp)
-      setError("");
       setType("");
       setTarget("");
       setProgress("0");
       setDeadline("");
-      onSuccess?.();
+      setError("");
       toast.success("Goal added successfully!");
+      onSuccess?.();
+      setDialogOpen(false);
     } catch (err) {
+      console.error(err);
       setError("Failed to add goal. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -117,62 +145,77 @@ const AddGoalDialog: FC<{
   };
 
   return (
-    <Dialog>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="w-full border-primary-500 text-primary-500 hover:bg-primary-50">
+        <Button
+          variant="outline"
+          className="w-full border-primary-500 text-primary-500 hover:bg-primary-50"
+        >
           Add New Goal
         </Button>
       </DialogTrigger>
+
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Add New Goal</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="type">Goal Type</Label>
-            <Input
-              id="type"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="target">Target</Label>
-            <Input
-              id="target"
-              value={target}
-              onChange={(e) => setTarget(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="progress">Progress (%)</Label>
-            <Input
-              id="progress"
-              type="number"
-              min="0"
-              max="100"
-              value={progress}
-              onChange={(e) => setProgress(e.target.value)}
-              required
-            />
-          </div>
-          <div>
-            <Label htmlFor="deadline">Deadline</Label>
-            <Input
-              id="deadline"
-              type="date"
-              value={deadline}
-              onChange={(e) => setDeadline(e.target.value)}
-              required
-            />
-          </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <Button type="submit" disabled={isSubmitting} className="w-full bg-primary-500 hover:bg-primary-600">
-            {isSubmitting ? "Adding..." : "Add Goal"}
-          </Button>
-        </form>
+
+        {hasGoal ? (
+          <p className="text-sm text-red-500">
+            You already have an active goal. Please complete or remove it first.
+          </p>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="type">Goal Type</Label>
+              <Input
+                id="type"
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="target">Target</Label>
+              <Input
+                id="target"
+                value={target}
+                onChange={(e) => setTarget(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="progress">Progress (%)</Label>
+              <Input
+                id="progress"
+                type="number"
+                min="0"
+                max="100"
+                value={progress}
+                onChange={(e) => setProgress(e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="deadline">Deadline</Label>
+              <Input
+                id="deadline"
+                type="date"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                required
+              />
+            </div>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full bg-primary-500 hover:bg-primary-600"
+            >
+              {isSubmitting ? "Adding..." : "Add Goal"}
+            </Button>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -304,6 +347,22 @@ console.log(goals)
   }
 };
 
+const handleRemoveGoal = async (goalId: number) => {
+  try {
+    await api.delete(`/client/goal/`, {
+      params: {goalId},
+      headers: { Authorization: `Bearer ${token}` },
+    });
+
+    toast.success("Goal removed successfully!");
+
+    // 🚀 Instantly update UI by removing the goal
+    setGoals((prev) => prev.filter((g) => g.id !== goalId));
+  } catch (err) {
+    toast.error("Failed to remove goal");
+    console.error(err);
+  }
+};
 const handleCompleteGoal = async (goalId: number) => {
   try {
     await api.post(
@@ -632,6 +691,18 @@ const handleCompleteGoal = async (goalId: number) => {
                   onClick={() => handleCompleteGoal(goal.id)}
                 >
                   Complete
+                </Button>
+              </>
+            )}
+            {goal.isComplete && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-500 hover:bg-primary-100"
+                  onClick={() => handleRemoveGoal(goal.id)}
+                >
+                  Delete!!
                 </Button>
               </>
             )}

@@ -83,9 +83,30 @@ const NutritionistDashboard = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Sort by session date
-        const sortedClients = clientDetails.data.sort(
-          (a, b) => new Date(a.nextSession).getTime() - new Date(b.nextSession).getTime()
+        const clients = clientDetails.data;
+
+// Fetch all client goals in parallel
+        const clientsWithGoals = await Promise.all(
+          clients.map(async (client) => {
+            try {
+              const goalRes = await api.get(`/client/goal`, {
+                params: { clientId: client.id },
+                headers: { Authorization: `Bearer ${token}` },
+              });
+
+              const progress = goalRes.data?.[0]?.progress ?? 0; // fallback to 0 if no goal
+              return { ...client, progress };
+            } catch (error) {
+              console.error(`Failed to fetch goals for client ${client.id}`, error);
+              return { ...client, progress: 0 };
+            }
+          })
+        );
+
+        // Sort based on session date
+        const sortedClients = clientsWithGoals.sort(
+          (a, b) =>
+            new Date(a.nextSession).getTime() - new Date(b.nextSession).getTime()
         );
 
         // Normalize dates to midnight (to compare by day, not time)

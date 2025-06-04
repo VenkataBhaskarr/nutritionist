@@ -10,6 +10,8 @@ import api from "@/lib/api";
 import { useNavigate } from 'react-router-dom';
 import { Weight } from 'lucide-react';
 import { toast } from "sonner";
+import confetti from "canvas-confetti";
+import { motion } from "framer-motion";
 
 class ErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
   state = { hasError: false };
@@ -41,10 +43,11 @@ interface ProgressMetric {
 
 interface Goal {
   id: number;
-  type: string;
+  title: string;
   target: string;
   progress: number;
   deadline: string;
+  isComplete: boolean;
 }
 
 interface ClientInfo {
@@ -77,25 +80,28 @@ const AddGoalDialog: FC<{
   const [deadline, setDeadline] = useState("");
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
+   
     e.preventDefault();
     if (!type || !target || !deadline) {
       setError("Type, target, and deadline are required.");
       return;
     }
     try {
-      setIsSubmitting(true);
-      const token = localStorage.getItem("token");
-      const navigate = useNavigate();
+      setIsSubmitting(true);  
       if(!token){
         navigate("/login")
       }
-      await api.post(
-        "/goals",
+      const resp = await api.post(
+        "/client/goal",
         { clientId, type, target, progress: parseFloat(progress), deadline },
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
+      console.log(resp)
       setError("");
       setType("");
       setTarget("");
@@ -241,12 +247,17 @@ const ClientProfile: FC = () => {
         setProfileImage(clientData.profilePicUrl || null);
 
         // Fetch goals
-        const goalsResponse = await api.get(`/client/goals`, {
+        const goalsResponse = await api.get(`/client/goal`, {
           params: { clientId: clientData.id },
           headers: { Authorization: `Bearer ${token}` },
         });
-        setGoals(Array.isArray(goalsResponse.data) ? goalsResponse.data : []);
 
+        setGoals(goalsResponse.data.map((g) => ({
+        ...g,
+        isComplete: g.progress == "100"
+      })));
+
+console.log(goals)
         // Fetch progress metrics
        
       } catch (err) {
@@ -261,6 +272,67 @@ const ClientProfile: FC = () => {
     fetchData();
   }, []);
 
+ const handleUpdateGoal = async (goal: Goal) => {
+  const newProgress = prompt("Enter new progress (0 - 100):", goal.progress.toString());
+  const progressValue = parseInt(newProgress || "", 10);
+
+  if (isNaN(progressValue) || progressValue < 0 || progressValue > 100) {
+    toast.error("Invalid progress value");
+    return;
+  }
+
+  try {
+    await api.post(
+      `/client/goal/update`,
+      {
+        goalId: goal.id,
+        progress: progressValue,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    toast.success("Goal progress updated!");
+
+    // 🧠 Update in UI instantly
+    setGoals((prev) =>
+      prev.map((g) => (g.id === goal.id ? { ...g, progress: progressValue } : g))
+    );
+  } catch (err) {
+    toast.error("Failed to update goal");
+    console.error(err);
+  }
+};
+
+const handleCompleteGoal = async (goalId: number) => {
+  try {
+    await api.post(
+      `/client/goal/update`,
+      {
+        goalId,
+        progress: 100,
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    toast.success("Goal marked as complete!");
+
+   confetti({
+      particleCount: 200,
+      spread: 80,
+      origin: { y: 0.75 }, // Push confetti down
+    });
+
+    // 🧠 Update in UI instantly
+    setGoals((prev) =>
+      prev.map((g) => (g.id === goalId ? { ...g, progress: 100 } : g))
+    );
+  } catch (err) {
+    toast.error("Failed to complete goal");
+    console.error(err);
+  }
+};
   // Image change handler - similar to NutProfile
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -517,29 +589,77 @@ const ClientProfile: FC = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {goals.length > 0 ? (
-                      goals.map((goal) => (
-                        <div key={goal.id} className="p-4 bg-primary-50 rounded-lg">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <h3 className="font-medium">{goal.type}</h3>
-                              <p className="text-sm text-gray-500">{goal.target} • Due {goal.deadline}</p>
-                            </div>
-                            <Button variant="ghost" size="sm" className="text-primary-500 hover:bg-primary-100">
-                              Update
-                            </Button>
-                          </div>
-                          <div className="w-full bg-gray-200 rounded-full h-2.5">
-                            <div
-                              className="bg-primary-500 h-2.5 rounded-full"
-                              style={{ width: `${goal.progress}%` }}
-                            />
-                          </div>
-                          <p className="text-sm text-gray-500 mt-1">{goal.progress}% completed</p>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-gray-500">No goals found.</p>
-                    )}
+  goals.map((goal) => {
+    //const isComplete = goal.progress === 100;
+
+    return (
+      <motion.div
+        key={goal.id}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={`p-4 rounded-lg shadow-sm transition-all duration-300 ${
+          goal.isComplete ? "bg-green-50 border border-green-200" : "bg-primary-50"
+        }`}
+      >
+        <div className="flex justify-between items-start mb-2">
+          <div className="flex gap-2 items-start">
+            {goal.isComplete && (
+              <div className="text-green-500 pt-0.5 text-xl">✅</div>
+            )}
+            <div>
+              <h3 className="font-medium text-gray-800">{goal.title}</h3>
+              <p className="text-sm text-muted-foreground">
+                {goal.target} • Due {goal.deadline}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex gap-1">
+            {!goal.isComplete && (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-primary-500 hover:bg-primary-100"
+                  onClick={() => handleUpdateGoal(goal)}
+                >
+                  Update
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-primary-500 hover:bg-primary-100"
+                  onClick={() => handleCompleteGoal(goal.id)}
+                >
+                  Complete
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+          <div
+            className={`h-2.5 rounded-full transition-all duration-500 ${
+              goal.isComplete ? "bg-green-400" : "bg-primary-500"
+            }`}
+            style={{ width: `${goal.progress}%` }}
+          />
+        </div>
+        <p
+          className={`text-sm mt-1 ${
+            goal.isComplete ? "text-green-600 font-medium" : "text-muted-foreground"
+          }`}
+        >
+          {goal.progress}% completed
+        </p>
+      </motion.div>
+    );
+  })
+                      ) : (
+                        <p className="text-gray-500">No goals found.</p>
+                      )}
+
                     <AddGoalDialog clientId={clientInfo.id} onSuccess={() => window.location.reload()} />
                   </div>
                 </CardContent>

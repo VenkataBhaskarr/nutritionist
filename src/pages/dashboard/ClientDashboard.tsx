@@ -9,35 +9,6 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import api from "@/lib/api";
 import { Calendar, ClipboardList, TrendingUp, User } from "lucide-react";
 
-const MOCK_CLIENT = {
-  id: 1,
-  name: "Madhusudan",
-  email: "michael@example.com",
-  plan: "Weight Loss",
-  startDate: "2023-04-01",
-  nutritionist: {
-    name: "Dr. Emma Smith",
-    email: "emma@example.com",
-    specialty: "Sports Nutrition",
-  },
-  nextAppointment: {
-    date: "2023-05-20",
-    time: "10:00 AM",
-  },
-  progress: [
-    { week: "Week 1", weight: 180 },
-    { week: "Week 2", weight: 178 },
-    { week: "Week 3", weight: 177 },
-    { week: "Week 4", weight: 175 },
-  ],
-  mealPlan: [
-    { meal: "Breakfast", food: "Oatmeal with berries and nuts" },
-    { meal: "Lunch", food: "Grilled chicken salad with olive oil dressing" },
-    { meal: "Snack", food: "Greek yogurt with honey" },
-    { meal: "Dinner", food: "Baked salmon with steamed vegetables" },
-  ],
-};
-
 const ScheduleAppointmentDialog: React.FC<{
   clientId: number;
   nutritionistId: number;
@@ -201,47 +172,68 @@ const ContactNutritionistDialog: React.FC<{
 };
 
 const ClientDashboard = () => {
-  const user = localStorage.getItem("user");
-  const [clientData, setClientData] = useState(MOCK_CLIENT);
-  const [nutData, setNutData] = useState({
-    id: 0,
-    name: "",
-    email: "",
-  });
+  const navigate = useNavigate();
+  const [clientData, setClientData] = useState<any>({});
+  const [nutData, setNutData] = useState<any>({});
+  const [progressData, setProgressData] = useState([]);
+  const [mealPlan, setMealPlan] = useState([]);
+  const [appointment, setAppointment] = useState<any>(null);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const userJSONValue = JSON.parse(user || "{}");
-        const email = encodeURIComponent(userJSONValue.email);
+        const user = localStorage.getItem("user");
         const token = localStorage.getItem("token");
-        const clientDetails = await api.get(`/client/email`, {
-          params: { email: userJSONValue.email },
+
+        if (!user || !token) return navigate("/login");
+
+        const parsedUser = JSON.parse(user);
+        const clientRes = await api.get("/client/email", {
+          params: { email: parsedUser.email },
           headers: { Authorization: `Bearer ${token}` },
         });
-        const nuttData = await api.get(`/nuts/id`, {
-          params: { id: clientDetails.data[0].nId },
+        console.log(clientRes.data[0])
+        const client = clientRes.data[0];
+        setClientData(client);
+
+        const nutRes = await api.get("/nuts/id", {
+          params: { id: client.nId },
           headers: { Authorization: `Bearer ${token}` },
         });
-        setNutData({
-          id: nuttData.data[0].id,
-          name: nuttData.data[0].name,
-          email: nuttData.data[0].email,
+
+        setNutData(nutRes.data[0]);
+
+        // const progressRes = await api.get(`/client/progress`, {
+        //   params: {id: client.id},
+        //   headers: { Authorization: `Bearer ${token}` },
+        // });
+
+        const dummyProgressData =  [
+          { week: "Week 1", weight: 100 },
+          { week: "Week 2", weight: 90 },
+          { week: "Week 3", weight: 80 },
+          { week: "Week 4", weight: 65 },
+        ]
+        //setProgressData(progressRes.data || []);
+        setProgressData(dummyProgressData)
+        console.log(progressData)
+
+        const mealPlanRes = await api.get(`/mealplan/${client.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
         });
-        setClientData((data) => ({
-          ...data,
-          id: clientDetails.data[0].id,
-          name: clientDetails.data[0].name,
-          email: clientDetails.data[0].email,
-        }));
+        setMealPlan(mealPlanRes.data || []);
+
+        const appointmentRes = await api.get(`/appointments/latest/${client.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setAppointment(appointmentRes.data);
       } catch (err) {
-        console.error("Failed to fetch data:", err);
+        console.error("Error loading client dashboard", err);
       }
     };
-    if (user) fetchData();
-  }, [user]);
 
-  const navigate = useNavigate();
+    fetchDashboardData();
+  }, []);
 
   return (
     <DashboardLayout title="Client Dashboard" userRole="client">
@@ -251,9 +243,7 @@ const ClientDashboard = () => {
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
               <div>
                 <h2 className="text-2xl font-bold mb-2">Welcome back, {clientData.name}!</h2>
-                <p className="text-gray-600">
-                  Your {clientData.plan} plan is making great progress. Keep it up!
-                </p>
+                <p className="text-gray-600">Your {clientData.plan} plan is making great progress. Keep it up!</p>
               </div>
               <div className="mt-4 md:mt-0">
                 <ContactNutritionistDialog nutritionistEmail={nutData.email} />
@@ -262,134 +252,23 @@ const ClientDashboard = () => {
           </CardContent>
         </Card>
 
-        {/* Stats and Info Cards */}
+        {/* Stat Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-l-4 border-l-primary-500">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">Next Appointment</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="text-xl font-bold">{clientData.nextAppointment.date}</div>
-                  <div className="text-gray-500 text-sm">{clientData.nextAppointment.time}</div>
-                </div>
-                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                  <Calendar className="h-6 w-6 text-primary-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-primary-500">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">Current Plan</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="text-xl font-bold">{clientData.plan}</div>
-                  <div className="text-gray-500 text-sm">Started {clientData.startDate}</div>
-                </div>
-                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                  <ClipboardList className="h-6 w-6 text-primary-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-primary-500">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">Progress</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="text-xl font-bold">-5 lbs</div>
-                  <div className="text-gray-500 text-sm">Last 4 weeks</div>
-                </div>
-                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                  <TrendingUp className="h-6 w-6 text-primary-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-primary-500">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-gray-500">Nutritionist</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex justify-between items-center">
-                <div>
-                  <div className="text-xl font-bold">{nutData.name}</div>
-                </div>
-                <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
-                  <User className="h-6 w-6 text-primary-500" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <StatCard title="Next Appointment" icon={<Calendar />} value={appointment?.date || "N/A"} sub={appointment?.time || ""} />
+          <StatCard title="Current Plan" icon={<ClipboardList />} value={clientData.plan} sub={`Started ${clientData.startDate}`} />
+          <StatCard title="Progress" icon={<TrendingUp />} value={`-${getWeightLoss(progressData)} lbs`} sub="Last 4 weeks" />
+          <StatCard title="Nutritionist" icon={<User />} value={nutData.name} sub={nutData.specialization || ""} />
         </div>
 
+        {/* Graph & Meal Plan */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Progress Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Your Progress</CardTitle>
-              <CardDescription>Weight tracking over the past 4 weeks</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-64 flex items-end space-x-2">
-                {clientData.progress.map((progress, index) => (
-                  <div key={index} className="flex-1 flex flex-col items-center h-64">
-                      <div
-                        className="bg-green-500 w-full border rounded-t-md"
-                        style={{
-                          height: progress.weight
-                            ? `${Math.max(((progress.weight - 170) / 15) * 100, 10)}%`
-                            : "10%",
-                          minHeight: "20px",
-                        }}
-                      />
-
-                    <div className="mt-2 text-xs font-medium">{progress.week}</div>
-                    <div className="text-sm">{progress.weight} lbs</div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Meal Plan Card */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Today's Meal Plan</CardTitle>
-              <CardDescription>Recommended by {nutData.name}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {clientData.mealPlan.map((meal, index) => (
-                  <div key={index} className="flex items-start">
-                    <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center mt-1 mr-3">
-                      <span className="text-primary-500 text-sm font-bold">{meal.meal[0]}</span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium">{meal.meal}</h4>
-                      <p className="text-gray-600">{meal.food}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          <ProgressGraph progress={progressData} />
+          <MealPlanSection meals={mealPlan} nutName={nutData.name} />
         </div>
 
-        {/* Nutritionist Info Card */}
+        {/* Nutritionist Details */}
         <Card>
-          <CardHeader>
-            <CardTitle>Your Nutritionist</CardTitle>
-          </CardHeader>
+          <CardHeader><CardTitle>Your Nutritionist</CardTitle></CardHeader>
           <CardContent>
             <div className="flex flex-col md:flex-row md:items-center">
               <div className="md:w-1/4 mb-4 md:mb-0 flex justify-center">
@@ -400,7 +279,7 @@ const ClientDashboard = () => {
               <div className="md:w-3/4">
                 <h3 className="text-xl font-bold mb-2">{nutData.name}</h3>
                 <p className="text-gray-600 mb-4">Email: {nutData.email}</p>
-                <div className="md:space-x-4 max-md:space-y-5 max-md:flex flex-col">
+                <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
                   <ContactNutritionistDialog nutritionistEmail={nutData.email} />
                   <ScheduleAppointmentDialog clientId={clientData.id} nutritionistId={nutData.id} />
                 </div>
@@ -414,3 +293,108 @@ const ClientDashboard = () => {
 };
 
 export default ClientDashboard;
+
+// Subcomponents
+const StatCard = ({ title, icon, value, sub }: any) => (
+  <Card className="border-l-4 border-l-primary-500">
+    <CardHeader className="pb-2">
+      <CardTitle className="text-sm font-medium text-gray-500">{title}</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div className="flex justify-between items-center">
+        <div>
+          <div className="text-xl font-bold">{value}</div>
+          <div className="text-gray-500 text-sm">{sub}</div>
+        </div>
+        <div className="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center">
+          {React.cloneElement(icon, { className: "h-6 w-6 text-primary-500" })}
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+const ProgressGraph = ({ progress }: { progress: any[] }) => {
+  if (!progress.length) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Your Progress</CardTitle>
+          <CardDescription>Tracking over the past 4 weeks</CardDescription>
+        </CardHeader>
+        <CardContent className="text-center text-gray-500 py-16">
+          No progress data available.
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const weights = progress.map((p) => p.weight);
+  const minWeight = Math.min(...weights);
+  const maxWeight = Math.max(...weights);
+
+  const range = maxWeight - minWeight || 1; // Prevent divide-by-zero
+  const baseHeight = 20; // Minimum bar height in px
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Your Progress</CardTitle>
+        <CardDescription>Progress tracking over the past 4 weeks (in kg)</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="h-64 flex items-end space-x-4 justify-around">
+          {progress.map((p, i) => {
+            const relativeHeight = ((p.weight - minWeight) / range) * 100;
+            return (
+              <div
+                key={i}
+                className="flex-1 flex flex-col items-center h-64"
+              >
+                <div
+                  className="bg-green-500 w-full rounded-t-md"
+                  style={{
+                    height: `calc(${baseHeight}px + ${relativeHeight}%)`,
+                    minHeight: `${baseHeight}px`,
+                    transition: "height 0.3s ease-in-out",
+                  }}
+                />
+                <div className="mt-2 text-xs font-semibold">{p.week}</div>
+                <div className="text-sm">{p.weight} kg</div>
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+const MealPlanSection = ({ meals, nutName }: { meals: any[], nutName: string }) => (
+  <Card>
+    <CardHeader>
+      <CardTitle>Today's Meal Plan</CardTitle>
+      <CardDescription>Recommended by {nutName}</CardDescription>
+    </CardHeader>
+    <CardContent className="space-y-4">
+      {meals.map((meal, i) => (
+        <div key={i} className="flex items-start">
+          <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center mt-1 mr-3">
+            <span className="text-primary-500 text-sm font-bold">{meal.meal[0]}</span>
+          </div>
+          <div>
+            <h4 className="font-medium">{meal.meal}</h4>
+            <p className="text-gray-600">{meal.food}</p>
+          </div>
+        </div>
+      ))}
+    </CardContent>
+  </Card>
+);
+
+const getWeightLoss = (progress: any[]) => {
+  if (progress.length < 2) return 0;
+  const first = progress[0]?.weight || 0;
+  const last = progress[progress.length - 1]?.weight || 0;
+  return Math.abs(first - last);
+};
+
+

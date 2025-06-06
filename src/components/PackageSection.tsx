@@ -79,51 +79,61 @@ const PackagesSection = () => {
       >
         {packages.map((pkg, index) => {
           const Icon = pkg.icon;
-          return (
-            <motion.div
-              key={pkg.title}
-              variants={cardVariants}
-              whileHover={{ y: -10 }}
-              className={`rounded-2xl border border-gray-200 shadow-xl p-8 bg-gradient-to-br ${pkg.gradient} transition-all duration-500 relative overflow-hidden`}
-            >
-              <div className="absolute top-4 right-4 opacity-10">
-                <Sparkles className="w-16 h-16 text-yellow-400" />
+                  return (
+                           <motion.div
+          key={pkg.title}
+          variants={cardVariants}
+          whileHover={{ y: -10, scale: 1.02 }}
+          className={`relative rounded-2xl border border-gray-200 shadow-lg p-8 bg-gradient-to-br ${pkg.gradient} transition-all duration-500 overflow-hidden hover:ring-2 hover:ring-primary-400`}
+        >
+          {/* Background Sparkles */}
+          <div className="absolute top-4 right-4 opacity-10">
+            <Sparkles className="w-16 h-16 text-yellow-400" />
+          </div>
+
+          {/* Badge for Gold */}
+          {pkg.title === "Gold Plan" && (
+            <div className="absolute top-4 left-4 bg-yellow-400 text-white text-xs font-bold px-3 py-1 rounded-full shadow-sm">
+              Best Value
+            </div>
+          )}
+
+          {/* Icon + Title + Pricing */}
+          <div className="flex items-center space-x-4 mb-6">
+            <div className="w-14 h-14 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center shadow-md">
+              <Icon className="text-white w-6 h-6" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-gray-800">{pkg.title}</h3>
+              <div className="flex items-center space-x-2">
+                <p className="text-sm text-gray-400 line-through">{pkg.original}</p>
+                <p className="text-2xl font-bold text-primary-600">{pkg.price}</p>
               </div>
+            </div>
+          </div>
 
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="w-14 h-14 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 flex items-center justify-center shadow-md">
-                  <Icon className="text-white w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-800">{pkg.title}</h3>
-                  <p className="text-gray-500 line-through text-sm">{pkg.original}</p>
-                  <p className="text-2xl font-bold text-primary-600">{pkg.price}</p>
-                </div>
-              </div>
+          {/* Refund / Offer */}
+          {pkg.refund ? (
+            <div className="text-sm font-medium text-yellow-900 bg-yellow-100 border border-yellow-300 p-3 rounded-md mb-4 shadow-sm">
+              {pkg.refund}
+            </div>
+          ) : (
+            <div className="text-sm font-medium text-green-700 bg-green-100 border border-green-200 p-3 rounded-md mb-4 shadow-sm">
+              Book now & save <span className="font-bold">29%</span> instantly.
+            </div>
+          )}
 
-              <ul className="space-y-3 text-gray-700 mb-6">
-                {pkg.features.map((feature, i) => (
-                  <li key={i} className="flex items-start">
-                    <span className="text-green-500 mr-2">✓</span>
-                    <span className='font-semibold'>{feature}</span>
-                  </li>
-                ))}
-              </ul>
+          {/* Feature List */}
+          <ul className="space-y-3 text-gray-700 mb-6">
+            {pkg.features.map((feature, i) => (
+              <li key={i} className="flex items-start">
+                <span className="text-green-500 mr-2">✓</span>
+                <span className='font-medium'>{feature}</span>
+              </li>
+            ))}
+          </ul>
+        </motion.div>
 
-              {pkg.refund && (
-                <div className="text-sm text-gray-600 bg-yellow-100 p-3 rounded-md mb-1">
-                  {pkg.refund}
-                </div>
-              )}
-
-              {/* {!pkg.refund && (
-                <div className='font-thin text-sm'>
-                  *financial support available
-                 </div>
-              )} */}
-
-              
-            </motion.div>
           );
         })}
       </motion.div>

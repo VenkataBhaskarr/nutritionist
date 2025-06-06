@@ -193,7 +193,7 @@ const FeaturesSection = () => {
                             <Icon className="w-8 h-8 text-white/90" />
                             <div className="text-right">
                               <div className="text-2xl font-bold">{feature.price}</div>
-                              <div className="text-sm text-white/80">{feature.period}</div>
+                              {/* <div className="text-sm text-white/80">{feature.period}</div> */}
                             </div>
                           </div>
 

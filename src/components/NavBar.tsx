@@ -20,7 +20,7 @@ const NavBar = () => {
               <img src="logo.png" alt="Livin Significant Logo" />
             </span>
           </div>
-          <span className="text-xl font-bold text-gray-900 hidden sm:inline">Livin Significant</span>
+          <span className="text-xl font-bold text-gray-900 sm:inline">Livin Significant</span>
         </HashLink>
 
         <nav className="hidden md:flex items-center space-x-8">
@@ -104,6 +104,13 @@ const NavBar = () => {
             >
               Services
             </HashLink>
+             <HashLink
+                smooth
+                to="/#package"
+                className="text-gray-700 hover:text-primary-500 font-medium"
+              >
+                Pricing
+              </HashLink>
             <HashLink
               smooth
               to="/blogs"

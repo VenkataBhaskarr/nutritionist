@@ -18,6 +18,7 @@ import BlogDetails from "@/components/BlogDetails"
 import NutClients from "./pages/nut/NutClients";
 import NutProfile from "./pages/nut/NutProfile";
 import NutSettings from "./pages/nut/NutMessages";
+import ProtectedRoute from "./pages/ProtectedRoute";
 
 import ClientNut from "./pages/client/ClientNut";
 import ClientProfile from "./pages/client/ClientProfile";
@@ -41,18 +42,20 @@ const App = () => (
           <Route path="/blogs" element={<Blogs />} />
            <Route path="/blogs/:id" element={<BlogDetails />} />
           <Route path="/calculator" element={<Calculator />} />
-          <Route path="/dashboard/admin" element={<AdminDashboard />} />
-          <Route path="/dashboard/admin/nutritionists" element={<AdminNuts/>} />
-          <Route path="/dashboard/admin/clients" element={<AdminClients/>} />
-          <Route path="/dashboard/admin/settings" element={<AdminSettings/>} />
-          <Route path="/dashboard/nutritionist/clients" element={<NutClients/>} />
-          <Route path="/dashboard/nutritionist/profile" element={<NutProfile/>} />
-          <Route path="/dashboard/nutritionist/messages" element={<NutSettings/>} />
-          <Route path="/dashboard/client/profile" element={<ClientProfile/>} />
-          <Route path="/dashboard/client/nutritionist" element={<ClientNut/>} />
-          <Route path="/dashboard/client/messages" element={<ClientMessages/>} />
-          <Route path="/dashboard/nutritionist" element={<NutritionistDashboard />} />
-          <Route path="/dashboard/client" element={<ClientDashboard />} />
+          <Route path="/dashboard" element={<ProtectedRoute />}>
+              <Route path="admin" element={<AdminDashboard />} />
+              <Route path="admin/nutritionists" element={<AdminNuts/>} />
+              <Route path="admin/clients" element={<AdminClients/>} />
+              <Route path="admin/settings" element={<AdminSettings/>} />
+              <Route path="nutritionist/clients" element={<NutClients/>} />
+              <Route path="nutritionist/profile" element={<NutProfile/>} />
+              <Route path="nutritionist/messages" element={<NutSettings/>} />
+              <Route path="client/profile" element={<ClientProfile/>} />
+              <Route path="client/nutritionist" element={<ClientNut/>} />
+              <Route path="client/messages" element={<ClientMessages/>} />
+              <Route path="nutritionist" element={<NutritionistDashboard />} />
+              <Route path="client" element={<ClientDashboard />} />
+          </Route>
           <Route
             path="/dashboard"
             element={

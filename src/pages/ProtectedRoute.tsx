@@ -15,6 +15,8 @@ const ProtectedRoute = () => {
         console.log(err)
         navigate("/")
     })
+
+    return <Outlet />
 }
 
 export default ProtectedRoute

@@ -79,6 +79,10 @@
   }
 }
 
+body {
+  font-family: 'Inter', sans-serif;
+}
+
 @theme inline {
   @keyframes marquee {
   from {

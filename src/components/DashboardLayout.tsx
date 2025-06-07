@@ -1,5 +1,4 @@
 import React, { ReactNode, useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   LayoutDashboard,
@@ -12,6 +11,7 @@ import {
   MessageCircleMore,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardLayoutProps {
   children: ReactNode;
@@ -24,10 +24,12 @@ const DashboardLayout = ({ children, title, userRole, }: DashboardLayoutProps) =
     const savedState = localStorage.getItem("sidebarOpen");
     return savedState ? JSON.parse(savedState) : true;
   });
-  const navigate = useNavigate();
+  const [email, setEmail] = useState("")
 
   useEffect(() => {
     localStorage.setItem("sidebarOpen", JSON.stringify(isSidebarOpen));
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    setEmail(user.email)
   }, [isSidebarOpen]);
 
   const getNavItems = () => {
@@ -55,6 +57,17 @@ const DashboardLayout = ({ children, title, userRole, }: DashboardLayoutProps) =
         ];
     }
   };
+
+  const navigate = useNavigate()
+
+  const handleProfile = () => {
+     const user = JSON.parse(localStorage.getItem("user") || "{}");
+     if(user.role == "nutritionist"){
+        navigate("/dashboard/nutritionist/profile")
+     }else if(user.role == "client"){
+        navigate("/dashboard/client/profile")
+     }
+  }
 
   const handleLogout = () => {
     localStorage.removeItem("user");
@@ -88,8 +101,8 @@ const DashboardLayout = ({ children, title, userRole, }: DashboardLayoutProps) =
             {/* Logo always visible on mobile, conditionally visible on desktop */}
             <div className="flex items-center space-x-2">
                <div className="w-8 h-8 rounded-full flex items-center justify-center">
-                <span className="font-bold">
-                  <img src="logo.png" alt="Livin Significant Logo" />
+                <span>
+                  <img src="/logo.png" alt="Livin Significant Logo" />
                 </span>
               </div>
               {/* Show "Livin Significant" text only on desktop when sidebar is open */}
@@ -190,15 +203,18 @@ const DashboardLayout = ({ children, title, userRole, }: DashboardLayoutProps) =
                   : "Client"}
               </span>
               <span className="text-xs text-gray-500">
-                {userRole === "admin"
+                {/* {userRole === "admin"
                   ? "admin@example.com"
                   : userRole === "nutritionist"
                   ? "nutritionist@example.com"
-                  : "client@example.com"}
+                  : "client@example.com"} */}
+                  {email}
               </span>
             </div>
-            <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
-              <User className="h-5 w-5 text-primary-500" />
+            <div className="w-12 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+              <Button className="rounded-full" onClick={handleProfile}>
+                  <User className="h-5 w-5 " />
+              </Button>
             </div>
           </div>
         </header>

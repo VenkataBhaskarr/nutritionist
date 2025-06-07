@@ -100,11 +100,11 @@ const OurTeamSection = () => {
                 viewport={{ once: true }}
                 className="group w-72 min-w-[18rem] bg-white rounded-2xl border border-gray-100 shadow-md p-6 hover:shadow-xl transition-all duration-300 hover:bg-gradient-to-br from-green-50 to-green-100"
               >
-                <img
+                {/* <img
                   src={member.image}
                   alt={member.name}
                   className="w-24 h-24 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-sm"
-                />
+                /> */}
                 <h3 className="text-xl font-semibold text-gray-900 text-center mb-1 group-hover:text-gray-800">
                   {member.name}
                 </h3>

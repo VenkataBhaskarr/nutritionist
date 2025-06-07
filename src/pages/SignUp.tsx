@@ -19,6 +19,8 @@ const indianStates = [
 
 const SignUp = () => {
   const [resp, setResp] = useState("")
+
+  // Tobe Added : 
   const [form, setForm] = useState({
     name: "",
     illness: "",
@@ -26,8 +28,9 @@ const SignUp = () => {
     email: "",
     country: "",
     state: "",
-   
   });
+
+
 
 
   const handleChange = (key, value) => {
@@ -70,15 +73,7 @@ const SignUp = () => {
                 />
               </div>
               
-              <div className="space-y-1">
-                <Label htmlFor="illness">Illness you are suffering from</Label>
-                <Input
-                  id="illness"
-                  value={form.illness}
-                  onChange={(e) => handleChange("illness", e.target.value)}
-                  required
-                />
-              </div>
+             
 
               <div className="space-y-1">
                 <Label htmlFor="email">Email</Label>
@@ -101,7 +96,6 @@ const SignUp = () => {
                     onChange={(e) => handleChange("phone", e.target.value)}
                     required
                   />
-                 
                 </div>
               </div>
 
@@ -134,6 +128,16 @@ const SignUp = () => {
                   </Select>
                 </div>
               )}
+
+              <div className="space-y-1">
+                <Label htmlFor="illness">Describe your issue</Label>
+                <Input
+                  id="illness"
+                  value={form.illness}
+                  onChange={(e) => handleChange("illness", e.target.value)}
+                  required
+                />
+              </div>
 
               <Button
                 type="submit"

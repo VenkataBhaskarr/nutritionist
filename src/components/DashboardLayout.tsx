@@ -87,8 +87,10 @@ const DashboardLayout = ({ children, title, userRole }: DashboardLayoutProps) =>
           >
             {/* Logo always visible on mobile, conditionally visible on desktop */}
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-full bg-primary-500 flex items-center justify-center">
-                <span className="text-white font-bold">N</span>
+               <div className="w-8 h-8 rounded-full flex items-center justify-center">
+                <span className="font-bold">
+                  <img src="logo.png" alt="Livin Significant Logo" />
+                </span>
               </div>
               {/* Show "Livin Significant" text only on desktop when sidebar is open */}
               {isSidebarOpen && (

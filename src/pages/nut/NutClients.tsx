@@ -356,8 +356,9 @@ const [weight, setWeight] = useState("");
                   <TableHead className="text-muted-foreground text-xs uppercase">Name</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase">Email</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase">Weight (kg)</TableHead>
-                  <TableHead className="text-muted-foreground text-xs uppercase">Goal</TableHead>
+
                   <TableHead className="text-muted-foreground text-xs uppercase">Issue</TableHead>
+                  <TableHead className="text-muted-foreground text-xs uppercase">Goal</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase">Allergies</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase">Progress</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase">Last Session</TableHead>
@@ -374,8 +375,9 @@ const [weight, setWeight] = useState("");
                     <TableCell className="font-medium">{client.name}</TableCell>
                     <TableCell>{client.email}</TableCell>
                     <TableCell>{client.weight}</TableCell>
-                    <TableCell>{client.goal || <span className="text-gray-400">-</span>}</TableCell>
+                   
                     <TableCell>{client.issue || <span className="text-gray-400">-</span>}</TableCell>
+                     <TableCell>{client.goal || <span className="text-gray-400">-</span>}</TableCell>
                     <TableCell>{client.allergies || <span className="text-gray-400">-</span>}</TableCell>
                     
                     {/* Progress bar */}

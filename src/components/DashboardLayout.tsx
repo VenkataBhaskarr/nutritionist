@@ -19,7 +19,7 @@ interface DashboardLayoutProps {
   userRole: "admin" | "nutritionist" | "client";
 }
 
-const DashboardLayout = ({ children, title, userRole }: DashboardLayoutProps) => {
+const DashboardLayout = ({ children, title, userRole, }: DashboardLayoutProps) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
     const savedState = localStorage.getItem("sidebarOpen");
     return savedState ? JSON.parse(savedState) : true;

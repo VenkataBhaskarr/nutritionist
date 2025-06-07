@@ -12,7 +12,7 @@ import api from "@/lib/api";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("");
+  const [role, setRole] = useState("admin");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -32,7 +32,8 @@ const Login = () => {
       //   password,
       //   role
       // });
-    
+      
+       
        const response = await api.post("/users/login", {
         email,
         password,
@@ -114,7 +115,7 @@ const Login = () => {
                   <SelectValue placeholder="Select your role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="admin">Admin</SelectItem>
+                  {/* <SelectItem value="admin">Admin</SelectItem> */}
                   <SelectItem value="nutritionist">Nutritionist</SelectItem>
                   <SelectItem value="client">Client</SelectItem>
                 </SelectContent>

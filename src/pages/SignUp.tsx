@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import api from "@/lib/api";
+import { Languages } from "lucide-react";
 
 const indianStates = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat",
@@ -20,7 +21,7 @@ const indianStates = [
 const SignUp = () => {
   const [resp, setResp] = useState("")
 
-  // Tobe Added : 
+  // Tobe Added : Language, 
   const [form, setForm] = useState({
     name: "",
     illness: "",
@@ -28,6 +29,7 @@ const SignUp = () => {
     email: "",
     country: "",
     state: "",
+    language: "",
   });
 
 
@@ -97,6 +99,16 @@ const SignUp = () => {
                     required
                   />
                 </div>
+              </div>
+
+               <div className="space-y-1">
+                <Label htmlFor="name">Languages you speak</Label>
+                <Input
+                  id="language"
+                  value={form.language}
+                  onChange={(e) => handleChange("language", e.target.value)}
+                  required
+                />
               </div>
 
 

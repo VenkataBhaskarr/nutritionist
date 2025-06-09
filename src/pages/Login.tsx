@@ -133,9 +133,14 @@ const Login = () => {
         </CardContent>
       </Card>
 
-      <p className="text-sm text-center text-gray-500">
-        <Link to="/" className="text-primary-500 hover:underline">← Back to Home</Link>
-      </p>
+      <div className="flex justify-center gap-12">
+          <p className="text-sm text-center text-gray-500">
+            <Link to="/forgotpassword" className="text-red-500 hover:underline">Forgot Password ?</Link>
+          </p>
+          <p className="text-sm text-center text-gray-500">
+            <Link to="/" className="text-primary-500 hover:underline">← Back to Home</Link>
+          </p>
+      </div>
     </div>
   </div>
 

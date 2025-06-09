@@ -23,25 +23,28 @@ const SignUp = () => {
 
   // Tobe Added : Language, 
   const [form, setForm] = useState({
-    name: "",
-    illness: "",
-    phone: "",
-    email: "",
-    country: "",
-    state: "",
-    language: "",
-  });
+  name: "",
+  illness: "",
+  phone: "",
+  email: "",
+  country: "",
+  state: "",
+  language: "",
+  acceptedTnC: false, // <-- New field
+});
+
 
 
 
 
   const handleChange = (key, value) => {
-    setForm({ ...form, [key]: value });
-  };
+  setForm((prev) => ({ ...prev, [key]: value }));
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      console.log(form)
       const response = await api.post("/users/sendmail", form);
       setResp(response.data)
       setTimeout(() => {
@@ -149,6 +152,22 @@ const SignUp = () => {
                   onChange={(e) => handleChange("illness", e.target.value)}
                   required
                 />
+              </div>
+
+              <div className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id="tnc"
+                  checked={form.acceptedTnC}
+                  onChange={(e) => handleChange("acceptedTnC", e.target.checked)}
+                  required
+                />
+                <Label htmlFor="tnc" className="text-sm text-gray-600">
+                  I agree to the{" "}
+                  <Link to="/terms" className="text-primary-500 underline">
+                    Terms and Conditions
+                  </Link>
+                </Label>
               </div>
 
               <Button

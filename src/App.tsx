@@ -19,13 +19,14 @@ import NutClients from "./pages/nut/NutClients";
 import NutProfile from "./pages/nut/NutProfile";
 import NutSettings from "./pages/nut/NutMessages";
 import ProtectedRoute from "./pages/ProtectedRoute";
-
+import Terms from "./pages/Terms";
 import ClientNut from "./pages/client/ClientNut";
 import ClientProfile from "./pages/client/ClientProfile";
 import ClientMessages from "./pages/client/ClientMessages";
 
 import NotFound from "./pages/NotFound";
 import Signup from "./pages/SignUp";
+import ForgotPassword from "./pages/ForgotPassword";
 
 const queryClient = new QueryClient();
 
@@ -42,6 +43,8 @@ const App = () => (
           <Route path="/blogs" element={<Blogs />} />
            <Route path="/blogs/:id" element={<BlogDetails />} />
           <Route path="/calculator" element={<Calculator />} />
+          <Route path="/terms" element={<Terms />} />
+           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/dashboard" element={<ProtectedRoute />}>
               <Route path="admin" element={<AdminDashboard />} />
               <Route path="admin/nutritionists" element={<AdminNuts/>} />

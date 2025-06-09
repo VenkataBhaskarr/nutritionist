@@ -75,6 +75,7 @@ const NutClients: FC = () => {
     location: "",
     nextSession: "",
     plan: "",
+    planDescription: "",
     issue: "",
   });
 
@@ -224,7 +225,7 @@ const NutClients: FC = () => {
   };
 
   const handleAddClient = async () => {
-    const { name, age, email, phone, gender, location, issue, plan } = formData;
+    const { name, age, email, phone, gender, location, issue, plan, planDescription } = formData;
     if (!name || !age || !email || !phone || !gender || !location || !issue || !plan) {
       toast.error("Please fill in all the fields.");
       return;
@@ -257,6 +258,7 @@ const NutClients: FC = () => {
         plan: "",
         location: "",
         issue: "",
+        planDescription: "",
         nextSession: "",
       });
 
@@ -627,30 +629,52 @@ const NutClients: FC = () => {
                 "location",
                 "issue",
                 "plan",
+                "planDescription",
                 "nextSession",
               ].map((field) => (
                 <div key={field} className="space-y-2">
                   <Label htmlFor={field} className="text-sm font-medium text-gray-700">
                     {field.charAt(0).toUpperCase() + field.slice(1)}
                   </Label>
-                  <Input
-                    id={field}
-                    type={
-                      field === "age"
-                        ? "number"
-                        : field === "nextSession"
-                        ? "date"
-                        : "text"
-                    }
-                    value={(formData as any)[field]}
-                    onChange={(e) =>
-                      setFormData({ ...formData, [field]: e.target.value })
-                    }
-                    className="w-full"
-                  />
+
+                  {field === "plan" ? (
+                    <select
+                      id={field}
+                      value={formData[field]}
+                      onChange={(e) =>
+                        setFormData({ ...formData, [field]: e.target.value })
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-green-500"
+                    >
+                      <option value="">Select a plan</option>
+                      <option value="Weight Loss Focus">Weight Loss Focus</option>
+                      <option value="Muscle Gain Boost">Muscle Gain Boost</option>
+                      <option value="Diabetes Control Plan">Diabetes Control Plan</option>
+                      <option value="Thyroid Management">Thyroid Management</option>
+                      <option value="PCOS Nutrition">PCOS Nutrition</option>
+                      <option value="General Wellness">General Wellness</option>
+                    </select>
+                  ) : (
+                    <Input
+                      id={field}
+                      type={
+                        field === "age"
+                          ? "number"
+                          : field === "nextSession"
+                          ? "date"
+                          : "text"
+                      }
+                      value={formData[field]}
+                      onChange={(e) =>
+                        setFormData({ ...formData, [field]: e.target.value })
+                      }
+                      className="w-full"
+                    />
+                  )}
                 </div>
               ))}
             </div>
+
 
             <DialogFooter className="mt-6">
               <Button onClick={handleAddClient} className="w-full sm:w-auto">

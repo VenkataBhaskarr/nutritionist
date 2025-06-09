@@ -40,7 +40,7 @@ const ForgotPassword = () => {
             <CardHeader>
               <CardTitle className="text-xl text-center">Reset Password</CardTitle>
               <CardDescription className="text-center text-gray-500">
-                Enter your email to receive a new temporary password.
+                Enter your email to receive a new password.
               </CardDescription>
             </CardHeader>
 

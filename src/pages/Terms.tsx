@@ -12,7 +12,7 @@ const Terms = () => {
                 </CardTitle>
             </CardHeader>
             <CardContent>
-                // Blah blah bhal
+                 Terms
             </CardContent>
             </Card>
         </div>

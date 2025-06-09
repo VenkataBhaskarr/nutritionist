@@ -256,142 +256,248 @@ const ClientProfile: FC = () => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const token = localStorage.getItem("token");
-
-        if(!token){
-        navigate("/login")
-        }
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const email = user.email
+        setError(""); // Clear previous errors
         
-        // Fetch client info
+        // Add a small delay to ensure localStorage is ready after refresh
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const token = localStorage.getItem("token");
+        const userStr = localStorage.getItem("user");
+
+        // Better validation for token and user data
+        if (!token || !userStr) {
+          console.log("No token or user data found, redirecting to login");
+          navigate("/login");
+          return;
+        }
+
+        let user;
+        try {
+          user = JSON.parse(userStr);
+        } catch (parseError) {
+          console.error("Error parsing user data:", parseError);
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+          navigate("/login");
+          return;
+        }
+
+        if (!user.email) {
+          console.error("No email found in user data");
+          navigate("/login");
+          return;
+        }
+
+        const email = user.email;
+        console.log("Fetching data for email:", email);
+        
+        // Fetch client info with better error handling
         const clientResponse = await api.get(`/client/email`, {
           params: { email },
           headers: { Authorization: `Bearer ${token}` },
         });
         
+        if (!clientResponse.data || !Array.isArray(clientResponse.data) || clientResponse.data.length === 0) {
+          throw new Error("No client data found");
+        }
+        
         const clientData = clientResponse.data[0];
+        
+        // Validate client data
+        if (!clientData.id) {
+          throw new Error("Invalid client data received");
+        }
+        
         setClientInfo({
           id: clientData.id,
-          name: clientData.name,
-          email: clientData.email,
-          phone: clientData.phone,
-          address: clientData.location,
-          age: clientData.age,
+          name: clientData.name || "",
+          email: clientData.email || "",
+          phone: clientData.phone || "",
+          address: clientData.location || "",
+          age: clientData.age || 0,
           issue: clientData.issue || {},
-          height: clientData.height,
-          weight: clientData.weight,
-          diet: clientData.diet,
+          height: clientData.height || 0,
+          weight: clientData.weight || 0,
+          diet: clientData.diet || "",
           profilePicture: clientData.profilePicture || "",
-          allergies: clientData.allergies,
+          allergies: clientData.allergies || "",
         });
 
         // Set profile image if it exists
         setProfileImage(clientData.profilePicUrl || null);
 
-        // Fetch goals
-        const goalsResponse = await api.get(`/client/goal`, {
-          params: { clientId: clientData.id },
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // Fetch goals with better error handling
+        try {
+          const goalsResponse = await api.get(`/client/goal`, {
+            params: { clientId: clientData.id },
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-        setGoals(goalsResponse.data.map((g) => ({
-        ...g,
-        isComplete: g.progress == "100"
-      })));
+          if (goalsResponse.data && Array.isArray(goalsResponse.data)) {
+            const formattedGoals = goalsResponse.data.map((g) => ({
+              ...g,
+              isComplete: g.progress == "100" || g.progress === 100
+            }));
+            setGoals(formattedGoals);
+            console.log("Goals loaded:", formattedGoals);
+          } else {
+            setGoals([]);
+          }
+        } catch (goalsError) {
+          console.warn("Failed to fetch goals:", goalsError);
+          setGoals([]);
+          // Don't throw here, goals are not critical for profile loading
+        }
 
-console.log(goals)
-        // Fetch progress metrics
-       
-      } catch (err) {
+        // Fetch progress metrics (if needed)
+        // Add your metrics fetching logic here if required
+        
+      } catch (err: any) {
         console.error('Fetch error:', err);
-        setError("Failed to fetch data. Please try again.");
+        
+        // Handle different types of errors
+        if (err.response?.status === 401) {
+          // Token expired or invalid
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          navigate("/login");
+          return;
+        } else if (err.response?.status === 404) {
+          setError("Profile not found. Please contact support.");
+        } else if (err.response?.status >= 500) {
+          setError("Server error. Please try again later.");
+        } else {
+          setError("Failed to fetch data. Please try again.");
+        }
+        
+        // Set default values to prevent UI crashes
         setGoals([]);
         setMetrics([]);
       } finally {
         setIsLoading(false);
       }
     };
+
     fetchData();
-  }, []);
+  }, [navigate]); // Add navigate to dependency array
 
- const handleUpdateGoal = async (goal: Goal) => {
-  const newProgress = prompt("Enter new progress (0 - 100):", goal.progress.toString());
-  const progressValue = parseInt(newProgress || "", 10);
+  const handleUpdateGoal = async (goal: Goal) => {
+    const newProgress = prompt("Enter new progress (0 - 100):", goal.progress.toString());
+    const progressValue = parseInt(newProgress || "", 10);
 
-  if (isNaN(progressValue) || progressValue < 0 || progressValue > 100) {
-    toast.error("Invalid progress value");
-    return;
-  }
+    if (isNaN(progressValue) || progressValue < 0 || progressValue > 100) {
+      toast.error("Invalid progress value");
+      return;
+    }
 
-  try {
-    await api.post(
-      `/client/goal/update`,
-      {
-        goalId: goal.id,
-        progress: progressValue,
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` },
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
       }
-    );
-    toast.success("Goal progress updated!");
 
-    // 🧠 Update in UI instantly
-    setGoals((prev) =>
-      prev.map((g) => (g.id === goal.id ? { ...g, progress: progressValue } : g))
-    );
-  } catch (err) {
-    toast.error("Failed to update goal");
-    console.error(err);
-  }
-};
+      await api.post(
+        `/client/goal/update`,
+        {
+          goalId: goal.id,
+          progress: progressValue,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success("Goal progress updated!");
 
-const handleRemoveGoal = async (goalId: number) => {
-  try {
-    await api.delete(`/client/goal/`, {
-      params: {goalId},
-      headers: { Authorization: `Bearer ${token}` },
-    });
-
-    toast.success("Goal removed successfully!");
-
-    // 🚀 Instantly update UI by removing the goal
-    setGoals((prev) => prev.filter((g) => g.id !== goalId));
-  } catch (err) {
-    toast.error("Failed to remove goal");
-    console.error(err);
-  }
-};
-const handleCompleteGoal = async (goalId: number) => {
-  try {
-    await api.post(
-      `/client/goal/update`,
-      {
-        goalId,
-        progress: 100,
-      },
-      {
-        headers: { Authorization: `Bearer ${token}` },
+      // Update in UI instantly
+      setGoals((prev) =>
+        prev.map((g) => 
+          g.id === goal.id 
+            ? { ...g, progress: progressValue, isComplete: progressValue === 100 } 
+            : g
+        )
+      );
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        navigate("/login");
+        return;
       }
-    );
-    toast.success("Goal marked as complete!");
+      toast.error("Failed to update goal");
+      console.error(err);
+    }
+  };
 
-   confetti({
-      particleCount: 200,
-      spread: 80,
-      origin: { y: 0.75 }, // Push confetti down
-    });
+  const handleRemoveGoal = async (goalId: number) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
 
-    // 🧠 Update in UI instantly
-    setGoals((prev) =>
-      prev.map((g) => (g.id === goalId ? { ...g, progress: 100 } : g))
-    );
-  } catch (err) {
-    toast.error("Failed to complete goal");
-    console.error(err);
-  }
-};
+      await api.delete(`/client/goal/`, {
+        params: { goalId },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      toast.success("Goal removed successfully!");
+
+      // Instantly update UI by removing the goal
+      setGoals((prev) => prev.filter((g) => g.id !== goalId));
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        navigate("/login");
+        return;
+      }
+      toast.error("Failed to remove goal");
+      console.error(err);
+    }
+  };
+
+  const handleCompleteGoal = async (goalId: number) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      await api.post(
+        `/client/goal/update`,
+        {
+          goalId,
+          progress: 100,
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      toast.success("Goal marked as complete!");
+
+      confetti({
+        particleCount: 200,
+        spread: 80,
+        origin: { y: 0.75 }, // Push confetti down
+      });
+
+      // Update in UI instantly
+      setGoals((prev) =>
+        prev.map((g) => 
+          g.id === goalId 
+            ? { ...g, progress: 100, isComplete: true } 
+            : g
+        )
+      );
+    } catch (err: any) {
+      if (err.response?.status === 401) {
+        navigate("/login");
+        return;
+      }
+      toast.error("Failed to complete goal");
+      console.error(err);
+    }
+  };
+
   // Image change handler - similar to NutProfile
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -416,15 +522,19 @@ const handleCompleteGoal = async (goalId: number) => {
     }
   };
 
-  const token = localStorage.getItem("token");
   const handleSaveChanges = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
-      console.log(clientInfo) 
-      if(!token){
-        navigate("/login")
+      setError(""); // Clear previous errors
+      
+      const token = localStorage.getItem("token");
+      if (!token) {
+        navigate("/login");
+        return;
       }
+
+      console.log("Saving profile:", clientInfo);
 
       // Use FormData for multipart form data - similar to NutProfile
       const formData = new FormData();
@@ -458,19 +568,32 @@ const handleCompleteGoal = async (goalId: number) => {
         }
       );
       toast.success("Profile updated successfully!");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to save profile:", err);
-      setError("Failed to update profile. Please try again.");
+      
+      if (err.response?.status === 401) {
+        navigate("/login");
+        return;
+      }
+      
+      const errorMessage = err.response?.data?.message || "Failed to update profile. Please try again.";
+      setError(errorMessage);
       toast.error("Update failed.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // Show loading state
   if (isLoading) {
     return (
       <DashboardLayout title="My Profile" userRole="client">
-        <div className="p-4">Loading...</div>
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your profile...</p>
+          </div>
+        </div>
       </DashboardLayout>
     );
   }
@@ -489,7 +612,20 @@ const handleCompleteGoal = async (goalId: number) => {
               {isSubmitting ? "Saving..." : "Save Changes"}
             </Button>
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
+          
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-md p-4">
+              <p className="text-red-700 text-sm">{error}</p>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="mt-2" 
+                onClick={() => window.location.reload()}
+              >
+                Retry
+              </Button>
+            </div>
+          )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Personal Info */}
@@ -632,8 +768,8 @@ const handleCompleteGoal = async (goalId: number) => {
                         onChange={(e) =>
                           setClientInfo({
                             ...clientInfo,
-                              allergies: e.target.value,
-                            })
+                            allergies: e.target.value,
+                          })
                         }
                       />
                     </div>
@@ -648,90 +784,115 @@ const handleCompleteGoal = async (goalId: number) => {
                 <CardContent>
                   <div className="space-y-4">
                     {goals.length > 0 ? (
-  goals.map((goal) => {
-    //const isComplete = goal.progress === 100;
+                      goals.map((goal) => {
+                        return (
+                          <motion.div
+                            key={goal.id}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={`p-4 rounded-lg shadow-sm transition-all duration-300 ${
+                              goal.isComplete ? "bg-green-50 border border-green-200" : "bg-primary-50"
+                            }`}
+                          >
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex gap-2 items-start">
+                                {goal.isComplete && (
+                                  <div className="text-green-500 pt-0.5 text-xl">✅</div>
+                                )}
+                                <div>
+                                  <h3 className="font-medium text-gray-800">{goal.title}</h3>
+                                  <p className="text-sm text-muted-foreground">
+                                    {goal.target} • Due {goal.deadline}
+                                  </p>
+                                </div>
+                              </div>
 
-    return (
-      <motion.div
-        key={goal.id}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className={`p-4 rounded-lg shadow-sm transition-all duration-300 ${
-          goal.isComplete ? "bg-green-50 border border-green-200" : "bg-primary-50"
-        }`}
-      >
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex gap-2 items-start">
-            {goal.isComplete && (
-              <div className="text-green-500 pt-0.5 text-xl">✅</div>
-            )}
-            <div>
-              <h3 className="font-medium text-gray-800">{goal.title}</h3>
-              <p className="text-sm text-muted-foreground">
-                {goal.target} • Due {goal.deadline}
-              </p>
-            </div>
-          </div>
+                              <div className="flex gap-1">
+                                {!goal.isComplete && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-primary-500 hover:bg-primary-100"
+                                      onClick={() => handleUpdateGoal(goal)}
+                                    >
+                                      Update
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-primary-500 hover:bg-primary-100"
+                                      onClick={() => handleCompleteGoal(goal.id)}
+                                    >
+                                      Complete
+                                    </Button>
+                                  </>
+                                )}
+                                {goal.isComplete && (
+                                  <>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      className="text-red-500 hover:bg-primary-100"
+                                      onClick={() => handleRemoveGoal(goal.id)}
+                                    >
+                                      Delete
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </div>
 
-          <div className="flex gap-1">
-            {!goal.isComplete && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-primary-500 hover:bg-primary-100"
-                  onClick={() => handleUpdateGoal(goal)}
-                >
-                  Update
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-primary-500 hover:bg-primary-100"
-                  onClick={() => handleCompleteGoal(goal.id)}
-                >
-                  Complete
-                </Button>
-              </>
-            )}
-            {goal.isComplete && (
-              <>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-500 hover:bg-primary-100"
-                  onClick={() => handleRemoveGoal(goal.id)}
-                >
-                  Delete!!
-                </Button>
-              </>
-            )}
-          </div>
-        </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                              <div
+                                className={`h-2.5 rounded-full transition-all duration-500 ${
+                                  goal.isComplete ? "bg-green-400" : "bg-primary-500"
+                                }`}
+                                style={{ width: `${goal.progress}%` }}
+                              />
+                            </div>
+                            <p
+                              className={`text-sm mt-1 ${
+                                goal.isComplete ? "text-green-600 font-medium" : "text-muted-foreground"
+                              }`}
+                            >
+                              {goal.progress}% completed
+                            </p>
+                          </motion.div>
+                        );
+                      })
+                    ) : (
+                      <p className="text-gray-500">No goals found.</p>
+                    )}
 
-        <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
-          <div
-            className={`h-2.5 rounded-full transition-all duration-500 ${
-              goal.isComplete ? "bg-green-400" : "bg-primary-500"
-            }`}
-            style={{ width: `${goal.progress}%` }}
-          />
-        </div>
-        <p
-          className={`text-sm mt-1 ${
-            goal.isComplete ? "text-green-600 font-medium" : "text-muted-foreground"
-          }`}
-        >
-          {goal.progress}% completed
-        </p>
-      </motion.div>
-    );
-  })
-                      ) : (
-                        <p className="text-gray-500">No goals found.</p>
-                      )}
+                    <AddGoalDialog 
+                      clientId={clientInfo.id} 
+                      onSuccess={() => {
+                        // Instead of full page reload, refetch goals
+                        const fetchGoals = async () => {
+                          try {
+                            const token = localStorage.getItem("token");
+                            if (!token) return;
+                            
+                            const goalsResponse = await api.get(`/client/goal`, {
+                              params: { clientId: clientInfo.id },
+                              headers: { Authorization: `Bearer ${token}` },
+                            });
 
-                    <AddGoalDialog clientId={clientInfo.id} onSuccess={() => window.location.reload()} />
+                            if (goalsResponse.data && Array.isArray(goalsResponse.data)) {
+                              const formattedGoals = goalsResponse.data.map((g) => ({
+                                ...g,
+                                isComplete: g.progress == "100" || g.progress === 100
+                              }));
+                              setGoals(formattedGoals);
+                            }
+                          } catch (error) {
+                            console.error("Failed to refetch goals:", error);
+                          }
+                        };
+                        fetchGoals();
+                      }} 
+                    />
                   </div>
                 </CardContent>
               </Card>

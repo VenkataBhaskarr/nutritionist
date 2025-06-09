@@ -11,91 +11,11 @@ import { Calendar, ClipboardList, TrendingUp, User } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import {toast} from "sonner"
 
-// const ScheduleAppointmentDialog: React.FC<{
-//   clientId: number;
-//   nutritionistId: number;
-//   onSuccess?: () => void;
-// }> = ({ clientId, nutritionistId, onSuccess }) => {
-//   const [date, setDate] = useState("");
-//   const [time, setTime] = useState("");
-//   const [error, setError] = useState("");
-//   const [isSubmitting, setIsSubmitting] = useState(false);
-//   const navigate = useNavigate()
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     if (!date || !time) {
-//       setError("Date and time are required.");
-//       return;
-//     }
+interface Props {
+  nutritionistEmail: string;
+  onSuccess?: () => void;
+}
 
-//     try {
-//       setIsSubmitting(true);
-//       const token = localStorage.getItem("token");
-//       if(!token){
-//         navigate("/login")
-//       }
-//       await api.post(
-//         "/appointments",
-//         { clientId, date, time, nutritionistId },
-//         {
-//           headers: { Authorization: `Bearer ${token}` },
-//         }
-//       );
-//       setError("");
-//       setDate("");
-//       setTime("");
-//       onSuccess?.();
-//       alert("Appointment scheduled successfully!");
-//     } catch (err) {
-//       setError("Failed to schedule appointment. Please try again.");
-//     } finally {
-//       setIsSubmitting(false);
-//     }
-//   };
-
-//   return (
-//     <Dialog>
-//       <DialogTrigger asChild>
-//         <Button variant="outline" className="border-primary-500 text-primary-500 hover:bg-primary-50">
-//           Schedule Appointment
-//         </Button>
-//       </DialogTrigger>
-//       <DialogContent>
-//         <DialogHeader>
-//           <DialogTitle>Schedule Appointment</DialogTitle>
-//         </DialogHeader>
-//         <form onSubmit={handleSubmit} className="space-y-4">
-//           <div>
-//             <Label htmlFor="date">Date</Label>
-//             <Input
-//               id="date"
-//               type="date"
-//               value={date}
-//               onChange={(e) => setDate(e.target.value)}
-//               required
-//             />
-//           </div>
-//           <div>
-//             <Label htmlFor="time">Time</Label>
-//             <Input
-//               id="time"
-//               type="time"
-//               value={time}
-//               onChange={(e) => setTime(e.target.value)}
-//               required
-//             />
-//           </div>
-//           {error && <p className="text-red-500 text-sm">{error}</p>}
-//           <Button type="submit" disabled={isSubmitting} className="w-full bg-primary-500 hover:bg-primary-600">
-//             {isSubmitting ? "Scheduling..." : "Schedule"}
-//           </Button>
-//         </form>
-//       </DialogContent>
-//     </Dialog>
-//   );
-// };
-
-// Contact Nutritionist Dialog Component
 const ContactNutritionistDialog: React.FC<Props> = ({
   nutritionistEmail,
   onSuccess,
@@ -106,17 +26,30 @@ const ContactNutritionistDialog: React.FC<Props> = ({
   const [nutritionistId, setNutritionistId] = useState<number | null>(null);
   const [nutritionistName, setNutritionistName] = useState("")
   const [clientId, setClientId] = useState<string>("");
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const token = localStorage.getItem("token");
 
   useEffect(() => {
+    // Only fetch if we have valid user and token
+    if (!user?.email || !token || !nutritionistEmail) {
+      setError("Authentication required");
+      return;
+    }
+
     const fetchIds = async () => {
       try {
+        setError(""); // Clear previous errors
+        
         const clientRes = await api.get("/client/email", {
           params: { email: user.email },
           headers: { Authorization: `Bearer ${token}` },
         });
+
+        if (!clientRes.data || !clientRes.data[0]) {
+          throw new Error("Client data not found");
+        }
 
         setClientId(clientRes.data[0].id);
 
@@ -125,17 +58,21 @@ const ContactNutritionistDialog: React.FC<Props> = ({
           headers: { Authorization: `Bearer ${token}` },
         });
         
+        if (!nutRes.data || !nutRes.data[0]) {
+          throw new Error("Nutritionist data not found");
+        }
+
         setNutritionistId(nutRes.data[0].id);
         setNutritionistName(nutRes.data[0].name);
-        console.log(nutritionistId)
+        setIsInitialized(true);
       } catch (err) {
         console.error("Error fetching IDs:", err);
-        setError("Unable to fetch contact information.");
+        setError("Unable to fetch contact information. Please try again.");
       }
     };
 
     fetchIds();
-  }, [nutritionistEmail]);
+  }, [user?.email, token, nutritionistEmail]); // Added proper dependencies
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -182,7 +119,7 @@ const ContactNutritionistDialog: React.FC<Props> = ({
 
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Message {nutritionistName}</DialogTitle>
+          <DialogTitle>Message {nutritionistName || "Nutritionist"}</DialogTitle>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -207,7 +144,7 @@ const ContactNutritionistDialog: React.FC<Props> = ({
 
           <Button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isInitialized}
             className="w-full bg-primary-500 hover:bg-primary-600"
           >
             {isSubmitting ? "Sending..." : "Send Message"}
@@ -225,61 +162,143 @@ const ClientDashboard = () => {
   const [progressData, setProgressData] = useState([]);
   const [mealPlan, setMealPlan] = useState([]);
   const [appointment, setAppointment] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        setLoading(true);
+        setError("");
+
         const user = localStorage.getItem("user");
         const token = localStorage.getItem("token");
 
-        if (!user || !token) return navigate("/login");
+        // Check authentication first
+        if (!user || !token) {
+          navigate("/login");
+          return;
+        }
 
-        const parsedUser = JSON.parse(user);
+        let parsedUser;
+        try {
+          parsedUser = JSON.parse(user);
+        } catch (parseError) {
+          console.error("Error parsing user data:", parseError);
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+          navigate("/login");
+          return;
+        }
+
+        if (!parsedUser?.email) {
+          console.error("Invalid user data");
+          navigate("/login");
+          return;
+        }
+
+        // Fetch client data
         const clientRes = await api.get("/client/email", {
           params: { email: parsedUser.email },
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log(clientRes.data[0])
+
+        if (!clientRes.data || !clientRes.data[0]) {
+          throw new Error("Client data not found");
+        }
+
         const client = clientRes.data[0];
         setClientData(client);
 
-        const nutRes = await api.get("/nuts/id", {
-          params: { id: client.nId },
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // Fetch nutritionist data
+        if (client.nId) {
+          const nutRes = await api.get("/nuts/id", {
+            params: { id: client.nId },
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-        setNutData(nutRes.data[0]);
+          if (nutRes.data && nutRes.data[0]) {
+            setNutData(nutRes.data[0]);
+          }
+        }
 
-        const progressRes = await api.get(`/client/progress`, {
-          params: {id: client.id},
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // Fetch progress data
+        if (client.id) {
+          try {
+            const progressRes = await api.get(`/client/progress`, {
+              params: { id: client.id },
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            setProgressData(progressRes.data || []);
+          } catch (progressError) {
+            console.warn("Error fetching progress data:", progressError);
+            setProgressData([]);
+          }
 
-        // const dummyProgressData =  [
-        //   { week: "Week 1", weight: 100 },
-        //   { week: "Week 2", weight: 90 },
-        //   { week: "Week 3", weight: 80 },
-        //   { week: "Week 4", weight: 65 },
-        // ]
-        setProgressData(progressRes.data || []);
-        //setProgressData(dummyProgressData)
-        //console.log(progressData)
+          // Fetch meal plan
+          try {
+            const mealPlanRes = await api.get(`/client/meal`, {
+              params: { id: client.id },
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            setMealPlan(mealPlanRes.data || []);
+          } catch (mealError) {
+            console.warn("Error fetching meal plan:", mealError);
+            setMealPlan([]);
+          }
+        }
 
-        const mealPlanRes = await api.get(`/client/meal`, {
-          params: {id: client.id},
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setMealPlan(mealPlanRes.data || []);
-
-        
         setAppointment(client.nextSession);
-      } catch (err) {
-        console.error("Error loading client dashboard", err);
+        
+      } catch (err: any) {
+        console.error("Error loading client dashboard:", err);
+        
+        // Handle authentication errors
+        if (err.response?.status === 401 || err.response?.status === 403) {
+          localStorage.removeItem("user");
+          localStorage.removeItem("token");
+          navigate("/login");
+          return;
+        }
+        
+        setError("Failed to load dashboard data. Please refresh the page or try again later.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchDashboardData();
-  }, []);
+  }, []); // Empty dependency array is fine here since we're checking localStorage inside
+
+  // Show loading state
+  if (loading) {
+    return (
+      <DashboardLayout title="Client Dashboard" userRole="client">
+        <div className="flex items-center justify-center min-h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500 mx-auto mb-4"></div>
+            <p>Loading dashboard...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <DashboardLayout title="Client Dashboard" userRole="client">
+        <div className="flex items-center justify-center min-h-64">
+          <div className="text-center">
+            <p className="text-red-500 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="Client Dashboard" userRole="client">
@@ -288,11 +307,13 @@ const ClientDashboard = () => {
           <CardContent className="p-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
               <div>
-                <h2 className="text-2xl font-bold mb-2">Welcome back, {clientData.name}!</h2>
-                <p className="text-gray-600">Your {clientData.plan} plan is making great progress. Keep it up!</p>
+                <h2 className="text-2xl font-bold mb-2">Welcome back, {clientData.name || "User"}!</h2>
+                <p className="text-gray-600">Your {clientData.plan || "nutrition"} plan is making great progress. Keep it up!</p>
               </div>
               <div className="mt-4 md:mt-0">
-                <ContactNutritionistDialog nutritionistEmail={nutData.email} />
+                {nutData.email && (
+                  <ContactNutritionistDialog nutritionistEmail={nutData.email} />
+                )}
               </div>
             </div>
           </CardContent>
@@ -301,39 +322,42 @@ const ClientDashboard = () => {
         {/* Stat Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard title="Next Appointment" icon={<Calendar />} value={appointment || "N/A"} sub={appointment?.time || ""} />
-          <StatCard title="Current Plan" icon={<ClipboardList />} value={clientData.plan} />
+          <StatCard title="Current Plan" icon={<ClipboardList />} value={clientData.plan || "Not Set"} />
           <StatCard title="Progress" icon={<TrendingUp />} value={`${getWeightLoss(progressData)} lbs`} sub="Last 4 weeks" />
-          <StatCard title="Nutritionist" icon={<User />} value={nutData.name} sub={nutData.specialization || ""} />
+          <StatCard title="Nutritionist" icon={<User />} value={nutData.name || "Not Assigned"} sub={nutData.specialization || ""} />
         </div>
 
         {/* Graph & Meal Plan */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <ProgressGraph progress={progressData} />
-          <MealPlanSection meals={mealPlan} nutName={nutData.name} />
+          <MealPlanSection meals={mealPlan} nutName={nutData.name || "Your Nutritionist"} />
         </div>
 
         {/* Nutritionist Details */}
-        <Card>
-          <CardHeader><CardTitle>Your Nutritionist</CardTitle></CardHeader>
-          <CardContent>
-            <div className="flex flex-col md:flex-row md:items-center">
-              <div className="md:w-1/4 mb-4 md:mb-0 flex justify-center">
-                <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center">
-                  <User className="h-12 w-12 text-primary-500" />
+        {nutData.name && (
+          <Card>
+            <CardHeader><CardTitle>Your Nutritionist</CardTitle></CardHeader>
+            <CardContent>
+              <div className="flex flex-col md:flex-row md:items-center">
+                <div className="md:w-1/4 mb-4 md:mb-0 flex justify-center">
+                  <div className="w-24 h-24 bg-primary-100 rounded-full flex items-center justify-center">
+                    <User className="h-12 w-12 text-primary-500" />
+                  </div>
+                </div>
+                <div className="md:w-3/4">
+                  <h3 className="text-xl font-bold mb-2">{nutData.name}</h3>
+                  <p className="text-gray-600 mb-4">Email: {nutData.email}</p>
+                  <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
+                    <ContactNutritionistDialog nutritionistEmail={nutData.email} />
+                    <Button onClick={() => window.open('https://meet.google.com/landing', '_blank')} className="bg-primary-500">
+                      Schedule G-Meet
+                    </Button>
+                  </div>
                 </div>
               </div>
-              <div className="md:w-3/4">
-                <h3 className="text-xl font-bold mb-2">{nutData.name}</h3>
-                <p className="text-gray-600 mb-4">Email: {nutData.email}</p>
-                <div className="flex flex-col md:flex-row md:space-x-4 space-y-4 md:space-y-0">
-                  <ContactNutritionistDialog nutritionistEmail={nutData.email} />
-                  {/* <ScheduleAppointmentDialog clientId={clientData.id} nutritionistId={nutData.id} /> */}
-                  <Button  onClick={() => window.open('https://meet.google.com/landing', '_blank')} className="bg-primary-500">Schedule G-Meet</Button>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </DashboardLayout>
   );
@@ -360,6 +384,7 @@ const StatCard = ({ title, icon, value, sub }: any) => (
     </CardContent>
   </Card>
 );
+
 const ProgressGraph = ({ progress }: { progress: any[] }) => {
   if (!progress.length) {
     return (
@@ -415,40 +440,41 @@ const ProgressGraph = ({ progress }: { progress: any[] }) => {
     </Card>
   );
 };
+
 const MealPlanSection = ({ meals, nutName }: { meals: any[], nutName: string }) => {
   if(!meals.length){
     return (
       <Card>
-    <CardHeader>
-      <CardTitle>Today's Meal Plan</CardTitle>
-      <CardDescription>Recommended by {nutName}</CardDescription>
-    </CardHeader>
-    <CardContent className="text-center text-gray-500 py-16">
+        <CardHeader>
+          <CardTitle>Today's Meal Plan</CardTitle>
+          <CardDescription>Recommended by {nutName}</CardDescription>
+        </CardHeader>
+        <CardContent className="text-center text-gray-500 py-16">
           No Meal Plans available, Contact Nutritionist.
         </CardContent>
-  </Card>
+      </Card>
     )
   }
   return (
-<Card>
-    <CardHeader>
-      <CardTitle>Today's Meal Plan</CardTitle>
-      <CardDescription>Recommended by {nutName}</CardDescription>
-    </CardHeader>
-    <CardContent className="space-y-4">
-      {meals.map((meal, i) => (
-        <div key={i} className="flex items-start">
-          <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center mt-1 mr-3">
-            <span className="text-primary-500 text-sm font-bold">{meal.meal[0]}</span>
+    <Card>
+      <CardHeader>
+        <CardTitle>Today's Meal Plan</CardTitle>
+        <CardDescription>Recommended by {nutName}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {meals.map((meal, i) => (
+          <div key={i} className="flex items-start">
+            <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center mt-1 mr-3">
+              <span className="text-primary-500 text-sm font-bold">{meal.meal[0]}</span>
+            </div>
+            <div>
+              <h4 className="font-medium">{meal.meal}</h4>
+              <p className="text-gray-600">{meal.food}</p>
+            </div>
           </div>
-          <div>
-            <h4 className="font-medium">{meal.meal}</h4>
-            <p className="text-gray-600">{meal.food}</p>
-          </div>
-        </div>
-      ))}
-    </CardContent>
-  </Card>
+        ))}
+      </CardContent>
+    </Card>
   )
 };
 
@@ -458,5 +484,3 @@ const getWeightLoss = (progress: any[]) => {
   const last = progress[progress.length - 1]?.weight || 0;
   return Math.abs(first - last);
 };
-
-

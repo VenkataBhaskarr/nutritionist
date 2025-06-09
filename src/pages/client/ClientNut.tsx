@@ -29,14 +29,16 @@ const MyNutritionist: FC = () => {
   const token = localStorage.getItem("token");
 
   useEffect(() => {
-    const fetchNut = async () => {
+    const fetchData = async () => {
       try {
         const nutRes = await api.get(`/client/nut`, {
           params: { email: user.email },
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const nut = nutRes.data[0];
+        const nut = nutRes.data?.[0];
+        if (!nut) throw new Error("No nutritionist assigned");
+
         setNutritionist(nut);
 
         const ratingRes = await api.get(`/nuts/rating`, {
@@ -44,20 +46,22 @@ const MyNutritionist: FC = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (ratingRes.data[0].rating) setRating(ratingRes.data[0].rating);
+        const fetchedRating = ratingRes.data?.[0]?.rating;
+        if (fetchedRating) setRating(fetchedRating);
       } catch (err) {
         toast.error("Failed to load nutritionist info");
-        console.error("Failed to load nutritionist info", err);
+        console.error("Error loading nutritionist:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchNut();
+    fetchData();
   }, []);
 
   const handleRating = async (value: number) => {
     if (!nutritionist) return;
+
     setRating(value);
     try {
       await api.post(
@@ -67,17 +71,16 @@ const MyNutritionist: FC = () => {
           clientEmail: user.email,
           rating: value,
         },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+        { headers: { Authorization: `Bearer ${token}` } }
       );
       toast.success("Thanks for rating!");
     } catch (err) {
       toast.error("Failed to submit rating");
-      console.error("Failed to submit rating", err);
+      console.error("Rating submission error:", err);
     }
   };
 
+  // 🔄 Loading Skeleton
   if (loading) {
     return (
       <DashboardLayout title="My Nutritionist" userRole="client">
@@ -93,6 +96,7 @@ const MyNutritionist: FC = () => {
     );
   }
 
+  // ❌ No Nutritionist Case
   if (!nutritionist) {
     return (
       <DashboardLayout title="My Nutritionist" userRole="client">
@@ -103,6 +107,7 @@ const MyNutritionist: FC = () => {
     );
   }
 
+  // ✅ Final Render
   return (
     <DashboardLayout title="My Nutritionist" userRole="client">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
@@ -114,11 +119,17 @@ const MyNutritionist: FC = () => {
             className="h-44 w-44 rounded-full object-cover shadow-lg border-4 border-green-100"
           />
           <div className="flex-1 text-center md:text-left">
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">{nutritionist.name}</h1>
-            <p className="text-sm text-green-700 font-medium mt-1">{nutritionist.specialization}</p>
-            <p className={`mt-2 text-sm text-muted-foreground transition-all duration-300 ${
-              isBioExpanded ? "" : "line-clamp-3"
-            }`}>
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+              {nutritionist.name}
+            </h1>
+            <p className="text-sm text-green-700 font-medium mt-1">
+              {nutritionist.specialization}
+            </p>
+            <p
+              className={`mt-2 text-sm text-muted-foreground transition-all duration-300 ${
+                isBioExpanded ? "" : "line-clamp-3"
+              }`}
+            >
               {nutritionist.bio || "No bio available."}
             </p>
             {nutritionist.bio && (
@@ -175,7 +186,9 @@ const MyNutritionist: FC = () => {
 
         {/* Rating */}
         <div className="pt-2">
-          <h2 className="text-base font-semibold text-gray-800 mb-2">Rate Your Nutritionist</h2>
+          <h2 className="text-base font-semibold text-gray-800 mb-2">
+            Rate Your Nutritionist
+          </h2>
           <div className="flex items-center gap-1">
             {[1, 2, 3, 4, 5].map((star) => (
               <Star

@@ -43,6 +43,8 @@ const NutProfile: FC = () => {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [open, setOpen] = useState(false);
@@ -53,28 +55,72 @@ const NutProfile: FC = () => {
 
   const triggerFileInput = () => fileInputRef.current?.click();
 
+  // Helper function to validate authentication
+  const validateAuth = () => {
+    const token = localStorage.getItem("token");
+    const userStr = localStorage.getItem("user");
+    
+    if (!token || !userStr) {
+      throw new Error("Authentication required. Please log in again.");
+    }
+    
+    try {
+      const user = JSON.parse(userStr);
+      if (!user.email) {
+        throw new Error("Invalid user data. Please log in again.");
+      }
+      return { token, user };
+    } catch (parseError) {
+      throw new Error("Invalid authentication data. Please log in again.");
+    }
+  };
+
   useEffect(() => {
     const fetchNutritionist = async () => {
       try {
-        const token = localStorage.getItem("token");
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        setIsLoading(true);
+        setError(null);
+        
+        // Add a small delay to ensure localStorage is ready after page refresh
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        const { token, user } = validateAuth();
 
         const res = await api.get(`/nuts/email`, {
           params: { email: user.email },
           headers: { Authorization: `Bearer ${token}` },
         });
 
+        if (!res.data || !Array.isArray(res.data) || res.data.length === 0) {
+          throw new Error("No profile data found.");
+        }
+
         const data = res.data[0];
         setProfile({
-          ...data,
-          qualifications: data.qualifications || [],
+          name: data.name || "",
+          email: data.email || user.email,
+          specialization: data.specialization || "",
+          experience: data.experience || "",
+          qualifications: Array.isArray(data.qualifications) ? data.qualifications : [],
+          bio: data.bio || "",
           profilePicture: data.profilePicture || "",
         });
 
         setProfileImage(data.profilePicUrl || null);
-      } catch (error) {
+      } catch (error: any) {
         console.error("Failed to fetch nutritionist profile", error);
-        toast.error("Error loading profile.");
+        const errorMessage = error.response?.data?.message || error.message || "Error loading profile.";
+        setError(errorMessage);
+        toast.error(errorMessage);
+        
+        // If authentication error, you might want to redirect to login
+        if (errorMessage.includes("Authentication") || errorMessage.includes("log in")) {
+          // Uncomment and modify based on your routing setup
+          // window.location.href = '/login';
+          // or router.push('/login');
+        }
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -104,32 +150,33 @@ const NutProfile: FC = () => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const validTypes = ['image/jpeg', 'image/png'];
-      if (!validTypes.includes(file.type)) {
-        toast.error('Only JPG and PNG formats are allowed.');
-        return;
-      }
+    if (!file) return;
 
-      if (file.size > 1024 * 1024) {
-        toast.error('Image must be less than 1MB.');
-        return;
-      }
-
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-
-      const reader = new FileReader();
-      reader.onloadend = () => setProfileImage(reader.result as string);
-      reader.readAsDataURL(file);
+    const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!validTypes.includes(file.type)) {
+      toast.error('Only JPG and PNG formats are allowed.');
+      return;
     }
+
+    if (file.size > 1024 * 1024) {
+      toast.error('Image must be less than 1MB.');
+      return;
+    }
+
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+
+    const reader = new FileReader();
+    reader.onloadend = () => setProfileImage(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
   const handleSave = async () => {
     try {
       setIsUploading(true);
-      const formData = new FormData();
+      const { token } = validateAuth();
 
+      const formData = new FormData();
       formData.append("name", profile.name);
       formData.append("email", profile.email);
       formData.append("specialization", profile.specialization);
@@ -141,8 +188,6 @@ const NutProfile: FC = () => {
         formData.append("profilePicture", imageFile);
       }
 
-      const token = localStorage.getItem("token");
-
       await api.post("/nuts/updateProfile", formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
@@ -151,21 +196,36 @@ const NutProfile: FC = () => {
       });
 
       toast.success("Profile updated successfully!");
-    } catch (err) {
+      // Clear the image file after successful upload
+      setImageFile(null);
+      setImagePreview(null);
+    } catch (err: any) {
       console.error("Failed to save profile:", err);
-      toast.error("Update failed.");
+      const errorMessage = err.response?.data?.message || "Update failed.";
+      toast.error(errorMessage);
     } finally {
       setIsUploading(false);
     }
   };
 
   const handleUpdatePassword = async () => {
-    if (!password || !confirmPassword) return toast.error("Please fill in both fields.");
-    if (password !== confirmPassword) return toast.error("Passwords do not match.");
+    if (!password || !confirmPassword) {
+      toast.error("Please fill in both fields.");
+      return;
+    }
+    
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long.");
+      return;
+    }
 
     try {
-      const token = localStorage.getItem("token");
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      const { token, user } = validateAuth();
 
       await api.post("/nuts/updatepassword", {
         email: user.email,
@@ -178,13 +238,42 @@ const NutProfile: FC = () => {
       setOpen(false);
       setPassword("");
       setConfirmPassword("");
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error updating password", err);
-      toast.error("Something went wrong.");
+      const errorMessage = err.response?.data?.message || "Something went wrong.";
+      toast.error(errorMessage);
     }
   };
 
-  console.log(profile)
+  // Loading state
+  if (isLoading) {
+    return (
+      <DashboardLayout title="My Profile" userRole="nutritionist">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading profile...</p>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Error state
+  if (error) {
+    return (
+      <DashboardLayout title="My Profile" userRole="nutritionist">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-center">
+            <p className="text-red-600 mb-4">{error}</p>
+            <Button onClick={() => window.location.reload()}>
+              Retry
+            </Button>
+          </div>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="My Profile" userRole="nutritionist">
@@ -208,15 +297,31 @@ const NutProfile: FC = () => {
               <CardContent className="flex flex-col items-center">
                 <div className="w-32 h-32 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center mb-4">
                   {imagePreview || profileImage ? (
-                    <img src={imagePreview || profileImage} className="object-cover w-full h-full" alt="Profile" />
+                    <img 
+                      src={imagePreview || profileImage} 
+                      className="object-cover w-full h-full" 
+                      alt="Profile"
+                      onError={(e) => {
+                        // Handle broken image
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
                   ) : (
                     <span className="text-4xl text-gray-500">
-                      {profile.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)}
+                      {profile.name?.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2) || "NU"}
                     </span>
                   )}
                 </div>
-                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-                <Button onClick={triggerFileInput} variant="outline" size="sm">Change Photo</Button>
+                <input 
+                  ref={fileInputRef} 
+                  type="file" 
+                  accept="image/jpeg,image/png,image/jpg" 
+                  className="hidden" 
+                  onChange={handleImageChange} 
+                />
+                <Button onClick={triggerFileInput} variant="outline" size="sm">
+                  Change Photo
+                </Button>
               </CardContent>
             </Card>
 
@@ -225,7 +330,7 @@ const NutProfile: FC = () => {
               <CardContent>
                 <Dialog open={open} onOpenChange={setOpen}>
                   <DialogTrigger asChild>
-                    <Button variant="destructive">Please update your password here</Button>
+                    <Button variant="destructive">Update Password</Button>
                   </DialogTrigger>
                   <DialogContent>
                     <DialogHeader><DialogTitle>Change Password</DialogTitle></DialogHeader>
@@ -233,20 +338,44 @@ const NutProfile: FC = () => {
                       <div>
                         <Label htmlFor="new-password">New Password</Label>
                         <div className="relative">
-                          <Input type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} />
-                          <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-2 top-2">{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                          <Input 
+                            id="new-password"
+                            type={showPassword ? "text" : "password"} 
+                            value={password} 
+                            onChange={e => setPassword(e.target.value)}
+                            placeholder="Enter new password"
+                          />
+                          <button 
+                            type="button" 
+                            onClick={() => setShowPassword(!showPassword)} 
+                            className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+                          >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
                         </div>
                       </div>
                       <div>
                         <Label htmlFor="confirm-password">Confirm Password</Label>
                         <div className="relative">
-                          <Input type={showConfirm ? "text" : "password"} value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
-                          <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-2 top-2">{showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}</button>
+                          <Input 
+                            id="confirm-password"
+                            type={showConfirm ? "text" : "password"} 
+                            value={confirmPassword} 
+                            onChange={e => setConfirmPassword(e.target.value)}
+                            placeholder="Confirm new password"
+                          />
+                          <button 
+                            type="button" 
+                            onClick={() => setShowConfirm(!showConfirm)} 
+                            className="absolute right-2 top-2 text-gray-500 hover:text-gray-700"
+                          >
+                            {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
                         </div>
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button onClick={handleUpdatePassword}>Update</Button>
+                      <Button onClick={handleUpdatePassword}>Update Password</Button>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>
@@ -260,19 +389,54 @@ const NutProfile: FC = () => {
               <CardHeader><CardTitle>Personal Information</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
-                  <div><Label>Full Name</Label><Input value={profile.name} onChange={e => handleInputChange("name", e.target.value)} /></div>
-                  <div><Label>Email</Label><Input value={profile.email} readOnly /></div>
+                  <div>
+                    <Label>Full Name</Label>
+                    <Input 
+                      value={profile.name} 
+                      onChange={e => handleInputChange("name", e.target.value)}
+                      placeholder="Enter your full name"
+                    />
+                  </div>
+                  <div>
+                    <Label>Email</Label>
+                    <Input 
+                      value={profile.email} 
+                      readOnly 
+                      className="bg-gray-50"
+                    />
+                  </div>
                 </div>
-                <div><Label>Specialization</Label><Input value={profile.specialization} onChange={e => handleInputChange("specialization", e.target.value)} /></div>
-                <div><Label>Experience</Label><Input value={profile.experience} onChange={e => handleInputChange("experience", e.target.value)} /></div>
-                <div><Label>Bio</Label><textarea className="w-full p-2 border rounded-md h-32" value={profile.bio} onChange={e => handleInputChange("bio", e.target.value)} /></div>
+                <div>
+                  <Label>Specialization</Label>
+                  <Input 
+                    value={profile.specialization} 
+                    onChange={e => handleInputChange("specialization", e.target.value)}
+                    placeholder="e.g., Sports Nutrition, Clinical Nutrition"
+                  />
+                </div>
+                <div>
+                  <Label>Experience</Label>
+                  <Input 
+                    value={profile.experience} 
+                    onChange={e => handleInputChange("experience", e.target.value)}
+                    placeholder="e.g., 5 years"
+                  />
+                </div>
+                <div>
+                  <Label>Bio</Label>
+                  <textarea 
+                    className="w-full p-2 border rounded-md h-32 resize-none" 
+                    value={profile.bio} 
+                    onChange={e => handleInputChange("bio", e.target.value)}
+                    placeholder="Tell us about yourself and your expertise..."
+                  />
+                </div>
               </CardContent>
             </Card>
           </div>
         </div>
 
         <Separator />
-
       </div>
     </DashboardLayout>
   );

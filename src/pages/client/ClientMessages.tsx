@@ -19,69 +19,73 @@ interface Nutritionist {
 
 const ClientMessages: FC = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [messageText, setMessageText] = useState<string>('');
+  const [messageText, setMessageText] = useState('');
   const [nutritionist, setNutritionist] = useState<Nutritionist | null>(null);
-  const [clientId, setClientId] = useState("")
+  const [clientId, setClientId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const messageEndRef = useRef<HTMLDivElement | null>(null);
 
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const token = localStorage.getItem("token");
-
-  
-
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        
-        const client = await api.get("/client/email",{
-          params: { email: user.email},
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        //console.log(client)
-        setClientId(client.data[0].id);
+    const fetchAll = async () => {
+      setLoading(true);
 
-        const nutResponse = await api.get(`/client/nut`, {
-          params: { email: user.email},
+      try {
+        const token = localStorage.getItem("token");
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+
+        if (!token || !user?.email) {
+          throw new Error("User not authenticated.");
+        }
+
+        const clientRes = await api.get("/client/email", {
+          params: { email: user.email },
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const nut = nutResponse.data[0];
-        
+        const clientData = clientRes.data[0];
+        const cId = clientData.id;
+        setClientId(cId);
+
+        const nutRes = await api.get("/client/nut", {
+          params: { email: user.email },
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const nut = nutRes.data[0];
         setNutritionist({ id: nut.id, name: nut.name });
-        //console.log(nutritionist)
 
-        if(clientId != ""){
-            const [nutMessages, clientMessages] = await Promise.all([
-            api.post(
-              `/nuts/messagesFromNut`,
-              { nId: nut.id, cId: clientId },
-              { headers: { Authorization: `Bearer ${token}` } }
-            ),
-            api.post(
-              `/nuts/messagesFromClient`,
-              { nId: nut.id, cId: clientId },
-              { headers: { Authorization: `Bearer ${token}` } }
-            ),
-          ]);
-          const combined = [...nutMessages.data, ...clientMessages.data].sort(
-            (a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime()
-          );
-          setMessages(combined);
-        }
-        
+        const [nutMessages, clientMessages] = await Promise.all([
+          api.post(
+            `/nuts/messagesFromNut`,
+            { nId: nut.id, cId },
+            { headers: { Authorization: `Bearer ${token}` } }
+          ),
+          api.post(
+            `/nuts/messagesFromClient`,
+            { nId: nut.id, cId },
+            { headers: { Authorization: `Bearer ${token}` } }
+          ),
+        ]);
 
-       
+        const combined = [...nutMessages.data, ...clientMessages.data].sort(
+          (a, b) => new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime()
+        );
+
+        setMessages(combined);
       } catch (err) {
-        console.error("Error fetching messages:", err);
+        console.error("Error fetching data:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchData();
-  }, [clientId]);
+    fetchAll();
+  }, []);
 
   const sendMessage = async () => {
-    if (!messageText.trim() || !nutritionist) return;
+    if (!messageText.trim() || !nutritionist || !clientId) return;
 
+    const token = localStorage.getItem("token");
     const content = messageText.trim();
 
     try {
@@ -113,13 +117,17 @@ const ClientMessages: FC = () => {
   };
 
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView();
+    messageEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
   return (
     <DashboardLayout title="Messages" userRole="client">
       <div className="h-[80vh] flex flex-col border rounded-lg overflow-hidden">
-        {nutritionist ? (
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center text-gray-500">
+            Loading messages...
+          </div>
+        ) : nutritionist ? (
           <>
             <div className="px-4 py-3 border-b bg-white">
               <h2 className="text-lg font-semibold">Chat with your nutritionist {nutritionist.name}</h2>
@@ -166,7 +174,7 @@ const ClientMessages: FC = () => {
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-gray-500">
-            No nutritionist assigned
+            No nutritionist assigned.
           </div>
         )}
       </div>

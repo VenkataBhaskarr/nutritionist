@@ -13,7 +13,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
-
   Dialog,
   DialogTrigger,
   DialogContent,
@@ -22,14 +21,7 @@ import {
   DialogFooter,
   DialogDescription
 } from "@/components/ui/dialog";
-import {
-  PlusCircle,
-  UserRound,
-  Info,
-  CheckCircle,
-  AlertCircle,
-} from "lucide-react";
-import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip"
+
 
 interface Client {
   id: string;
@@ -43,215 +35,266 @@ interface Client {
 
 const NutClients: FC = () => {
   const [deleteDialog, setDeleteDialog] = useState<{
-  open: boolean;
-  client: any | null;
-}>({ open: false, client: null });
-   const [messageDialogOpen, setMessageDialogOpen] = useState(false)
-   const [dialogOpen, setDialogOpen] = useState(false);
-   const [messageText, setMessageText] = useState("");
-   const [selectedWeek, setSelectedWeek] = useState("");
-const [weight, setWeight] = useState("");
-   const user = JSON.parse(localStorage.getItem("user") || "{}");
-   const token = localStorage.getItem("token");
-   const weeks = ["Week 1", "Week 2", "Week 3", "Week 4"];
-   const navigate = useNavigate();
-   const [progressDialog, setProgressDialog] = useState<{
-      open: boolean;
-      client: any | null;
-    }>({ open: false, client: null });
-   const [mealPlanDialog, setMealPlanDialog] = useState<{
-      open: boolean;
-      client: any | null;
-    }>({ open: false, client: null });
+    open: boolean;
+    client: any | null;
+  }>({ open: false, client: null });
+  const [messageDialogOpen, setMessageDialogOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [messageText, setMessageText] = useState("");
+  const [selectedWeek, setSelectedWeek] = useState("");
+  const [weight, setWeight] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
+  const weeks = ["Week 1", "Week 2", "Week 3", "Week 4"];
+  const navigate = useNavigate();
+  
+  const [progressDialog, setProgressDialog] = useState<{
+    open: boolean;
+    client: any | null;
+  }>({ open: false, client: null });
+  
+  const [mealPlanDialog, setMealPlanDialog] = useState<{
+    open: boolean;
+    client: any | null;
+  }>({ open: false, client: null });
 
-    const [mealInputs, setMealInputs] = useState({
-      breakfast: "",
-      lunch: "",
-      snack: "",
-      dinner: "",
-    });
-   const [formData, setFormData] = useState({
-       name: "",
-       age: "",
-       email: "",
-       phone: "",
-       gender: "",
-       location: "",
-       nextSession: "",
-       plan: "",
-       issue: "",
-     });
-     const submitProgress = async () => {
-        if (!selectedWeek || !weight) {
-          toast.error("Please select week and enter weight.");
-          return;
-        }
+  const [mealInputs, setMealInputs] = useState({
+    breakfast: "",
+    lunch: "",
+    snack: "",
+    dinner: "",
+  });
 
-        try {
-          await api.post(
-            "/client/progress", // adjust your backend route here
-            {
-              clientId: progressDialog.client?.id,
-              week: selectedWeek,
-              weight: parseFloat(weight),
-            },
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            }
-          );
+  const [formData, setFormData] = useState({
+    name: "",
+    age: "",
+    email: "",
+    phone: "",
+    gender: "",
+    location: "",
+    nextSession: "",
+    plan: "",
+    issue: "",
+  });
 
-          toast.success("Progress updated successfully!");
-          setProgressDialog({ open: false, client: null });
-          setSelectedWeek("");
-          setWeight("");
-          // Refresh list or trigger data reload
-        } catch (error) {
-          console.error(error);
-          toast.error("Failed to update progress.");
-        }
-      };
-     const handleDeleteClient = async () => {
-        if (!deleteDialog.client) return;
+  const [clients, setClients] = useState([]);
 
-        try {
-          const data = {
-            cId: deleteDialog.client.id,
-            email: deleteDialog.client.email,
-          }
-          await api.post("/nuts/deleteClient", data, { headers: { Authorization: `Bearer ${token}` }});
-
-          toast.success(`Deleted ${deleteDialog.client.name} ✅`);
-          
-          // Refresh client list or remove from local state if you want
-          // setClients((prev) => prev.filter(c => c.id !== deleteDialog.client?.id));
-           setClients((prev) =>
-             prev.filter((client) => client.id !== deleteDialog.client?.id)
-           );
-
-          setDeleteDialog({ open: false, client: null });
-        } catch (err) {
-          console.error("Delete failed:", err);
-          toast.error("Failed to delete user ❌");
-        }
-      };
-
-    const handleBulkMessage = async() => {
-      if (!messageText.trim()) return;
-      const content = messageText.trim();
-
-      try {
-        const nutDetails = await api.get(`/nuts/email`, {
-          params: { email: user.email },
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const nutritionistId = nutDetails.data[0].id;
-        const clientDetails = await api.get(`/client/byNutId`, {
-          params: { id: nutritionistId },
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const clients = clientDetails.data;
-        const now = new Date().toISOString();
-        // Loop through all clients and send message
-        await Promise.all(
-          clients.map(async (client) => {
-            const messagePayload = {
-              nId: nutritionistId,
-              cId: client.id,
-              content,
-              sentAt: now,
-            };
-            return api.post(`/nuts/sendMessage`, messagePayload, {
-              headers: { Authorization: `Bearer ${token}` },
-            });
-          })
-        );
-        setMessageText('');
-        toast.success(`Message sent to all ${clients.length} clients ✅`);
-        setMessageDialogOpen(false);
-      } catch (err) {
-        console.error("Failed to send bulk messages:", err);
-        toast.error("Failed to send messages ❌");
+  // Get user and token with proper error handling
+  const getUserAndToken = () => {
+    try {
+      const userStr = localStorage.getItem("user");
+      const token = localStorage.getItem("token");
+      
+      if (!token) {
+        navigate("/login");
+        return { user: null, token: null };
       }
-    } 
-    const handleAddClient = async () => {
-        const { name, age, email, phone, gender, location, issue, plan } = formData;
-        if (!name || !age || !email || !phone || !gender || !location || !issue || !plan) {
-          toast.error("Please fill in all the fields.");
-          return;
-        }
-
+      
+      let user = {};
+      if (userStr) {
         try {
-          const nutDetails = await api.get(`/nuts/email`, {
-            params: { email: user.email },
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
-          const newClient = {
-            ...formData,
-            nId: nutDetails.data[0].id,
-          };
-
-
-          const response = await api.post(`/client/add`, newClient, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
-          
-          // setCuserName(email);
-          // setCPassword(response.data.password);
-          
-          // await api.post("/users/sendmail", {
-            
-          // });
-     
-          // alert("username is " + response.data.email +" and " + " password: " + response.data.password)
-
-          setClients((prev) => [...prev, newClient]);
-          setFormData({
-            name: "",
-            age: "",
-            email: "",
-            phone: "",
-            gender: "",
-            plan: "",
-            location: "",
-            issue: "",
-            nextSession: "",
-          });
-
-          toast.success("Client added successfully!");
-          setDialogOpen(false);
-
-          const updatedClients = await api.get(`/client/byNutId`, {
-            params: { id: nutDetails.data[0].id },
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setClients(updatedClients.data);
-        } catch (error) {
-          toast.error("Failed to add client.");
+          user = JSON.parse(userStr);
+        } catch (parseError) {
+          console.error("Error parsing user data:", parseError);
+          localStorage.removeItem("user"); // Remove corrupted data
+          navigate("/login");
+          return { user: null, token: null };
         }
+      }
+      
+      if (!user || typeof user !== 'object' || !user.email) {
+        navigate("/login");
+        return { user: null, token: null };
+      }
+      
+      return { user, token };
+    } catch (error) {
+      console.error("Error accessing localStorage:", error);
+      navigate("/login");
+      return { user: null, token: null };
+    }
+  };
+
+  const submitProgress = async () => {
+    if (!selectedWeek || !weight) {
+      toast.error("Please select week and enter weight.");
+      return;
+    }
+
+    const { token } = getUserAndToken();
+    if (!token) return;
+
+    try {
+      await api.post(
+        "/client/progress",
+        {
+          clientId: progressDialog.client?.id,
+          week: selectedWeek,
+          weight: parseFloat(weight),
+        },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
+      toast.success("Progress updated successfully!");
+      setProgressDialog({ open: false, client: null });
+      setSelectedWeek("");
+      setWeight("");
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update progress.");
+    }
+  };
+
+  const handleDeleteClient = async () => {
+    if (!deleteDialog.client) return;
+
+    const { token } = getUserAndToken();
+    if (!token) return;
+
+    try {
+      const data = {
+        cId: deleteDialog.client.id,
+        email: deleteDialog.client.email,
+      };
+      
+      await api.post("/nuts/deleteClient", data, { 
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      toast.success(`Deleted ${deleteDialog.client.name} ✅`);
+      
+      setClients((prev) =>
+        prev.filter((client) => client.id !== deleteDialog.client?.id)
+      );
+
+      setDeleteDialog({ open: false, client: null });
+    } catch (err) {
+      console.error("Delete failed:", err);
+      toast.error("Failed to delete user ❌");
+    }
+  };
+
+  const handleBulkMessage = async () => {
+    if (!messageText.trim()) return;
+    
+    const { user, token } = getUserAndToken();
+    if (!user || !token) return;
+
+    const content = messageText.trim();
+
+    try {
+      const nutDetails = await api.get(`/nuts/email`, {
+        params: { email: user.email },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      const nutritionistId = nutDetails.data[0].id;
+      const clientDetails = await api.get(`/client/byNutId`, {
+        params: { id: nutritionistId },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      const clients = clientDetails.data;
+      const now = new Date().toISOString();
+      
+      await Promise.all(
+        clients.map(async (client) => {
+          const messagePayload = {
+            nId: nutritionistId,
+            cId: client.id,
+            content,
+            sentAt: now,
+          };
+          return api.post(`/nuts/sendMessage`, messagePayload, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+        })
+      );
+      
+      setMessageText('');
+      toast.success(`Message sent to all ${clients.length} clients ✅`);
+      setMessageDialogOpen(false);
+    } catch (err) {
+      console.error("Failed to send bulk messages:", err);
+      toast.error("Failed to send messages ❌");
+    }
+  };
+
+  const handleAddClient = async () => {
+    const { name, age, email, phone, gender, location, issue, plan } = formData;
+    if (!name || !age || !email || !phone || !gender || !location || !issue || !plan) {
+      toast.error("Please fill in all the fields.");
+      return;
+    }
+
+    const { user, token } = getUserAndToken();
+    if (!user || !token) return;
+
+    try {
+      const nutDetails = await api.get(`/nuts/email`, {
+        params: { email: user.email },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const newClient = {
+        ...formData,
+        nId: nutDetails.data[0].id,
+      };
+
+      await api.post(`/client/add`, newClient, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setFormData({
+        name: "",
+        age: "",
+        email: "",
+        phone: "",
+        gender: "",
+        plan: "",
+        location: "",
+        issue: "",
+        nextSession: "",
+      });
+
+      toast.success("Client added successfully!");
+      setDialogOpen(false);
+
+      // Refresh the client list
+      await fetchData();
+    } catch (error) {
+      console.error("Add client error:", error);
+      toast.error("Failed to add client.");
+    }
   };
 
   const submitMealPlan = async () => {
-    const nutDetails = await api.get(`/nuts/email`, {
-      params: { email: user.email },
-      headers: { Authorization: `Bearer ${token}` },
-    });
     if (!mealPlanDialog.client) return;
+
+    const { user, token } = getUserAndToken();
+    if (!user || !token) return;
+
     try {
+      const nutDetails = await api.get(`/nuts/email`, {
+        params: { email: user.email },
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
       const payload = {
         nId: nutDetails.data[0].id,
         cId: mealPlanDialog.client.id,
         meals: mealInputs,
       };
-      console.log(payload)
+
       await api.post("/nuts/addMealPlan", payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
       
       toast.success("Meal plan sent 🍽️");
 
-      // Reset state
       setMealInputs({
         breakfast: "",
         lunch: "",
@@ -265,67 +308,91 @@ const [weight, setWeight] = useState("");
     }
   };
 
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const { user, token } = getUserAndToken();
+      if (!user || !token) return;
 
-   if(!token){
-    navigate("/login")
-   }
-   const [clients, setClients] = useState([])
-   useEffect(() => {
-      const fetchData = async() => {
-         const nutDetails = await api.get(`/nuts/email`, {
-          params: { email: user.email },
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        const clientDetails = await api.get(`/client/byNutId`, {
-          params: { id: nutDetails.data[0].id },
-          headers: { Authorization: `Bearer ${token}` },
-        });
+      const nutDetails = await api.get(`/nuts/email`, {
+        params: { email: user.email },
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        const clients = clientDetails.data;
-        console.log(clients)
+      if (!nutDetails.data || nutDetails.data.length === 0) {
+        throw new Error("Nutritionist details not found");
+      }
 
-// Fetch all client goals in parallel
-        const clientsWithGoals = await Promise.all(
-          clients.map(async (client) => {
-            try {
-              const goalRes = await api.get(`/client/goal`, {
-                params: { clientId: client.id },
-                headers: { Authorization: `Bearer ${token}` },
-              });
-              const goal = goalRes.data?.[0]?.title ?? ""
-              const progress = goalRes.data?.[0]?.progress ?? 0; // fallback to 0 if no goal
-              return { ...client, progress, goal };
-            } catch (error) {
-              console.error(`Failed to fetch goals for client ${client.id}`, error);
-              return { ...client, progress: 0, goal: "" };
-            }
-          })
-        );
+      const clientDetails = await api.get(`/client/byNutId`, {
+        params: { id: nutDetails.data[0].id },
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-        setClients(clientsWithGoals);
-      } 
-      fetchData()
-   }, [])
-  // const clients: Client[] = [
-  //   {
-  //     id: '1',
-  //     name: 'John Doe',
-  //     email: 'john@example.com',
-  //     goal: 'Weight Loss',
-  //     progress: 65,
-  //     nextSession: '2024-02-01',
-  //     status: 'active'
-  //   },
-  //   {
-  //     id: '2',
-  //     name: 'Jane Smith',
-  //     email: 'jane@example.com',
-  //     goal: 'Muscle Gain',
-  //     progress: 40,
-  //     nextSession: '2024-02-03',
-  //     status: 'active'
-  //   }
-  // ];
+      const clients = clientDetails.data || [];
+      console.log(clients);
+
+      // Fetch all client goals in parallel
+      const clientsWithGoals = await Promise.all(
+        clients.map(async (client) => {
+          try {
+            const goalRes = await api.get(`/client/goal`, {
+              params: { clientId: client.id },
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            const goal = goalRes.data?.[0]?.title ?? "";
+            const progress = goalRes.data?.[0]?.progress ?? 0;
+            return { ...client, progress, goal };
+          } catch (error) {
+            console.error(`Failed to fetch goals for client ${client.id}`, error);
+            return { ...client, progress: 0, goal: "" };
+          }
+        })
+      );
+
+      setClients(clientsWithGoals);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setError("Failed to load client data. Please try again.");
+      
+      // Check if it's an authentication error
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        localStorage.removeItem("user");
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  // Show loading state
+  if (loading) {
+    return (
+      <DashboardLayout title="My Clients" userRole="nutritionist">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-lg">Loading clients...</div>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <DashboardLayout title="My Clients" userRole="nutritionist">
+        <div className="flex flex-col justify-center items-center h-64 space-y-4">
+          <div className="text-lg text-red-600">{error}</div>
+          <Button onClick={fetchData}>Retry</Button>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout title="My Clients" userRole="nutritionist">
@@ -333,14 +400,14 @@ const [weight, setWeight] = useState("");
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Client Management</h1>
           <div className="space-x-4">
-            <Button variant="outline" className='bg-primary-500 text-white' onClick={() => setMessageDialogOpen(true)}>Send Bulk Message</Button>
-            {/* <Button className="bg-primary-500">Add New Client</Button> */}
-            <Button variant="outline" className="bg-primary-500 text-white"  onClick={() => setDialogOpen(true)}>Add Client</Button> 
-        
+            <Button variant="outline" className='bg-primary-500 text-white' onClick={() => setMessageDialogOpen(true)}>
+              Send Bulk Message
+            </Button>
+            <Button variant="outline" className="bg-primary-500 text-white" onClick={() => setDialogOpen(true)}>
+              Add Client
+            </Button> 
           </div>
         </div>
-
-        
 
         <Separator />
 
@@ -356,16 +423,13 @@ const [weight, setWeight] = useState("");
                   <TableHead className="text-muted-foreground text-xs uppercase">Name</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase">Email</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase">Weight (kg)</TableHead>
-
                   <TableHead className="text-muted-foreground text-xs uppercase">Issue</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase">Goal</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase">Allergies</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase">Progress</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase">Last Session</TableHead>
                   <TableHead className="text-muted-foreground text-xs uppercase">Next Session</TableHead>
-                  {/* <TableHead className="text-muted-foreground text-xs uppercase">Status</TableHead> */}
                   <TableHead className="text-muted-foreground text-xs uppercase">Actions</TableHead>
-                  
                 </TableRow>
               </TableHeader>
 
@@ -375,12 +439,10 @@ const [weight, setWeight] = useState("");
                     <TableCell className="font-medium">{client.name}</TableCell>
                     <TableCell>{client.email}</TableCell>
                     <TableCell>{client.weight}</TableCell>
-                   
                     <TableCell>{client.issue || <span className="text-gray-400">-</span>}</TableCell>
-                     <TableCell>{client.goal || <span className="text-gray-400">-</span>}</TableCell>
+                    <TableCell>{client.goal || <span className="text-gray-400">-</span>}</TableCell>
                     <TableCell>{client.allergies || <span className="text-gray-400">-</span>}</TableCell>
                     
-                    {/* Progress bar */}
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <div className="w-24 bg-gray-200 rounded-full h-2">
@@ -396,7 +458,6 @@ const [weight, setWeight] = useState("");
                     <TableCell className="text-sm text-gray-600">{client.lastSession}</TableCell>
                     <TableCell className="text-sm text-gray-600">{client.nextSession}</TableCell>
 
-                    {/* Actions */}
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Button
@@ -407,7 +468,7 @@ const [weight, setWeight] = useState("");
                         >
                           Add Progress
                         </Button>
-                         <Button
+                        <Button
                           variant="ghost"
                           size="sm"
                           className="text-primary-600 hover:text-primary-700"
@@ -423,7 +484,6 @@ const [weight, setWeight] = useState("");
                         >
                           Delete User
                         </Button>
-                       
                       </div>
                     </TableCell>
                   </TableRow>
@@ -433,7 +493,7 @@ const [weight, setWeight] = useState("");
           </CardContent>
         </Card>
 
-
+        {/* All your existing dialogs remain the same */}
         <Dialog open={deleteDialog.open} onOpenChange={(open) => setDeleteDialog({ open, client: null })}>
           <DialogContent className="sm:max-w-[400px]">
             <DialogHeader>
@@ -464,7 +524,6 @@ const [weight, setWeight] = useState("");
             </DialogHeader>
 
             <div className="grid gap-4 py-4">
-              {/* Week Selector */}
               <div className="flex flex-col gap-1">
                 <Label>Select Week</Label>
                 <Select
@@ -484,7 +543,6 @@ const [weight, setWeight] = useState("");
                 </Select>
               </div>
 
-              {/* Weight Input */}
               <div className="flex flex-col gap-1">
                 <Label>Weight (kg)</Label>
                 <Input
@@ -532,33 +590,29 @@ const [weight, setWeight] = useState("");
           </DialogContent>
         </Dialog>
 
-
         <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
-           <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Sending Bulk Message to all your clients</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <Label htmlFor="message">Your Message</Label>
-                <Textarea
-                  id="message"
-                  rows={4}
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  placeholder="Type your message..."
-                />
-              </div>
-              <DialogFooter>
-                <Button onClick={handleBulkMessage}>Send</Button>
-              </DialogFooter>
-            </DialogContent>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Sending Bulk Message to all your clients</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <Label htmlFor="message">Your Message</Label>
+              <Textarea
+                id="message"
+                rows={4}
+                value={messageText}
+                onChange={(e) => setMessageText(e.target.value)}
+                placeholder="Type your message..."
+              />
+            </div>
+            <DialogFooter>
+              <Button onClick={handleBulkMessage}>Send</Button>
+            </DialogFooter>
+          </DialogContent>
         </Dialog>
 
-
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-          <DialogContent
-            className="max-w-md w-full max-h-[90vh] overflow-y-auto rounded-2xl p-6 sm:p-8"
-          >
+          <DialogContent className="max-w-md w-full max-h-[90vh] overflow-y-auto rounded-2xl p-6 sm:p-8">
             <DialogHeader>
               <DialogTitle className="text-xl sm:text-2xl">Add New Client</DialogTitle>
             </DialogHeader>
@@ -605,7 +659,6 @@ const [weight, setWeight] = useState("");
             </DialogFooter>
           </DialogContent>
         </Dialog>
-
       </div>
     </DashboardLayout>
   );

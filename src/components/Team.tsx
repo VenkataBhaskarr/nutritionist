@@ -9,34 +9,70 @@ import avatar5 from "/assets/avatar-8.png";
 
 const nutritionists = [
   {
-    name: "Dr. Ayesha Rahman",
-    title: "Clinical Nutritionist",
+    name: "Pranathi Jandhyala",
+    experience: "5.5 years",
+    clientbase: "500+ clients",
+    specializations: [
+      "Weight loss & metabolic disorder management",
+      "Diabetes, thyroid, obesity, cholesterol, liver disease, mild kidney disorder",
+      "Cancer nutrition and post-operative care",
+      "Community Nutrition (5th–10th grade sessions)",
+    ],
+    approach:
+      "Customized diet plans, personalized counseling, and long-term lifestyle guidance tailored to each individual.",
     image: avatar1,
-    description: "Expert in metabolic disorders and personalized nutrition protocols.",
   },
   {
-    name: "Dr. Rohan Singh",
-    title: "Sports Dietitian",
+    name: "Shouli Basak",
+    experience: "7 years",
+    clientbase: "450+ clients",
+    specializations: [
+      "General clinical nutrition",
+      "Personalized nutrition counseling",
+      "Weight management & lifestyle interventions",
+    ],
+    approach:
+      "Empowering individuals with lifestyle-focused, personalized diet solutions for sustainable health.",
     image: avatar2,
-    description: "Focuses on performance nutrition for athletes and active individuals.",
   },
   {
-    name: "Dr. Meera Patel",
-    title: "Pediatric Nutritionist",
+    name: "Sowmya B.",
+    experience: "15+ years",
+    clientbase: "Extensive (Data not specified)",
+    specializations: [
+      "Chronic disease nutrition",
+      "Preventive health",
+      "Sustainable diet patterns",
+    ],
+    approach:
+      "Integrating clinical precision with decades of hands-on nutrition strategy for long-term impact.",
     image: avatar3,
-    description: "Specializes in children’s dietary planning and holistic development.",
   },
   {
-    name: "Dr. Arjun Desai",
-    title: "Functional Medicine Expert",
+    name: "Jyothsna",
+    experience: "4+ years",
+    clientbase: "250–500 clients/month",
+    specializations: [
+      "Diabetes & weight management",
+      "Evidence-based interventions",
+      "Structured meal planning",
+    ],
+    approach:
+      "Data-driven dietary planning and follow-ups to deliver measurable outcomes for every client.",
     image: avatar4,
-    description: "Blends science and lifestyle to treat chronic health issues naturally.",
   },
   {
-    name: "Dr. Sneha Iyer",
-    title: "Women’s Health Dietitian",
+    name: "G. Shiva Raja Shree",
+    experience: "4 years",
+    clientbase: "10,000+ clients",
+    specializations: [
+      "Broad-spectrum nutrition care",
+      "Scalable transformation models",
+      "Large-scale client success",
+    ],
+    approach:
+      "Mass-impact nutrition with precision tracking, making wellness accessible and effective at scale.",
     image: avatar5,
-    description: "Focused on PCOS, hormonal balance, and fertility nutrition.",
   },
 ];
 
@@ -60,7 +96,7 @@ const OurTeamSection = () => {
         animate={{ opacity: 1, y: [0, -20, 0] }}
         transition={{ duration: 6, repeat: Infinity }}
       >
-        <Sparkles size={80} className="text-primary-500" />
+        <Sparkles size={80} className="text-green-500" />
       </motion.div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -74,19 +110,17 @@ const OurTeamSection = () => {
         >
           <h2 className="text-4xl font-bold text-black mb-4">
             Meet Our{' '}
-            <span className="text-green-500">
-              Expert Nutritionists
-            </span>
+            <span className="text-green-500">Expert Nutritionists</span>
           </h2>
           <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
-            Our elite team brings experience, care, and science-backed strategies tailored just for you.
+            Personalized expertise for your unique health journey.
           </p>
         </motion.div>
 
         {/* Infinite scroll carousel */}
         <div className="relative">
           <motion.div
-            className="flex gap-6 animate-scroll-x "
+            className="flex gap-6 animate-scroll-x"
             initial={{ x: 0 }}
             animate={{ x: ['0%', '-50%'] }}
             transition={{ duration: 30, ease: 'linear', repeat: Infinity }}
@@ -98,18 +132,34 @@ const OurTeamSection = () => {
                 initial="initial"
                 whileInView="animate"
                 viewport={{ once: true }}
-                className="group w-72 min-w-[18rem] bg-white rounded-2xl border border-gray-100 shadow-md p-6 hover:shadow-xl transition-all duration-300 hover:bg-gradient-to-br from-green-50 to-green-100"
+                className="group w-80 min-w-[20rem] bg-white rounded-2xl border border-gray-100 shadow-md p-6 hover:shadow-xl transition-all duration-300 hover:bg-gradient-to-br from-green-50 to-green-100 flex flex-col justify-between"
               >
                 {/* <img
                   src={member.image}
                   alt={member.name}
-                  className="w-24 h-24 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-sm"
+                  className="w-20 h-20 rounded-full object-cover mx-auto mb-4 border-4 border-white shadow-sm"
                 /> */}
-                <h3 className="text-xl font-semibold text-gray-900 text-center mb-1 group-hover:text-gray-800">
+                <h3 className="text-xl text-primary-700 font-semibold text-center text-gray-900 mb-2 group-hover:text-gray-800">
                   {member.name}
                 </h3>
-                <p className="text-sm text-green-600 text-center font-medium mb-2">{member.title}</p>
-                <p className="text-sm text-gray-600 text-center">{member.description}</p>
+
+                <div className="text-sm text-center text-gray-500 mb-3 space-y-1">
+                  <p><strong>Experience:</strong> {member.experience}</p>
+                  <p><strong>Clients:</strong> {member.clientbase}</p>
+                </div>
+
+                <div className="text-sm text-left text-gray-800 mb-3">
+                  <p className="text-green-600 font-semibold mb-1 text-center">Specializations:</p>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1 text-xs">
+                    {member.specializations.map((spec, idx) => (
+                      <li key={idx}>{spec}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                {/* <p className="text-xs text-gray-600 text-center italic mt-2">
+                  “{member.approach}”
+                </p> */}
               </motion.div>
             ))}
           </motion.div>

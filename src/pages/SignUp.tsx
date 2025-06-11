@@ -26,6 +26,7 @@ const SignUp = () => {
   name: "",
   illness: "",
   phone: "",
+  // requirement: "",
   email: "",
   country: "",
   state: "",
@@ -78,7 +79,6 @@ const SignUp = () => {
                 />
               </div>
               
-             
 
               <div className="space-y-1">
                 <Label htmlFor="email">Email</Label>
@@ -153,6 +153,16 @@ const SignUp = () => {
                   required
                 />
               </div>
+
+              {/* <div className="space-y-1">
+                <Label htmlFor="illness">Describe your Requirements</Label>
+                <Input
+                  id="requirement"
+                  value={form.requirement}
+                  onChange={(e) => handleChange("requirement", e.target.value)}
+                  required
+                />
+              </div> */}
 
               <div className="flex items-start gap-2">
                 <input

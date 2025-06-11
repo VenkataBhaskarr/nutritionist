@@ -32,7 +32,7 @@ const PackagesSection = () => {
       gradient: "from-gray-100 via-slate-100 to-white",
       features: [
         "1 on 1 call with our expert nutritionist",
-        "Provides Personalized Solutions",
+        "Provides Personalized Guidelines",
         "Upgrade opportunity to Gold at ₹2499",
         "Validity: One-time"
       ],
@@ -45,7 +45,7 @@ const PackagesSection = () => {
       refund: null,
       gradient: "from-yellow-100 via-yellow-50 to-white",
       features: [
-        "1 on 1 consultations (2/day, 30 mins each)",
+        "1 on 1 consultations",
         "Personalized meal plan designing",
         "Regular chat follow-ups",
         "Habit tracking",

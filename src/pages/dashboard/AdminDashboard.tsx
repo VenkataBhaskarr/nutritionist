@@ -288,7 +288,7 @@ const AdminDashboard: React.FC = () => {
             edit: (item) => handleEdit(item, 'nutritionist'),
             delete: (id) => setDeleteDialog({ isOpen: true, id, type: 'nutritionist' }),
           }}
-          onAdd={() => handleAdd('nutritionist')}
+          // onAdd={() => handleAdd('nutritionist')}
           renderCell={(key, item) => (key === 'address' ? item.address || 'Not provided' : item[key as keyof typeof item])}
         />
 
@@ -308,7 +308,7 @@ const AdminDashboard: React.FC = () => {
             edit: (item) => handleEdit(item, 'client'),
             delete: (id) => setDeleteDialog({ isOpen: true, id, type: 'client' }),
           }}
-          onAdd={() => handleAdd('client')}
+          // onAdd={() => handleAdd('client')}
           renderCell={(key, item) => (key === 'address' ? item.address || 'Not provided' : item[key as keyof typeof item])}
         />
 

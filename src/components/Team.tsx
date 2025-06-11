@@ -38,7 +38,7 @@ const nutritionists = [
   {
     name: "Sowmya B.",
     experience: "15+ years",
-    clientbase: "Extensive (Data not specified)",
+    clientbase: "20000+ clients",
     specializations: [
       "Chronic disease nutrition",
       "Preventive health",
@@ -51,7 +51,7 @@ const nutritionists = [
   {
     name: "Jyothsna",
     experience: "4+ years",
-    clientbase: "250–500 clients/month",
+    clientbase: "2000+ clients",
     specializations: [
       "Diabetes & weight management",
       "Evidence-based interventions",

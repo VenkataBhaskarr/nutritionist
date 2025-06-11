@@ -235,46 +235,39 @@ const AdminClients: FC = () => {
 
   // Assuming you already have nutritionists state filled
 useEffect(() => {
-  
-  // console.log("starting itt.....")
-  const fetchNutritionists = async () => {
-      try {
-      
-        if(!token){
-          navigate("/login")
-        }
-        const response = await api.get('/nuts/nutritionists', {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setNutritionists(
-          Array.isArray(response.data)
-            ? response.data.map((n) => ({ id: n.id, name: n.name }))
-            : []
-        );
-      } catch (err) {
-        setError("Failed to fetch nutritionists.");
-      }
-    };
-  fetchNutritionists();
-  console.log("nuts are")
-  console.log(nutritionists)
-  const fetchClientsAndMapNutritionists = async () => {
+  const fetchData = async () => {
     try {
-      const response = await api.get('/client/clients', {
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
+      // Step 1: Fetch nutritionists
+      const nutResponse = await api.get('/nuts/nutritionists', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const rawClients = Array.isArray(response.data) ? response.data : [];
+      const nutritionistsData = Array.isArray(nutResponse.data)
+        ? nutResponse.data.map((n) => ({ id: n.id, name: n.name }))
+        : [];
 
-      // Build a quick lookup map for nutritionist by ID
+      setNutritionists(nutritionistsData);
+
+      // Build nutritionist map
       const nutritionistMap = new Map(
-        nutritionists.map((n) => [n.id, n.name]) // adjust keys if structure differs
+        nutritionistsData.map((n) => [n.id, n.name])
       );
 
-      console.log("nut map is")
-      console.log(nutritionistMap)
+      // Step 2: Fetch clients
+      const clientResponse = await api.get('/client/clients', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-      // Enrich each client with nutritionist name
+      const rawClients = Array.isArray(clientResponse.data)
+        ? clientResponse.data
+        : [];
+
+      // Enrich with nutritionist names
       const enrichedClients = rawClients.map((client) => ({
         ...client,
         nutritionist: nutritionistMap.get(client.nId) || 'Unknown',
@@ -282,15 +275,15 @@ useEffect(() => {
 
       setClients(enrichedClients);
     } catch (error) {
-      console.error('Error fetching clients:', error);
+      console.error("Error in fetchData:", error);
+      setError("Failed to fetch data.");
       setClients([]);
     }
   };
 
-  console.log(clients)
-  fetchClientsAndMapNutritionists();
-  
-}, []); // Re-run when nutritionists are ready
+  fetchData();
+}, []);
+ // Re-run when nutritionists are ready
 
 
   const activeCount = clients.filter(c => c.status === 'active').length;

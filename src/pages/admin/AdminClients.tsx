@@ -223,6 +223,54 @@ const AddClientDialog: FC<{ onSuccess?: () => void }> = ({ onSuccess }) => {
   );
 };
 
+const DeleteClientDialog: FC<{ id: string, email: string; onSuccess?: () => void }> = ({ id,email, onSuccess }) => {
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+  if(!token){
+    navigate("/login")
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+        setIsSubmitting(true);
+        await api.post(`/client/delete/`, {
+          params: {id, email},
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setError("");
+        onSuccess?.();
+        toast("Client deleted successfully!");
+      } catch (err) {
+        setError("Failed to delete client. Please try again.");
+      } finally {
+        setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="sm" className="text-red-600">Delete</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Delete Client</DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <p>Are you sure you want to delete this client?</p>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <Button type="submit" disabled={isSubmitting} className="w-full bg-red-500 hover:bg-red-600">
+            {isSubmitting ? "Deleting..." : "Confirm Delete"}
+          </Button>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
 const AdminClients: FC = () => {
   const [clients, setClients] = useState<Client[]>([]);
   const [error, setError] = useState("");
@@ -378,7 +426,7 @@ useEffect(() => {
                       {/* <TableCell>{client.nextSession}</TableCell> */}
                       <TableCell className="flex gap-2">
                         {/* <EditClientDialog client={client} onSuccess={() => window.location.reload()} /> */}
-                        {/* <DeleteClientDialog id={client.id} onSuccess={() => window.location.reload()} /> */}
+                         <DeleteClientDialog id={client.id} email={client.email} onSuccess={() => window.location.reload()} />
                       </TableCell>
                     </TableRow>
                   ))
@@ -556,51 +604,6 @@ useEffect(() => {
 //   );
 // };
 
-// const DeleteClientDialog: FC<{ id: string; onSuccess?: () => void }> = ({ id, onSuccess }) => {
-//   const [error, setError] = useState("");
-//   const [isSubmitting, setIsSubmitting] = useState(false);
 
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     try {
-//       setIsSubmitting(true);
-//       const token = localStorage.getItem("token");
-//       const navigate = useNavigate();
-//    if(!token){
-//     navigate("/login")
-//    }
-//       await api.delete(`/clients/${id}`, {
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       setError("");
-//       onSuccess?.();
-//       alert("Client deleted successfully!");
-//     } catch (err) {
-//       setError("Failed to delete client. Please try again.");
-//     } finally {
-//       setIsSubmitting(false);
-//     }
-//   };
-
-//   return (
-//     <Dialog>
-//       <DialogTrigger asChild>
-//         <Button variant="ghost" size="sm" className="text-red-600">Delete</Button>
-//       </DialogTrigger>
-//       <DialogContent>
-//         <DialogHeader>
-//           <DialogTitle>Delete Client</DialogTitle>
-//         </DialogHeader>
-//         <form onSubmit={handleSubmit} className="space-y-4">
-//           <p>Are you sure you want to delete this client?</p>
-//           {error && <p className="text-red-500 text-sm">{error}</p>}
-//           <Button type="submit" disabled={isSubmitting} className="w-full bg-red-500 hover:bg-red-600">
-//             {isSubmitting ? "Deleting..." : "Confirm Delete"}
-//           </Button>
-//         </form>
-//       </DialogContent>
-//     </Dialog>
-//   );
-// };
 
 export default AdminClients;

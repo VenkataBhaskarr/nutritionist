@@ -146,7 +146,7 @@ const EditNutritionistDialog: FC<{ nutritionist: Nutritionist; onSuccess?: () =>
       );
       setError("");
       onSuccess?.();
-      alert("Nutritionist updated successfully!");
+      toast("Nutritionist updated successfully!");
     } catch (err) {
       setError("Failed to update nutritionist. Please try again.");
     } finally {
@@ -206,25 +206,33 @@ const EditNutritionistDialog: FC<{ nutritionist: Nutritionist; onSuccess?: () =>
   );
 };
 
-const DeleteNutritionistDialog: FC<{ id: string; onSuccess?: () => void }> = ({ id, onSuccess }) => {
+const DeleteNutritionistDialog: FC<{ id: string,email:string, onSuccess?: () => void }> = ({ id,email, onSuccess }) => {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+  if(!token){
+    navigate("/login")
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     try {
       setIsSubmitting(true);
-      const token = localStorage.getItem("token");
-      const navigate = useNavigate();
-   if(!token){
-    navigate("/login")
-   }
-      await api.delete(`/nutritionists/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      
+      // await api.delete(`/nuts/${id}`, {
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
+      console.log(id, email)
+      const deletedNut = await api.post(`/nuts/delete`, {
+          params: { id, email },
+          headers: { Authorization: `Bearer ${token}` },
       });
+      console.log(deletedNut)
       setError("");
       onSuccess?.();
-      alert("Nutritionist deleted successfully!");
+      toast("Nutritionist deleted successfully!");
     } catch (err) {
       setError("Failed to delete nutritionist. Please try again.");
     } finally {
@@ -380,7 +388,7 @@ const AdminNutritionists: FC = () => {
                      
                       <TableCell className="flex gap-2">
                         <EditNutritionistDialog nutritionist={n} onSuccess={fetchNutritionists} />
-                        <DeleteNutritionistDialog id={n.id} onSuccess={fetchNutritionists} />
+                        <DeleteNutritionistDialog id={n.id} email={n.email} onSuccess={fetchNutritionists} />
                       </TableCell>
                     </TableRow>
                   ))

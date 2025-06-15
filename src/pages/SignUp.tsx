@@ -167,6 +167,7 @@ const SignUp = () => {
               <div className="flex items-start gap-2">
                 <input
                   type="checkbox"
+                  className="mt-1"
                   id="tnc"
                   checked={form.acceptedTnC}
                   onChange={(e) => handleChange("acceptedTnC", e.target.checked)}

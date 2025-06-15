@@ -89,6 +89,11 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/reachout" className="text-gray-600 hover:text-primary-500">
+                  Reach out to us
+                </Link>
+              </li>
+              <li>
                 <Link to="#" className="text-gray-600 hover:text-primary-500">
                   Careers
                 </Link>

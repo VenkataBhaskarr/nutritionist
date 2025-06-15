@@ -27,6 +27,7 @@ import ClientMessages from "./pages/client/ClientMessages";
 import NotFound from "./pages/NotFound";
 import Signup from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
+import ReachOut from "./pages/ReachOut";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +44,7 @@ const App = () => (
           <Route path="/blogs" element={<Blogs />} />
            <Route path="/blogs/:id" element={<BlogDetails />} />
           <Route path="/calculator" element={<Calculator />} />
+          <Route path="/reachout" element={<ReachOut/>}/>
           <Route path="/terms" element={<Terms />} />
            <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/dashboard" element={<ProtectedRoute />}>

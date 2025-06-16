@@ -104,7 +104,7 @@ const SignUp = () => {
                 </div>
               </div>
 
-               <div className="space-y-1">
+               {/* <div className="space-y-1">
                 <Label htmlFor="name">Languages you speak</Label>
                 <Input
                   id="language"
@@ -112,7 +112,7 @@ const SignUp = () => {
                   onChange={(e) => handleChange("language", e.target.value)}
                   required
                 />
-              </div>
+              </div> */}
 
 
               <div className="space-y-1">

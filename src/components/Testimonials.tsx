@@ -12,59 +12,48 @@ import avatar9 from "/assets/avatar-9.png";
 
 const testimonials = [
   {
-    text: "This platform has transformed how I manage my clients’ nutrition plans. The dashboard is intuitive and saves me hours every week.",
+    text: "Thank you coach. I'm keen to work on a better regimen to diet and fitness will consider after 6 months. You have trained me very well. Now I want to implement all of it. Thanks again.",
     imageSrc: avatar1,
-    name: "Anjali Sharma",
-    username: "Nutritionist",
+    name: "Charanjit Singh",
+    username: "Client",
   },
   {
-    text: "Tracking my diet and communicating with my nutritionist is so easy with this app. It’s helped me stay consistent with my goals.",
+    text: "I'm truly blessed to remain under your close guidance all through this year 2024. It certainly gave me an opportunity to learn and understand the intricacies of diabetes management. Now, i feel confident that I'm able to keep my sugar reading under control with exercise and given a stress free life",
     imageSrc: avatar2,
-    name: "Suresh Patel",
+    name: "Santosh Kumar",
     username: "Client",
   },
   {
-    text: "As an admin, I love the role-based access control. Managing our team of nutritionists and clients is seamless and efficient.",
+    text: "You've given me the best advice, best coaching with the best knowledge. You're a true motivator, who was available to me at all required times.",
     imageSrc: avatar3,
-    name: "Madhusudan Rao",
-    username: "Admin",
+    name: "Raju",
+    username: "Client",
   },
   {
-    text: "The real-time analytics help me monitor my clients’ progress and tweak their plans instantly. It’s a game-changer for my practice.",
+    text: "You're a great coach to me. Thank you so much for all the best advice that you've given me to support my health goals. You're such a wonderful girl. Love and blessings to my coach",
     imageSrc: avatar4,
-    name: "Rohit Iyer",
-    username: "Nutritionist",
+    name: "Manjushree",
+    username: "Client",
   },
   {
-    text: "The personalized meal plans from my nutritionist are amazing, and the app makes it so simple to follow them daily.",
+    text: "our diet plan is working good. At first, it was hard for me to change my eating routine but your suggestions for the best alternatives were very supportive to me, whenever I feel like quitting. I continued my plan and it was very normal now. I've lost 4 kgs and my uric acid level was in control. Thank you so much and I wish to continue this plan forward",
     imageSrc: avatar5,
-    name: "Reena",
+    name: "Jayant",
     username: "Client",
   },
   {
-    text: "This platform’s data insights allow me to make informed decisions for my clients, improving their outcomes significantly.",
+    text: "My LDL cholesterol has decreased and I have a good inch loss too. Your suggestion to eat the same at the same time everyday helped me with my glucose and cravings as well. I'm happy that my body has a good momentum. Thank you",
     imageSrc: avatar6,
-    name: "Preethi Reddy",
-    username: "Nutritionist",
+    name: "Phani prasad",
+    username: "Client",
   },
   {
-    text: "As a client, I appreciate how user-friendly the app is. It keeps me motivated with clear progress tracking and tips.",
+    text: "I'm grateful to you for helping me manage my PCOD with a practical, easy nutrition plan. It didn't feel like a restrictive diet. Everything was clearly laid out, making it simple to follow.",
     imageSrc: avatar7,
-    name: "Arjun Desai",
+    name: "Sravya",
     username: "Client",
   },
-  {
-    text: "Managing multiple nutritionists and their schedules is effortless with this platform’s robust admin tools.",
-    imageSrc: avatar8,
-    name: "Neha Gupta",
-    username: "Nutritionist",
-  },
-  {
-    text: "The app’s reminders and meal logging features have made sticking to my nutrition plan so much easier!",
-    imageSrc: avatar9,
-    name: "Priya Menon",
-    username: "Client",
-  },
+ 
 ];
 
 const TestimonialCard = ({ column, className, duration }) => {
@@ -91,11 +80,11 @@ const TestimonialCard = ({ column, className, duration }) => {
                   {testimonial.text}
                 </div>
                 <div className="flex items-center gap-2 mt-5">
-                  <img
+                  {/* <img
                     src={testimonial.imageSrc}
                     alt={testimonial.name}
                     className="h-10 w-10 rounded-full"
-                  />
+                  /> */}
                   <div>
                     <div className="font-medium text-gray-900 dark:text-white">
                       {testimonial.name}

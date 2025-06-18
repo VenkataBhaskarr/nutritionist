@@ -29,7 +29,7 @@ const Landing = () => {
     <div className="min-h-screen flex flex-col">
       <NavBar />
       <a
-        href="https://wa.me/919398036704?text=Hello%20I%20am%20from%20livinsignificant%20site%20can%20we%20please%20talk%20about%20the%20process%20"
+        href="https://wa.me/919963257226?text=Hello%20I%20am%20contacting%20from%20livinsignificant%20site%20can%20we%20please%20talk%20about%20the%20process%20"
         className="whatsapp-float"
         target="_blank"
       >
@@ -63,16 +63,14 @@ const Landing = () => {
                   </Button>
                 </Link>
               </div>
-              <div className="mt-8 flex items-center justify-center md:justify-start space-x-2">
+              {/* <div className="mt-8 flex items-center justify-center md:justify-start space-x-2">
                 <div className="flex -space-x-2">
                   {[1, 2, 3, 4].map((item) => (
                     <div key={item} className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white" />
                   ))}
                 </div>
-                <p className="text-sm text-gray-600">
-                  <span className="font-bold">10+</span> active users
-                </p>
-              </div>
+                
+              </div> */}
             </div>
 
             {/* Image Section */}

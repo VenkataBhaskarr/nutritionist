@@ -80,7 +80,7 @@ const SignUp = () => {
               </div>
               
 
-              <div className="space-y-1">
+              {/* <div className="space-y-1">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
@@ -89,7 +89,7 @@ const SignUp = () => {
                   onChange={(e) => handleChange("email", e.target.value)}
                   required
                 />
-              </div>
+              </div> */}
 
               <div className="space-y-1">
                 <Label htmlFor="phone">Phone</Label>

@@ -3,10 +3,11 @@ import { Link } from "react-router-dom";
 import { HashLink } from "react-router-hash-link";
 import { Button } from "@/components/ui/button";
 import { Menu, Home, Star, Book, Calculator, LogIn, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const NavBar = () => {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-
+  const navigate = useNavigate()
   const handleLinkClick = () => {
     setIsMenuOpen(false);
   };
@@ -14,9 +15,10 @@ const NavBar = () => {
   return (
     <div>
       <div className="w-full bg-yellow-100 border-b border-yellow-300 overflow-hidden text-sm font-semibold text-yellow-900">
-        <div className="whitespace-nowrap animate-marquee py-1 px-4">
-          ⚡ Lightning Deal: Flat 29% Off This Week! Grab Now → &nbsp;&nbsp;&nbsp; ⚡ Lightning Deal: Flat 25% Off This Week! Grab Now →
-        </div>
+        <button onClick={() => navigate("/signup")} className="whitespace-nowrap animate-marquee py-1 px-4">
+          ⚡ Lightning Deal: Flat 29% Off This Week! Grab Now → &nbsp;&nbsp;&nbsp; ⚡ Lightning Deal: Flat 29% Off This Week! Grab Now →
+        </button>
+        
       </div>
       <header className="w-full bg-transparent backdrop-blur-md shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">

@@ -173,7 +173,7 @@ const packages = [
         target="_blank"
       >
         <button className="w-full mt-auto bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all shadow-lg">
-          Contact Sales
+          Custom Pricing
         </button>
       </a>
       )}

@@ -175,9 +175,7 @@ const FeaturesSection = () => {
                           {feature.desc}
                         </p>
 
-                        <div className="absolute bottom-6 right-6 opacity-60">
-                          <ArrowRight className="w-5 h-5 text-gray-400" />
-                        </div>
+                       
                       </div>
                     </div>
                   </div>

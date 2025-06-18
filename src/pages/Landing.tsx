@@ -38,7 +38,7 @@ const Landing = () => {
 
       <section id="home" className="hero-gradient pt-20 pb-32">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col-reverse md:flex-row items-center md:items-center md:justify-center gap-32">
+          <div className="flex flex-col-reverse md:flex-row items-center md:items-center md:justify-center gap-8">
             {/* Text Section */}
             <div className="md:w-1/2 mt-10 md:mt-0 md:pr-10 text-center md:text-left">
               <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">

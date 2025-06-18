@@ -12,7 +12,13 @@ const NavBar = () => {
   };
 
   return (
-    <header className="w-full bg-transparent backdrop-blur-md shadow-sm sticky top-0 z-50">
+    <div>
+      <div className="w-full bg-yellow-100 border-b border-yellow-300 overflow-hidden text-sm font-semibold text-yellow-900">
+        <div className="whitespace-nowrap animate-marquee py-1 px-4">
+          ⚡ Lightning Deal: Flat 29% Off This Week! Grab Now → &nbsp;&nbsp;&nbsp; ⚡ Lightning Deal: Flat 25% Off This Week! Grab Now →
+        </div>
+      </div>
+      <header className="w-full bg-transparent backdrop-blur-md shadow-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
         <HashLink smooth to="/#home" className="flex items-center space-x-2">
           <div className="w-8 h-8 rounded-full flex items-center justify-center">
@@ -159,6 +165,9 @@ const NavBar = () => {
         </div>
       )}
     </header>
+
+    </div>
+    
   );
 };
 

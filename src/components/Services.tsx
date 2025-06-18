@@ -58,7 +58,7 @@ const FeaturesSection = () => {
     },
     {
       icon: PersonStanding,
-      title: 'Kids Health',
+      title: 'Kids and Women Health',
       desc: `Nutrition shapes your child's future—make every bite count. Smart, tasty plans designed for growing minds and bodies`,
       color: 'from-green-500 to-green-600',
       bgColor: 'from-green-50 to-green-100',

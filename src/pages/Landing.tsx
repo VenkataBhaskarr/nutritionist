@@ -76,7 +76,7 @@ const Landing = () => {
             {/* Image Section */}
             <div className="order-1 md:order-2 flex justify-center">
               <img
-                src="mainph2.png"
+                src="happylogo.jpg"
                 alt="Hero Visual"
                 className="max-w-full md:max-w-lg lg:max-w-xl rounded-2xl shadow-sm object-contain"
               />

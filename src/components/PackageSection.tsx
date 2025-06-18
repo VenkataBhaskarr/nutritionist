@@ -3,7 +3,9 @@ import { motion, useInView } from 'framer-motion';
 import { Sparkles, Crown, BadgeCheck } from 'lucide-react';
 import { PhoneCall } from 'lucide-react';
 
+import { useNavigate } from 'react-router-dom';
 const PackagesSection = () => {
+  const navigate = useNavigate()
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
 
@@ -164,13 +166,20 @@ const packages = [
 
       {/* Contact Sales CTA */}
       {pkg.contact && (
+        
+        <a
+        href="https://wa.me/919963257226?text=Hello%20I%20am%20contacting%20from%20livinsignificant%20site%20can%20we%20please%20talk%20about%20the%20process%20"
+        
+        target="_blank"
+      >
         <button className="w-full mt-auto bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all shadow-lg">
           Contact Sales
         </button>
+      </a>
       )}
 
     {pkg.normal && (
-        <button className="w-full mt-auto bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all shadow-lg">
+        <button onClick={() => navigate('/signup')} className="w-full mt-auto bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all shadow-lg">
            get in touch
         </button>
       )}

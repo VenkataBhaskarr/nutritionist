@@ -16,7 +16,7 @@ const NavBar = () => {
     <div>
       <div className="w-full bg-yellow-100 border-b border-yellow-300 overflow-hidden text-sm font-semibold text-yellow-900">
         <button onClick={() => navigate("/signup")} className="whitespace-nowrap animate-marquee py-1 px-4">
-          ⚡ Lightning Deal: Flat 29% Off This Week! Grab Now → &nbsp;&nbsp;&nbsp; ⚡ Lightning Deal: Flat 29% Off This Week! Grab Now →
+          ⚡ Lightning Deal: Flat 1000/- Off on Gold plan This Week! Grab Now → &nbsp;&nbsp;&nbsp; ⚡ Lightning Deal: Flat 501/- Off on Silver plan This Week! Grab Now →
         </button>
         
       </div>

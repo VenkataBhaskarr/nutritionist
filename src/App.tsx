@@ -23,11 +23,12 @@ import Terms from "./pages/Terms";
 import ClientNut from "./pages/client/ClientNut";
 import ClientProfile from "./pages/client/ClientProfile";
 import ClientMessages from "./pages/client/ClientMessages";
-
+import AboutUs from "./pages/Aboutus";
 import NotFound from "./pages/NotFound";
 import Signup from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";
 import ReachOut from "./pages/ReachOut";
+import ClientAssessmentForm from "./pages/nut/ClientAssessmentForm";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
           <Route path="/blogs" element={<Blogs />} />
            <Route path="/blogs/:id" element={<BlogDetails />} />
           <Route path="/calculator" element={<Calculator />} />
+          <Route path="/aboutus" element={<AboutUs/>} />
           <Route path="/reachout" element={<ReachOut/>}/>
           <Route path="/terms" element={<Terms />} />
            <Route path="/forgotpassword" element={<ForgotPassword />} />
@@ -55,6 +57,7 @@ const App = () => (
               <Route path="nutritionist/clients" element={<NutClients/>} />
               <Route path="nutritionist/profile" element={<NutProfile/>} />
               <Route path="nutritionist/messages" element={<NutSettings/>} />
+              <Route path="nutritionist/clientassessment" element={<ClientAssessmentForm />} />
               <Route path="client/profile" element={<ClientProfile/>} />
               <Route path="client/nutritionist" element={<ClientNut/>} />
               <Route path="client/messages" element={<ClientMessages/>} />

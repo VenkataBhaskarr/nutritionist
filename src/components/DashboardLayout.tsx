@@ -47,6 +47,7 @@ const DashboardLayout = ({ children, title, userRole, }: DashboardLayoutProps) =
           { icon: Users, name: "My Clients", path: "/dashboard/nutritionist/clients" },
           { icon: User, name: "Profile", path: "/dashboard/nutritionist/profile" },
           { icon: MessageCircleMore, name: "Messages", path: "/dashboard/nutritionist/messages" },
+          { icon: MessageCircleMore, name: "ClientAssessment", path: "/dashboard/nutritionist/clientassessment" },
         ];
       case "client":
         return [

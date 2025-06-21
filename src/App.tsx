@@ -23,7 +23,7 @@ import Terms from "./pages/Terms";
 import ClientNut from "./pages/client/ClientNut";
 import ClientProfile from "./pages/client/ClientProfile";
 import ClientMessages from "./pages/client/ClientMessages";
-import AboutUs from "./pages/Aboutus";
+import AboutUs from "./pages/AboutUs";
 import NotFound from "./pages/NotFound";
 import Signup from "./pages/SignUp";
 import ForgotPassword from "./pages/ForgotPassword";

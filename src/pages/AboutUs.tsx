@@ -1,9 +1,7 @@
 import React from 'react';
 import { Target, LineChart, Users } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 const AboutUs = () => {
-    const navigate = useNavigate()
   return (
     <section className="bg-green-50 py-16 px-4">
       <div className="max-w-6xl mx-auto">

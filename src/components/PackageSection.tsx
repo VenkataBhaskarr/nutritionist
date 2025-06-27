@@ -2,9 +2,13 @@ import React, { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Sparkles, Crown, BadgeCheck } from 'lucide-react';
 import { PhoneCall } from 'lucide-react';
+import PaymentModal from "@/components/PaymentModal";
+import { useState } from 'react';
 
 import { useNavigate } from 'react-router-dom';
 const PackagesSection = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedAmount, setSelectedAmount] = useState(999);
   const navigate = useNavigate()
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-100px" });
@@ -178,11 +182,23 @@ const packages = [
       </a>
       )}
 
-    {pkg.normal && (
-        <button onClick={() => navigate('/signup')} className="w-full mt-auto bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all shadow-lg">
+    {pkg.title=="Gold Plan" && (
+        <button onClick={() => {
+          setSelectedAmount(2499);
+          setIsModalOpen(true);
+        }} className="w-full mt-auto bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all shadow-lg">
            get in touch
         </button>
       )}
+
+    {pkg.title=="Silver Plan" && (
+    <button onClick={() => {
+          setSelectedAmount(999);
+          setIsModalOpen(true);
+        }} className="w-full mt-auto bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all shadow-lg">
+        get in touch
+    </button>
+  )}
 
 
     </motion.div>
@@ -190,6 +206,12 @@ const packages = [
 })}
 
       </motion.div>
+
+      <PaymentModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        amount={selectedAmount}
+      />
       
     </section>
   );

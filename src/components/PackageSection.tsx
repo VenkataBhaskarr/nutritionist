@@ -187,7 +187,7 @@ const packages = [
           setSelectedAmount(2499);
           setIsModalOpen(true);
         }} className="w-full mt-auto bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all shadow-lg">
-           get in touch
+           Pay now
         </button>
       )}
 
@@ -196,7 +196,7 @@ const packages = [
           setSelectedAmount(999);
           setIsModalOpen(true);
         }} className="w-full mt-auto bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all shadow-lg">
-        get in touch
+        Pay now
     </button>
   )}
 

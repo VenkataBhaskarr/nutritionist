@@ -1,4 +1,3 @@
-// components/PaymentModal.tsx
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -11,19 +10,22 @@ interface PaymentModalProps {
 }
 
 const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, amount }) => {
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const isValidEmail = (email: string) =>
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
   const handlePay = async () => {
-    if (!phone || phone.length !== 10) {
-      toast.error("Please enter a valid 10-digit phone number");
+    if (!isValidEmail(email)) {
+      toast.error("Please enter a valid email address");
       return;
     }
 
     try {
       setLoading(true);
-      await api.post("/users/pay", { phone, amount });
-      toast.success("Payment initiated successfully");
+      await api.post("/users/pay", { email, amount });
+      toast.success("Payment link sent to your email");
       onClose();
     } catch (err) {
       toast.error("Payment failed, please try again");
@@ -56,18 +58,18 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, amount }) 
             </button>
             <div className="flex flex-col items-center text-center">
               <h2 className="text-3xl font-bold text-neutral-800 dark:text-white mb-2">
-                 Payment
+                Payment
               </h2>
               <p className="text-neutral-500 dark:text-neutral-400 text-lg mb-6">
-                we will send a link for payment to your mobile number.
+                We’ll send a payment link to your email address.
               </p>
 
               <div className="w-full max-w-md space-y-5">
                 <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="Enter your phone number"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Enter your email address"
                   className="w-full px-5 py-3 text-lg rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
                 />
 
@@ -83,6 +85,13 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, amount }) 
               <p className="mt-6 text-xs text-neutral-400">
                 Your payment is secure and encrypted.
               </p>
+
+              
+              <div className="mt-3 text-neutral-500">
+                <span className="font-bold">Note : </span>
+                <span>After completing the payment, please upload the reciept to our whatsapp to verify.</span>
+              </div>
+              
             </div>
           </motion.div>
         </motion.div>

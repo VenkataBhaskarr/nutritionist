@@ -19,7 +19,7 @@ const FeaturesSection = () => {
     {
       icon: Users,
       title: 'Weight Management',
-      desc: 'Struggling with overweight? We tailor sustainable plans just for you. Lose fat, gain confidence—with no crash diets involved.',
+      desc: 'Over weight, obesity and weightgain service',
       color: 'from-pink-500 to-pink-600',
       bgColor: 'from-pink-50 to-pink-100',
       price: 'Upgrade to Gold Plan',
@@ -29,7 +29,7 @@ const FeaturesSection = () => {
     {
       icon: LayoutDashboard,
       title: 'Diabetes',
-      desc: 'Take control of your sugar levels with personalized nutrition plans. Live healthy, energized, and in charge every single day.',
+      desc: 'Both the type 1 and type 2 diabetes',
       color: 'from-yellow-500 to-yellow-600',
       bgColor: 'from-yellow-50 to-yellow-100',
       price: 'Upgrade to Gold Plan',
@@ -39,7 +39,7 @@ const FeaturesSection = () => {
     {
       icon: BriefcaseMedical,
       title: 'PCOD/PCOS',
-      desc: `Hormonal imbalances don't have to rule your life. We help you eat right, feel right, and thrive.`,
+      desc: `Overall woman health including pregnancy care `,
       color: 'from-indigo-500 to-indigo-600',
       bgColor: 'from-indigo-50 to-indigo-100',
       price: 'Upgrade to Gold Plan',
@@ -49,7 +49,7 @@ const FeaturesSection = () => {
     {
       icon: HeartPulse,
       title: 'Organ Health',
-      desc: 'Your liver, heart, and kidneys deserve top-notch care. Support your organs with food that heals and protects.',
+      desc: 'Maintaining good health of heart, lungs, liver, kidney, GUT, spleen and pancreas',
       color: 'from-rose-500 to-rose-600',
       bgColor: 'from-rose-50 to-rose-100',
       price: 'Upgrade to Gold Plan',
@@ -57,25 +57,49 @@ const FeaturesSection = () => {
       features: ['Detox meal plans', 'Organ-specific nutrition', 'Regular health assessments', 'Supplement guidance']
     },
     {
-      icon: PersonStanding,
-      title: 'Kids and Women Health',
-      desc: `Nutrition shapes your child's future—make every bite count. Smart, tasty plans designed for growing minds and bodies`,
-      color: 'from-green-500 to-green-600',
-      bgColor: 'from-green-50 to-green-100',
-      price: 'Upgrade to Gold Plan',
-      period: 'per month',
-      features: ['Age-appropriate meals', 'Fun recipe activities', 'Growth tracking', 'Parent guidance sessions']
-    },
-    {
-      icon: HeartPulse,
-      title: 'Thyroid Health',
-      desc: 'Balance your hormones with personalized nutrition.',
-      color: 'from-blue-500 to-blue-600',
-      bgColor: 'from-blue-50 to-blue-100',
-      price: 'Upgrade to Gold Plan',
-      period: 'per month',
-      features: ['Thyroid-friendly foods', 'Metabolism boosting', 'Hormone optimization', 'Energy level tracking']
-    },
+    icon: Users, // from lucide-react
+    title: "Women Health",
+    shortDesc: "Empowering women's wellness through every stage of life.",
+    desc: "Personalized nutrition and lifestyle plans tailored for hormonal balance, reproductive health, and long-term vitality.",
+    color: "from-green-500 to-green-600",
+    bgColor: "from-green-50 to-green-100",
+    price: "Upgrade to Gold Plan",
+    period: "per month",
+    features: ["Hormonal balance meals", "Bone health support", "Stress reduction strategies", "Fertility guidance"]
+  },
+  {
+    icon: HeartPulse, 
+    title: "Thyroid Health",
+    shortDesc: "Revitalize your thyroid and metabolism naturally.",
+    desc: "Balance your hormones with personalized nutrition to support optimal thyroid function, energy, and mood.",
+    color: "from-blue-500 to-blue-600",
+    bgColor: "from-blue-50 to-blue-100",
+    price: "Upgrade to Gold Plan",
+    period: "per month",
+    features: ["Thyroid-friendly foods", "Metabolism boosting", "Hormone optimization", "Energy level tracking"]
+  },
+  {
+    icon: Users, 
+    title: "Kids Health",
+    shortDesc: "Overall kids health, kids growth and kids disorders",
+    desc: "Nutrition shapes your child's future—make every bite count. Smart, tasty plans designed for growing minds and bodies.",
+    color: "from-pink-500 to-pink-600",
+    bgColor: "from-pink-50 to-pink-100",
+    price: "Upgrade to Gold Plan",
+    period: "per month",
+    features: ["Age-appropriate meals", "Fun recipe activities", "Growth tracking", "Parent guidance sessions"]
+  },
+  {
+    icon: HeartPulse,
+    title: "Hypertension",
+    shortDesc: "Stress Management and blood pressure issues",
+    desc: "Lower your BP naturally through tailored meal plans, lifestyle tweaks, and continuous monitoring to protect your heart.",
+    color: "from-yellow-500 to-yellow-600",
+    bgColor: "from-yellow-50 to-yellow-100",
+    price: "Upgrade to Gold Plan",
+    period: "per month",
+    features: ["Low-sodium meals", "Stress management tools", "Heart health tracking", "Custom exercise advice"]
+  }
   ];
 
   const containerVariants = {

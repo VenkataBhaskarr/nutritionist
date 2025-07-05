@@ -37,7 +37,7 @@ const Terms = () => {
             </p>
 
             <p><strong>6. Communication Policy</strong><br />
-              Communication must occur only via the Company’s authorised channels (email, portal, designated phone/messaging apps). Communications may be monitored for quality and dispute resolution.
+              Communication must occur only via the Company’s authorised channels (email, portal, designated phone/messaging apps such as Google Meet, WhatsApp Business). Communications may be monitored for quality and dispute resolution.
             </p>
 
             <p><strong>7. Breach of Communication Protocol</strong><br />

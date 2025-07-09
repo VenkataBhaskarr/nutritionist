@@ -10,22 +10,22 @@ interface PaymentModalProps {
 }
 
 const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, amount }) => {
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const isValidEmail = (email: string) =>
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const isValidPhone = (phone: string) =>
+    /^[6-9]\d{9}$/.test(phone); // basic Indian 10-digit starting 6-9
 
   const handlePay = async () => {
-    if (!isValidEmail(email)) {
-      toast.error("Please enter a valid email address");
+    if (!isValidPhone(phone)) {
+      toast.error("Please enter a valid phone number");
       return;
     }
 
     try {
       setLoading(true);
-      await api.post("/users/pay", { email, amount });
-      toast.success("Payment link sent to your email");
+      await api.post("/users/pay", { phone, amount });
+      toast.success("Payment link sent to your WhatsApp / SMS");
       onClose();
     } catch (err) {
       toast.error("Payment failed, please try again");
@@ -61,15 +61,15 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, amount }) 
                 Payment
               </h2>
               <p className="text-neutral-500 dark:text-neutral-400 text-lg mb-6">
-                We’ll send a payment link to your email address.
+                We’ll send a payment link to your phone number.
               </p>
 
               <div className="w-full max-w-md space-y-5">
                 <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email address"
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="Enter your 10-digit phone number"
                   className="w-full px-5 py-3 text-lg rounded-xl border border-neutral-300 dark:border-neutral-700 bg-neutral-100 dark:bg-neutral-800 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-green-500 transition"
                 />
 
@@ -86,12 +86,10 @@ const PaymentModal: React.FC<PaymentModalProps> = ({ isOpen, onClose, amount }) 
                 Your payment is secure and encrypted.
               </p>
 
-              
               <div className="mt-3 text-neutral-500">
                 <span className="font-bold">Note : </span>
-                <span>After completing the payment, please upload the reciept to our whatsapp to verify.</span>
+                <span>After completing the payment, please upload the receipt to our WhatsApp to verify.</span>
               </div>
-              
             </div>
           </motion.div>
         </motion.div>

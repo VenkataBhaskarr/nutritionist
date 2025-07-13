@@ -5,10 +5,8 @@ import {
   LayoutDashboard,
   BriefcaseMedical,
   HeartPulse,
-  PersonStanding,
   Sparkles,
-  Check,
-  ArrowRight,
+  Check
 } from 'lucide-react';
 
 const FeaturesSection = () => {
@@ -18,115 +16,103 @@ const FeaturesSection = () => {
   const features = [
     {
       icon: Users,
-      title: 'Weight Management',
-      desc: 'Over weight, obesity and weightgain service',
-      color: 'from-pink-500 to-pink-600',
-      bgColor: 'from-pink-50 to-pink-100',
-      price: 'Upgrade to Gold Plan',
-      period: 'per month',
-      features: ['Personalized meal plans', 'Weekly progress tracking', '24/7 nutritionist support', 'Recipe suggestions']
+      title: "Weight Management",
+      shortDesc: "Over weight, obesity and weight gain service",
+      color: "from-pink-500 to-pink-600",
+      bgColor: "from-pink-50 to-pink-100",
+      whatYouGet: "Over weight, Obesity and Weight gain",
+      coach: "A nutritionist with expertise over almost all the lifestyle disorders",
+      consultations: "Unlimited (tailored according to our nutritionist guidelines)",
+      whatWillBeCovered: "Personalized food planning, behavioral coaching and guidance for Living Significant",
+      tools: "24/7 Website support and Quickest WhatsApp support"
     },
     {
       icon: LayoutDashboard,
-      title: 'Diabetes',
-      desc: 'Both the type 1 and type 2 diabetes',
-      color: 'from-yellow-500 to-yellow-600',
-      bgColor: 'from-yellow-50 to-yellow-100',
-      price: 'Upgrade to Gold Plan',
-      period: 'per month',
-      features: ['Blood sugar monitoring', 'Carb counting guidance', 'Meal timing optimization', 'Doctor consultation']
-    },
-    {
-      icon: BriefcaseMedical,
-      title: 'PCOD/PCOS',
-      desc: `Overall woman health including pregnancy care `,
-      color: 'from-indigo-500 to-indigo-600',
-      bgColor: 'from-indigo-50 to-indigo-100',
-      price: 'Upgrade to Gold Plan',
-      period: 'per month',
-      features: ['Hormone-balancing foods', 'Cycle tracking support', 'Anti-inflammatory diet', 'Lifestyle coaching']
+      title: "Diabetes",
+      shortDesc: "Type 1, type 2 and gestational diabetes",
+      color: "from-yellow-500 to-yellow-600",
+      bgColor: "from-yellow-50 to-yellow-100",
+      whatYouGet: "Type 1, type 2 and gestational diabetes",
+      coach: "A nutritionist with expertise over almost all the lifestyle disorders",
+      consultations: "Unlimited (tailored according to our nutritionist guidelines)",
+      whatWillBeCovered: "Personalized food planning, behavioral coaching and guidance for Living Significant",
+      tools: "24/7 Website support and Quickest WhatsApp support"
     },
     {
       icon: HeartPulse,
-      title: 'Organ Health',
-      desc: 'Maintaining good health of heart, lungs, liver, kidney, GUT, spleen and pancreas',
-      color: 'from-rose-500 to-rose-600',
-      bgColor: 'from-rose-50 to-rose-100',
-      price: 'Upgrade to Gold Plan',
-      period: 'per month',
-      features: ['Detox meal plans', 'Organ-specific nutrition', 'Regular health assessments', 'Supplement guidance']
+      title: "Thyroid Health",
+      shortDesc: "Hormonal imbalances in TSH, T3 and T4 values",
+      color: "from-blue-500 to-blue-600",
+      bgColor: "from-blue-50 to-blue-100",
+      whatYouGet: "Hormonal imbalances in TSH, T3 and T4 values",
+      coach: "A nutritionist with expertise over almost all the lifestyle disorders",
+      consultations: "Unlimited (tailored according to our nutritionist guidelines)",
+      whatWillBeCovered: "Personalized food planning, behavioral coaching and guidance for Living Significant",
+      tools: "24/7 Website support and Quickest WhatsApp support"
     },
     {
-    icon: Users, // from lucide-react
-    title: "Women Health",
-    shortDesc: "Empowering women's wellness through every stage of life.",
-    desc: "Personalized nutrition and lifestyle plans tailored for hormonal balance, reproductive health, and long-term vitality.",
-    color: "from-green-500 to-green-600",
-    bgColor: "from-green-50 to-green-100",
-    price: "Upgrade to Gold Plan",
-    period: "per month",
-    features: ["Hormonal balance meals", "Bone health support", "Stress reduction strategies", "Fertility guidance"]
-  },
-  {
-    icon: HeartPulse, 
-    title: "Thyroid Health",
-    shortDesc: "Revitalize your thyroid and metabolism naturally.",
-    desc: "Balance your hormones with personalized nutrition to support optimal thyroid function, energy, and mood.",
-    color: "from-blue-500 to-blue-600",
-    bgColor: "from-blue-50 to-blue-100",
-    price: "Upgrade to Gold Plan",
-    period: "per month",
-    features: ["Thyroid-friendly foods", "Metabolism boosting", "Hormone optimization", "Energy level tracking"]
-  },
-  {
-    icon: Users, 
-    title: "Kids Health",
-    shortDesc: "Overall kids health, kids growth and kids disorders",
-    desc: "Nutrition shapes your child's future—make every bite count. Smart, tasty plans designed for growing minds and bodies.",
-    color: "from-pink-500 to-pink-600",
-    bgColor: "from-pink-50 to-pink-100",
-    price: "Upgrade to Gold Plan",
-    period: "per month",
-    features: ["Age-appropriate meals", "Fun recipe activities", "Growth tracking", "Parent guidance sessions"]
-  },
-  {
-    icon: HeartPulse,
-    title: "Hypertension",
-    shortDesc: "Stress Management and blood pressure issues",
-    desc: "Lower your BP naturally through tailored meal plans, lifestyle tweaks, and continuous monitoring to protect your heart.",
-    color: "from-yellow-500 to-yellow-600",
-    bgColor: "from-yellow-50 to-yellow-100",
-    price: "Upgrade to Gold Plan",
-    period: "per month",
-    features: ["Low-sodium meals", "Stress management tools", "Heart health tracking", "Custom exercise advice"]
-  }
+      icon: BriefcaseMedical,
+      title: "PCOD, PCOS",
+      shortDesc: "Overall woman health including pregnancy care",
+      color: "from-indigo-500 to-indigo-600",
+      bgColor: "from-indigo-50 to-indigo-100",
+      whatYouGet: "Overall woman health including pregnancy care",
+      coach: "A nutritionist with expertise over almost all the lifestyle disorders",
+      consultations: "Unlimited (tailored according to our nutritionist guidelines)",
+      whatWillBeCovered: "Personalized food planning, behavioral coaching and guidance for Living Significant",
+      tools: "24/7 Website support and Quickest WhatsApp support"
+    },
+    {
+      icon: Users,
+      title: "Hyper tension",
+      shortDesc: "Stress Management and blood pressure issues",
+      color: "from-yellow-500 to-yellow-600",
+      bgColor: "from-yellow-50 to-yellow-100",
+      whatYouGet: "Stress Management and blood pressure issues",
+      coach: "A nutritionist with expertise over almost all the lifestyle disorders",
+      consultations: "Unlimited (tailored according to our nutritionist guidelines)",
+      whatWillBeCovered: "Personalized food planning, behavioral coaching and guidance for Living Significant",
+      tools: "24/7 Website support and Quickest WhatsApp support"
+    },
+    {
+      icon: Users,
+      title: "Kids Health",
+      shortDesc: "Overall kids health, growth and their issues",
+      color: "from-pink-500 to-pink-600",
+      bgColor: "from-pink-50 to-pink-100",
+      whatYouGet: "Overall kids health, growth and their issues",
+      coach: "A nutritionist with expertise over almost all the lifestyle disorders",
+      consultations: "Unlimited (tailored according to our nutritionist guidelines)",
+      whatWillBeCovered: "Personalized food planning, behavioral coaching and guidance for Living Significant",
+      tools: "24/7 Website support and Quickest WhatsApp support"
+    },
+    {
+      icon: HeartPulse,
+      title: "Organ Health",
+      shortDesc: "Maintaining good health of heart, lungs, liver, kidney, GUT, spleen and pancreas",
+      color: "from-rose-500 to-rose-600",
+      bgColor: "from-rose-50 to-rose-100",
+      whatYouGet: "Maintaining good health of heart, lungs, liver, kidney, GUT, and pancreas",
+      coach: "A nutritionist with expertise over almost all the lifestyle disorders",
+      consultations: "Unlimited (tailored according to our nutritionist guidelines)",
+      whatWillBeCovered: "Personalized food planning, behavioral coaching and guidance for Living Significant",
+      tools: "24/7 Website support and Quickest WhatsApp support"
+    }
   ];
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1, duration: 0.6 },
-    },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1, duration: 0.6 } },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 60, scale: 0.9 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] },
-    },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.6, ease: [0.4, 0, 0.2, 1] } },
   };
 
   const headerVariants = {
     hidden: { opacity: 0, y: -30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.8, ease: [0.4, 0, 0.2, 1] },
-    },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.4, 0, 0.2, 1] } },
   };
 
   return (
@@ -139,9 +125,8 @@ const FeaturesSection = () => {
       >
         <Sparkles size={80} className="text-primary-500" />
       </motion.div>
-      
+
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <motion.div
           initial="hidden"
           animate={isInView ? "visible" : "hidden"}
@@ -149,19 +134,14 @@ const FeaturesSection = () => {
           className="text-center mb-16 lg:mb-20"
         >
           <h2 className="text-4xl font-bold text-black mb-6">
-            Transform Your{' '}
-            <span className="text-primary-500">
-              Wellness Journey
-            </span>
+            Transform Your <span className="text-primary-500">Wellness Journey</span>
           </h2>
-          
           <p className="text-lg text-gray-500 max-w-3xl mx-auto leading-relaxed">
             Discover comprehensive wellness solutions designed to help you achieve your health goals 
             with personalized support every step of the way.
           </p>
         </motion.div>
 
-        {/* Grid Features */}
         <motion.div
           initial="hidden"
           animate={isInView ? 'visible' : 'hidden'}
@@ -177,71 +157,51 @@ const FeaturesSection = () => {
                 className="group relative h-80 [perspective:1000px]"
               >
                 <div className="relative h-full w-full transition-transform duration-1000 ease-out [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+                  
                   {/* Front Side */}
                   <div className="absolute inset-0 h-full w-full rounded-2xl [backface-visibility:hidden]">
-                    <div className="relative h-full bg-white rounded-2xl p-8 shadow-xl hover:shadow-2xl transition-all duration-700 border border-gray-100 overflow-hidden">
-                      <div
-                        className={`absolute inset-0 bg-gradient-to-br ${feature.bgColor} opacity-0 group-hover:opacity-30 transition-opacity duration-700`}
-                      ></div>
-
-                      <div className="relative z-10">
-                        <motion.div
-                          className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-r ${feature.color} mb-6 shadow-lg`}
-                        >
-                          <Icon className="w-8 h-8 text-white" />
-                        </motion.div>
-
-                        <h3 className="text-xl font-bold text-gray-900 mb-4">
-                          {feature.title}
-                        </h3>
-
-                        <p className="text-gray-600 leading-relaxed text-sm">
-                          {feature.desc}
-                        </p>
-
-                       
+                    <div className="relative h-full bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-700 border border-gray-100 overflow-hidden">
+                      <div className={`absolute inset-0 bg-gradient-to-br ${feature.bgColor} opacity-0 group-hover:opacity-30 transition-opacity duration-700`}></div>
+                      <div className="relative z-10 space-y-4">
+                        <div className={`inline-flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r ${feature.color} shadow-lg`}>
+                          <Icon className="w-6 h-6 text-white" />
+                        </div>
+                        <h3 className="text-xl font-bold text-gray-900">{feature.title}</h3>
+                        <p className="text-gray-800 text-sm font-semibold leading-relaxed">{feature.shortDesc}</p>
+                        <div className="mt-2 space-y-3">
+                          <div className="flex items-center gap-2 text-gray-500 text-xs">
+                            <Check className="w-4 h-4 text-primary-500" />
+                            <span>*Unlimited Consults</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-gray-500 text-xs">
+                            <Check className="w-4 h-4 text-primary-500" />
+                            <span>24/7 website Support</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-gray-500 text-xs">
+                            <Check className="w-4 h-4 text-primary-500" />
+                            <span>Whatsapp Support</span>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Back Side */}
                   <div className="absolute inset-0 h-full w-full rounded-2xl [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                    <div className={`relative h-full bg-gradient-to-br ${feature.color} rounded-2xl p-8 shadow-xl text-white overflow-hidden`}>
+                    <div className={`relative h-full bg-gradient-to-br ${feature.color} rounded-2xl p-6 shadow-xl text-white overflow-hidden`}>
                       <div className="absolute inset-0 bg-black/10 rounded-2xl"></div>
-                      
                       <div className="relative z-10 h-full flex flex-col justify-between">
-                        <div>
-                          <div className="flex items-center justify-between mb-6">
-                            <Icon className="w-8 h-8 text-white/90" />
-                            <div className="text-right">
-                              <div className="text-2xl font-bold">{feature.price}</div>
-                              {/* <div className="text-sm text-white/80">{feature.period}</div> */}
-                            </div>
-                          </div>
-
-                          <h3 className="text-lg font-bold mb-4">{feature.title}</h3>
-                          
-                          <div className="space-y-2">
-                            {feature.features.map((feat, idx) => (
-                              <div key={idx} className="flex items-start gap-2">
-                                <Check className="w-4 h-4 mt-0.5 text-white/90 flex-shrink-0" />
-                                <span className="text-sm text-white/90">{feat}</span>
-                              </div>
-                            ))}
-                          </div>
+                        <div className="space-y-2 text-s text-white/90">
+                          <div><span className="font-bold">What you get:</span> {feature.whatYouGet}</div>
+                          <div><span className="font-bold">Coach:</span> {feature.coach}</div>
+                          <div><span className="font-bold">Consultations:</span> {feature.consultations}</div>
+                          <div><span className="font-bold">Covered:</span> {feature.whatWillBeCovered}</div>
+                          {/* <div><span className="font-bold">Tools:</span> {feature.tools}</div> */}
                         </div>
-
-                        {/* <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          transition={{ duration: 0.3, ease: "easeOut" }}
-                          className="mt-2 w-full bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-500 border border-white/20"
-                        >
-                          Get Started
-                        </motion.button> */}
                       </div>
                     </div>
                   </div>
+
                 </div>
               </motion.div>
             );

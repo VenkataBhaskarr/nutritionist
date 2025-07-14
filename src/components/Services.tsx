@@ -8,8 +8,12 @@ import {
   Sparkles,
   Check,
   ShieldPlus,
-  Activity
+  
+  Activity,
+  Syringe
 } from 'lucide-react';
+import { FaVenus } from "react-icons/fa";
+import { GiWeightScale } from "react-icons/gi";
 
 const FeaturesSection = () => {
   const sectionRef = useRef(null);
@@ -17,7 +21,7 @@ const FeaturesSection = () => {
 
   const features = [
     {
-      icon: Activity,
+      icon: GiWeightScale,
       title: "Weight Management",
       shortDesc: "Over weight, obesity and weight gain service",
       color: "from-pink-500 to-pink-600",
@@ -29,7 +33,7 @@ const FeaturesSection = () => {
       tools: "24/7 Website support and Quickest WhatsApp support"
     },
     {
-      icon: LayoutDashboard,
+      icon: Syringe,
       title: "Diabetes",
       shortDesc: "Type 1, type 2 and gestational diabetes",
       color: "from-yellow-500 to-yellow-600",
@@ -53,9 +57,9 @@ const FeaturesSection = () => {
       tools: "24/7 Website support and Quickest WhatsApp support"
     },
     {
-      icon: BriefcaseMedical,
-      title: "PCOD, PCOS",
-      shortDesc: "Overall woman health including pregnancy care",
+      icon: FaVenus,
+      title: "Women Health",
+      shortDesc: "Overall woman health including PCOD,PCOS, pregnancy care",
       color: "from-indigo-500 to-indigo-600",
       bgColor: "from-indigo-50 to-indigo-100",
       whatYouGet: "Overall woman health including pregnancy care",
@@ -65,7 +69,7 @@ const FeaturesSection = () => {
       tools: "24/7 Website support and Quickest WhatsApp support"
     },
     {
-      icon: ShieldPlus,
+      icon: Activity,
       title: "Hyper tension",
       shortDesc: "Stress Management and blood pressure issues",
       color: "from-yellow-500 to-yellow-600",

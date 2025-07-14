@@ -6,7 +6,9 @@ import {
   BriefcaseMedical,
   HeartPulse,
   Sparkles,
-  Check
+  Check,
+  ShieldPlus,
+  Activity
 } from 'lucide-react';
 
 const FeaturesSection = () => {
@@ -15,7 +17,7 @@ const FeaturesSection = () => {
 
   const features = [
     {
-      icon: Users,
+      icon: Activity,
       title: "Weight Management",
       shortDesc: "Over weight, obesity and weight gain service",
       color: "from-pink-500 to-pink-600",
@@ -63,7 +65,7 @@ const FeaturesSection = () => {
       tools: "24/7 Website support and Quickest WhatsApp support"
     },
     {
-      icon: Users,
+      icon: ShieldPlus,
       title: "Hyper tension",
       shortDesc: "Stress Management and blood pressure issues",
       color: "from-yellow-500 to-yellow-600",

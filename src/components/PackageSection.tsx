@@ -171,15 +171,22 @@ const packages = [
       {/* Contact Sales CTA */}
       {pkg.contact && (
         
-        <a
-        href="https://wa.me/919963257226?text=Hello%20I%20am%20contacting%20from%20livinsignificant%20site%20can%20we%20please%20talk%20about%20the%20process%20"
+      //   <a
+      //   href="https://wa.me/919963257226?text=Hello%20I%20am%20contacting%20from%20livinsignificant%20site%20can%20we%20please%20talk%20about%20the%20process%20"
         
-        target="_blank"
-      >
-        <button className="w-full mt-auto bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all shadow-lg">
-          Custom Pricing
+      //   target="_blank"
+      // >
+        // <button className="w-full mt-auto bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all shadow-lg">
+        //   Custom Pricing
+        // </button>
+      // </a>
+
+       <button onClick={() => {
+          setSelectedAmount(0);
+          setIsModalOpen(true);
+        }} className="w-full mt-auto bg-emerald-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-emerald-700 transition-all shadow-lg">
+           Pay now
         </button>
-      </a>
       )}
 
     {pkg.title=="Gold Plan" && (

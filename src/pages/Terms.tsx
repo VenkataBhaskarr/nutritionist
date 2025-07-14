@@ -60,7 +60,7 @@ const Terms = () => {
 
         <div className="text-center mt-2">
           <p className="mt-5 text-sm text-center text-gray-500">
-            <Link to="/" className="text-primary-500 hover:underline">← Back to Home</Link>
+            <Link to="/signup" className="text-primary-500 hover:underline">← Back to Home</Link>
           </p>
         </div>
       </div>

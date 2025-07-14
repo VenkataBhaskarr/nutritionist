@@ -9,6 +9,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import api from "@/lib/api";
 import { Languages } from "lucide-react";
+import useFormStore from "../store/formStore.js"
 
 const indianStates = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat",
@@ -22,27 +23,13 @@ const indianStates = [
 
 const SignUp = () => {
   const [resp, setResp] = useState("")
-
+  
   // Tobe Added : Language, 
-  const [form, setForm] = useState({
-  name: "",
-  illness: "",
-  phone: "",
-  // requirement: "",
-  email: "",
-  country: "",
-  state: "",
-  language: "",
-  acceptedTnC: false, // <-- New field
-});
-
-
-
-
+   const { form, setFormField, resetForm } = useFormStore(); // Zustand in action
 
   const handleChange = (key, value) => {
-  setForm((prev) => ({ ...prev, [key]: value }));
-};
+    setFormField(key, value);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -54,6 +41,7 @@ const SignUp = () => {
         setResp("");
       }, 5000);
       toast.success("Signed up successfully!");
+      resetForm()
       
     } catch (err) {
       toast.error("Failed to sign up");

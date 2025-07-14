@@ -79,6 +79,9 @@ const NutClients: FC = () => {
     issue: "",
   });
 
+  // Add state for custom plan input
+  const [customPlan, setCustomPlan] = useState("");
+
   const [clients, setClients] = useState([]);
 
   // Get user and token with proper error handling
@@ -225,9 +228,19 @@ const NutClients: FC = () => {
   };
 
   const handleAddClient = async () => {
-    const { name, age, email, phone, gender, location, issue, plan, planDescription } = formData;
-    if (!name || !age || !email || !phone || !gender || !location || !issue || !plan) {
+    const { name, age, email, phone, gender, location, issue, planDescription } = formData;
+    
+    // Determine the final plan value
+    const finalPlan = formData.plan === "Custom" ? customPlan : formData.plan;
+    
+    if (!name || !age || !email || !phone || !gender || !location || !issue || !finalPlan) {
       toast.error("Please fill in all the fields.");
+      return;
+    }
+
+    // Additional validation for custom plan
+    if (formData.plan === "Custom" && !customPlan.trim()) {
+      toast.error("Please enter your custom plan.");
       return;
     }
 
@@ -242,6 +255,7 @@ const NutClients: FC = () => {
 
       const newClient = {
         ...formData,
+        plan: finalPlan, // Use the final plan value instead of formData.plan
         nId: nutDetails.data[0].id,
       };
 
@@ -261,6 +275,9 @@ const NutClients: FC = () => {
         planDescription: "",
         nextSession: "",
       });
+
+      // Reset custom plan
+      setCustomPlan("");
 
       toast.success("Client added successfully!");
       setDialogOpen(false);
@@ -638,22 +655,47 @@ const NutClients: FC = () => {
                   </Label>
 
                   {field === "plan" ? (
-                    <select
-                      id={field}
-                      value={formData[field]}
-                      onChange={(e) =>
-                        setFormData({ ...formData, [field]: e.target.value })
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-green-500"
-                    >
-                      <option value="">Select a plan</option>
-                      <option value="Weight Loss Focus">Weight Loss Focus</option>
-                      <option value="Muscle Gain Boost">Muscle Gain Boost</option>
-                      <option value="Diabetes Control Plan">Diabetes Control Plan</option>
-                      <option value="Thyroid Management">Thyroid Management</option>
-                      <option value="PCOS Nutrition">PCOS Nutrition</option>
-                      <option value="General Wellness">General Wellness</option>
-                    </select>
+                    <>
+                      <select
+                        id={field}
+                        value={formData[field]}
+                        onChange={(e) => {
+                          setFormData({ ...formData, [field]: e.target.value });
+                          // Clear custom plan when switching away from Custom
+                          if (e.target.value !== "Custom") {
+                            setCustomPlan("");
+                          }
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring focus:ring-green-500"
+                      >
+                        <option value="">Select a plan</option>
+                        <option value="Weight Management">Weight Management</option>
+                        <option value="Diabetes">Diabetes</option>
+                        <option value="Thyroid Health">Thyroid Health</option>
+                        <option value="PCOD, PCOS">PCOD, PCOS</option>
+                        <option value="Hyper Tension">Hyper Tension</option>
+                        <option value="Kids Health">Kids Health</option>
+                        <option value="Organ Health">Organ Health</option>
+                        <option value="Custom">Custom Plan</option>
+                      </select>
+                      
+                      {/* Custom plan input field */}
+                      {formData.plan === "Custom" && (
+                        <div className="mt-2">
+                          <Label htmlFor="customPlan" className="text-sm font-medium text-gray-700">
+                            Enter Your Custom Plan
+                          </Label>
+                          <Input
+                            id="customPlan"
+                            type="text"
+                            placeholder="Type your custom plan..."
+                            value={customPlan}
+                            onChange={(e) => setCustomPlan(e.target.value)}
+                            className="w-full mt-1"
+                          />
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <Input
                       id={field}
@@ -674,7 +716,6 @@ const NutClients: FC = () => {
                 </div>
               ))}
             </div>
-
 
             <DialogFooter className="mt-6">
               <Button onClick={handleAddClient} className="w-full sm:w-auto">

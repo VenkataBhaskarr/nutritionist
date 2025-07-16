@@ -15,7 +15,7 @@ const Footer = () => {
                   <img src="logo.png"></img>
                 </span>
               </div>
-              <span className="text-xl font-bold text-gray-900">Livin Signicant</span>
+              <span className="text-xl font-bold text-gray-900">Livin Significant</span>
             </Link>
             <p className="text-gray-600 mb-4">
               Empowering better health through personalized nutrition guidance.

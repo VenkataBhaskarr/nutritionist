@@ -59,12 +59,16 @@ const NutClients: FC = () => {
     client: any | null;
   }>({ open: false, client: null });
 
-  const [mealInputs, setMealInputs] = useState({
-    breakfast: "",
-    lunch: "",
-    snack: "",
-    dinner: "",
-  });
+  // Update your state to handle 7 days
+const [mealInputs, setMealInputs] = useState({
+  monday: { breakfast: "", lunch: "", snack: "", dinner: "" },
+  tuesday: { breakfast: "", lunch: "", snack: "", dinner: "" },
+  wednesday: { breakfast: "", lunch: "", snack: "", dinner: "" },
+  thursday: { breakfast: "", lunch: "", snack: "", dinner: "" },
+  friday: { breakfast: "", lunch: "", snack: "", dinner: "" },
+  saturday: { breakfast: "", lunch: "", snack: "", dinner: "" },
+  sunday: { breakfast: "", lunch: "", snack: "", dinner: "" },
+});
 
   const [formData, setFormData] = useState({
     name: "",
@@ -291,41 +295,45 @@ const NutClients: FC = () => {
   };
 
   const submitMealPlan = async () => {
-    if (!mealPlanDialog.client) return;
-
-    const { user, token } = getUserAndToken();
-    if (!user || !token) return;
-
-    try {
-      const nutDetails = await api.get(`/nuts/email`, {
-        params: { email: user.email },
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const payload = {
-        nId: nutDetails.data[0].id,
-        cId: mealPlanDialog.client.id,
-        meals: mealInputs,
-      };
-
-      await api.post("/nuts/addMealPlan", payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      
-      toast.success("Meal plan sent 🍽️");
-
-      setMealInputs({
-        breakfast: "",
-        lunch: "",
-        snack: "",
-        dinner: "",
-      });
-      setMealPlanDialog({ open: false, client: null });
-    } catch (err) {
-      console.error("Error sending meal plan", err);
-      toast.error("Failed to send meal plan ❌");
-    }
-  };
+  if (!mealPlanDialog.client) return;
+  const { user, token } = getUserAndToken();
+  if (!user || !token) return;
+  
+  try {
+    const nutDetails = await api.get(`/nuts/email`, {
+      params: { email: user.email },
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    
+    const payload = {
+      nId: nutDetails.data[0].id,
+      cId: mealPlanDialog.client.id,
+      weeklyMeals: mealInputs,
+    };
+    
+    await api.post("/nuts/addWeeklyMealPlan", payload, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    
+    toast.success("Weekly meal plan sent 🍽️");
+    
+    // Reset inputs
+    setMealInputs({
+      monday: { breakfast: "", lunch: "", snack: "", dinner: "" },
+      tuesday: { breakfast: "", lunch: "", snack: "", dinner: "" },
+      wednesday: { breakfast: "", lunch: "", snack: "", dinner: "" },
+      thursday: { breakfast: "", lunch: "", snack: "", dinner: "" },
+      friday: { breakfast: "", lunch: "", snack: "", dinner: "" },
+      saturday: { breakfast: "", lunch: "", snack: "", dinner: "" },
+      sunday: { breakfast: "", lunch: "", snack: "", dinner: "" },
+    });
+    
+    setMealPlanDialog({ open: false, client: null });
+  } catch (err) {
+    console.error("Error sending meal plan", err);
+    toast.error("Failed to send meal plan ❌");
+  }
+};
 
   const fetchData = async () => {
     try {
@@ -580,34 +588,42 @@ const NutClients: FC = () => {
         </Dialog>
 
         <Dialog open={mealPlanDialog.open} onOpenChange={(open) => setMealPlanDialog({ open, client: null })}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>Add Meal Plan for {mealPlanDialog.client?.name}</DialogTitle>
-            </DialogHeader>
-
-            <div className="grid gap-4 py-4">
-              {["breakfast", "lunch", "snack", "dinner"].map((meal) => (
-                <div key={meal} className="flex flex-col gap-1">
-                  <Label className="capitalize">{meal}</Label>
-                  <Input
-                    placeholder={`Enter ${meal} food`}
-                    value={mealInputs[meal as keyof typeof mealInputs]}
-                    onChange={(e) =>
-                      setMealInputs((prev) => ({
-                        ...prev,
+  <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+    <DialogHeader>
+      <DialogTitle>Add Weekly Meal Plan for {mealPlanDialog.client?.name}</DialogTitle>
+    </DialogHeader>
+    <div className="grid gap-6 py-4">
+      {Object.keys(mealInputs).map((day) => (
+        <div key={day} className="border rounded-lg p-4">
+          <h3 className="font-semibold capitalize mb-3">{day}</h3>
+          <div className="grid gap-3">
+            {["breakfast", "lunch", "snack", "dinner"].map((meal) => (
+              <div key={meal} className="flex flex-col gap-1">
+                <Label className="capitalize text-sm">{meal}</Label>
+                <Input
+                  placeholder={`Enter ${meal} food`}
+                  value={mealInputs[day][meal]}
+                  onChange={(e) =>
+                    setMealInputs((prev) => ({
+                      ...prev,
+                      [day]: {
+                        ...prev[day],
                         [meal]: e.target.value,
-                      }))
-                    }
-                  />
-                </div>
-              ))}
-            </div>
-
-            <DialogFooter>
-              <Button onClick={submitMealPlan}>Send Plan</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+                      },
+                    }))
+                  }
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+    <DialogFooter>
+      <Button onClick={submitMealPlan}>Send Weekly Plan</Button>
+    </DialogFooter>
+  </DialogContent>
+</Dialog>
 
         <Dialog open={messageDialogOpen} onOpenChange={setMessageDialogOpen}>
           <DialogContent>

@@ -160,10 +160,11 @@ const ClientDashboard = () => {
   const [clientData, setClientData] = useState<any>({});
   const [nutData, setNutData] = useState<any>({});
   const [progressData, setProgressData] = useState([]);
-  const [mealPlan, setMealPlan] = useState([]);
+  const [mealPlan, setMealPlan] = useState({});
   const [appointment, setAppointment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -241,7 +242,7 @@ const ClientDashboard = () => {
               params: { id: client.id },
               headers: { Authorization: `Bearer ${token}` },
             });
-            setMealPlan(mealPlanRes.data || []);
+            setMealPlan(mealPlanRes.data || {});
           } catch (mealError) {
             console.warn("Error fetching meal plan:", mealError);
             setMealPlan([]);
@@ -330,7 +331,8 @@ const ClientDashboard = () => {
         {/* Graph & Meal Plan */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <ProgressGraph progress={progressData} />
-          <MealPlanSection meals={mealPlan} nutName={nutData.name || "Your Nutritionist"} />
+          {/* <MealPlanSection meals={mealPlan} nutName={nutData.name || "Your Nutritionist"} /> */}
+          <InteractiveMealPlanSection meals={mealPlan} nutName={nutData.name || "Your Nutritionist"} />
         </div>
 
         {/* Nutritionist Details */}
@@ -441,12 +443,20 @@ const ProgressGraph = ({ progress }: { progress: any[] }) => {
   );
 };
 
-const MealPlanSection = ({ meals, nutName }: { meals: any[], nutName: string }) => {
-  if(!meals.length){
+
+
+const InteractiveMealPlanSection = ({ meals, nutName }: { meals: any, nutName: string }) => {
+  const daysOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  const [selectedDay, setSelectedDay] = useState('monday');
+  const selectedDayMeals = meals[selectedDay] || [];
+  
+  const hasMeals = Object.keys(meals).length > 0;
+  
+  if (!hasMeals) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Today's Meal Plan</CardTitle>
+          <CardTitle>Weekly Meal Plan</CardTitle>
           <CardDescription>Recommended by {nutName}</CardDescription>
         </CardHeader>
         <CardContent className="text-center text-gray-500 py-16">
@@ -455,29 +465,111 @@ const MealPlanSection = ({ meals, nutName }: { meals: any[], nutName: string }) 
       </Card>
     )
   }
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Today's Meal Plan</CardTitle>
-        <CardDescription>Recommended by {nutName}</CardDescription>
+        <CardTitle>Weekly Meal Plan</CardTitle>
+        <CardDescription className="pb-2">Recommended by {nutName}</CardDescription>
+        
+        {/* Day selector */}
+        <div className="flex flex-wrap gap-2">
+          {daysOrder.map((day) => (
+            <button
+              key={day}
+              onClick={() => setSelectedDay(day)}
+              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                selectedDay === day 
+                  ? 'bg-primary-500 text-white' 
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {day.substring(0, 3).toUpperCase()}
+            </button>
+          ))}
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        {meals.map((meal, i) => (
-          <div key={i} className="flex items-start">
-            <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center mt-1 mr-3">
-              <span className="text-primary-500 text-sm font-bold">{meal.meal[0]}</span>
+        <h3 className="font-semibold capitalize text-lg">{selectedDay}</h3>
+        {selectedDayMeals.length === 0 ? (
+          <p className="text-gray-500 text-center py-8">No meals planned for {selectedDay}</p>
+        ) : (
+          selectedDayMeals.map((meal, i) => (
+            <div key={i} className="flex items-start">
+              <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center mt-1 mr-3">
+                <span className="text-primary-500 text-sm font-bold">
+                  {meal.meal[0].toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <h4 className="font-medium capitalize">{meal.meal}</h4>
+                <p className="text-gray-600">{meal.food}</p>
+              </div>
             </div>
-            <div>
-              <h4 className="font-medium">{meal.meal}</h4>
-              <p className="text-gray-600">{meal.food}</p>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </CardContent>
     </Card>
   )
 };
 
+const MealPlanSection = ({ meals, nutName }: { meals: any, nutName: string }) => {
+  const daysOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+  
+  // Check if there are any meals
+  const hasMeals = Object.keys(meals).length > 0;
+  
+  if (!hasMeals) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Weekly Meal Plan</CardTitle>
+          <CardDescription>Recommended by {nutName}</CardDescription>
+        </CardHeader>
+        <CardContent className="text-center text-gray-500 py-16">
+          No Meal Plans available, Contact Nutritionist.
+        </CardContent>
+      </Card>
+    )
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Weekly Meal Plan</CardTitle>
+        <CardDescription>Recommended by {nutName}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {daysOrder.map((day) => {
+          const dayMeals = meals[day] || [];
+          
+          if (dayMeals.length === 0) return null;
+          
+          return (
+            <div key={day} className="border rounded-lg p-4">
+              <h3 className="font-semibold capitalize mb-3 text-lg">{day}</h3>
+              <div className="space-y-3">
+                {dayMeals.map((meal, i) => (
+                  <div key={i} className="flex items-start">
+                    <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center mt-1 mr-3">
+                      <span className="text-primary-500 text-sm font-bold">
+                        {meal.meal[0].toUpperCase()}
+                      </span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium capitalize">{meal.meal}</h4>
+                      <p className="text-gray-600">{meal.food}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </CardContent>
+    </Card>
+  )
+};
 const getWeightLoss = (progress: any[]) => {
   if (progress.length < 2) return 0;
   const first = progress[0]?.weight || 0;
